@@ -6,6 +6,7 @@ import { requireForbiddenDeps } from './forbidden-deps/requireForbiddenDeps';
 import { requirePackageJsonScripts } from './package-json/requirePackageJsonScripts';
 import { requirePublishConfig } from './package-json/requirePublishConfig';
 import { requireConnectPublicDependencies } from './public-package-dependencies/requireConnectPublicDependencies';
+import { requireTypecheckTsconfig } from './tsconfig/requireTypecheckTsconfig';
 
 export const requirements: ReadonlyArray<Requirement<RequirementScope>> = [
     requireAgentsSkills,
@@ -14,5 +15,6 @@ export const requirements: ReadonlyArray<Requirement<RequirementScope>> = [
     requireDocsSummary,
     requireForbiddenDeps,
     requirePackageJsonScripts,
+    requireTypecheckTsconfig,
     requirePublishConfig,
 ];
