@@ -52,5 +52,6 @@
                 ]
             }
         }
-    }
+    },
+    "types": "./libDev/src/index.d.ts"
 }

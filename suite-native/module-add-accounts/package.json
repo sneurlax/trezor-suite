@@ -37,5 +37,6 @@
     },
     "devDependencies": {
         "@trezor/requirements": "workspace:*"
-    }
+    },
+    "types": "./libDev/src/index.d.ts"
 }

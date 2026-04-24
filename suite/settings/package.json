@@ -22,5 +22,6 @@
         "@trezor/connect": "workspace:*",
         "@trezor/env-utils": "workspace:*",
         "@trezor/suite-desktop-api": "workspace:*"
-    }
+    },
+    "types": "./libDev/src/index.d.ts"
 }

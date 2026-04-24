@@ -29,5 +29,6 @@
     "devDependencies": {
         "@trezor/protobuf": "workspace:*",
         "@trezor/utils": "workspace:*"
-    }
+    },
+    "types": "./libDev/src/index.d.ts"
 }
