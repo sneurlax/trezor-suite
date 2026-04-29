@@ -1,0 +1,22 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": { "outDir": "libDev" },
+    "references": [
+        { "path": "../../suite-common/device" },
+        {
+            "path": "../../suite-common/redux-utils"
+        },
+        { "path": "../atoms" },
+        { "path": "../device-mutex" },
+        { "path": "../intl" },
+        { "path": "../swipeable-walkthrough" },
+        { "path": "../../packages/connect" },
+        {
+            "path": "../../packages/connect-common"
+        },
+        {
+            "path": "../../packages/styles-native"
+        },
+        { "path": "../../packages/type-utils" }
+    ]
+}

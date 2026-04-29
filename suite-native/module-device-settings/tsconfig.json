@@ -31,6 +31,7 @@
         { "path": "../link" },
         { "path": "../module-check-backup" },
         { "path": "../navigation" },
+        { "path": "../nfc" },
         { "path": "../services" },
         { "path": "../thp" },
         { "path": "../toasts" },
@@ -40,6 +41,7 @@
         {
             "path": "../../packages/styles-native"
         },
+        { "path": "../../packages/urls" },
         { "path": "../../packages/utils" },
         { "path": "../../packages/requirements" }
     ]

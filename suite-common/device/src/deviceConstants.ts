@@ -1,4 +1,5 @@
 import { type TrezorDevice } from '@suite-common/suite-types';
+import { type PROTO } from '@trezor/connect';
 import { asDeviceUniquePath } from '@trezor/connect-common';
 import { DeviceModelInternal } from '@trezor/device-utils';
 
@@ -84,3 +85,9 @@ export const portfolioTrackerDevice: TrezorDevice = {
         firmwareHash: { success: true },
     },
 };
+
+export const EXTENDABLE_SHAMIR_BACKUP_TYPES: PROTO.BackupType[] = [
+    'Slip39_Single_Extendable',
+    'Slip39_Basic_Extendable',
+    'Slip39_Advanced_Extendable',
+];

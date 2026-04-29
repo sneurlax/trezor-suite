@@ -1,7 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// this import is against the rule of not importing from other modules. This specific case is OK, because the @suite-native/module-check-backup
-// is imported only here and nowhere else, so it is treated as a submodule of @suite-native/module-device-settings.
+// This import is an exception to the rule of not importing from other modules. This specific case is OK, because
+// @suite-native/module-check-backup is imported only here and nowhere else, so it is treated as a submodule of
+// @suite-native/module-device-settings.
 import { DeviceCheckBackupStackNavigator } from '@suite-native/module-check-backup';
 import {
     type DeviceSettingsStackParamList,
