@@ -24,6 +24,7 @@
         { "path": "../bluetooth" },
         { "path": "../device" },
         { "path": "../device-authorization" },
+        { "path": "../feature-flags" },
         { "path": "../firmware" },
         { "path": "../forms" },
         { "path": "../helpers" },

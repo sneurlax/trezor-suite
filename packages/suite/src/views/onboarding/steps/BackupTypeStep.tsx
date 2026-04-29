@@ -4,7 +4,7 @@ import { useDevice } from '@suite/device';
 import { Translation } from '@suite/intl';
 import { SelectBackupType as SelectBackupMedium } from '@suite/nfc';
 import { OnboardingCard } from '@suite/onboarding-components';
-import { selectIsN4w1BackupEnabled } from '@suite/settings';
+import { selectIsNfcBackupEnabled } from '@suite/settings';
 import { selectDeviceDefaultBackupType, selectSelectedDevice } from '@suite-common/device';
 import { type BackupType } from '@suite-common/suite-types';
 import { Badge, Column, Text } from '@trezor/components';
@@ -21,7 +21,7 @@ export const BackupTypeStep = () => {
     const { isLocked } = useDevice();
     const device = useSelector(selectSelectedDevice);
     const deviceDefaultBackupType = useSelector(selectDeviceDefaultBackupType);
-    const isN4w1BackupEnabled = useSelector(selectIsN4w1BackupEnabled);
+    const isNfcBackupEnabled = useSelector(selectIsNfcBackupEnabled);
 
     const deviceModel = device?.features?.internal_model;
     const unitPackaging = device?.features?.unit_packaging ?? 0;
@@ -36,7 +36,7 @@ export const BackupTypeStep = () => {
     } = useOnboarding();
 
     const [backupType, setBackupType] = useState<BackupType>(deviceDefaultBackupType);
-    const [showMediumChoice, setShowMediumChoice] = useState(isN4w1BackupEnabled);
+    const [showMediumChoice, setShowMediumChoice] = useState(isNfcBackupEnabled);
 
     const isDeviceLocked = isLocked();
 
@@ -120,7 +120,7 @@ export const BackupTypeStep = () => {
             outerActions={
                 <OnboardingCard.SecondaryButton
                     onClick={() =>
-                        isN4w1BackupEnabled ? setShowMediumChoice(true) : goToPreviousStep()
+                        isNfcBackupEnabled ? setShowMediumChoice(true) : goToPreviousStep()
                     }
                 >
                     <Translation id="TR_BACK" />

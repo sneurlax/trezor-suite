@@ -13,7 +13,6 @@ export type LaunchArguments = {
     isFirmwareUpdateEnabled?: boolean;
     isTradingResidenceCheckEnabled?: boolean;
     isTradingDebugEnabled?: boolean;
-    isN4w1BackupEnabled?: boolean;
+    isNfcBackupEnabled?: boolean;
     isStablecoinYieldEnabled?: boolean;
-    isN4W1BackupEnabled?: boolean;
 };

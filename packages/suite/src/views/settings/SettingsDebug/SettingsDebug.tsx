@@ -28,7 +28,7 @@ import { GithubIssue } from './GithubIssue';
 import { MessageSystemConfigSourceSelect } from './MessageSystem/MessageSystemConfigSourceSelect';
 import { MessageSystemDebug } from './MessageSystem/MessageSystemDebug';
 import { Metadata } from './Metadata';
-import { N4w1Backup } from './N4w1Backup';
+import { NfcBackup } from './NfcBackup';
 import { OAuthApi } from './OAuthApi';
 import { PingDevice } from './PingDevice';
 import { PlatformEncrypton } from './PlatformEncrypton';
@@ -93,8 +93,12 @@ export const SettingsDebug = () => {
                 <Devkit />
                 <CheckFirmwareAuthenticity />
                 <ClearDevicePersistentData />
+<<<<<<< HEAD
                 <N4w1Backup />
                 <PingDevice />
+=======
+                <NfcBackup />
+>>>>>>> 002f912f08 (feat(suite-native): wire create additional backup into device settings)
             </SettingsSection>
             <SettingsSection isBelowLaptop={isBelowLaptop} title="Testing">
                 <ThrowTestingError />

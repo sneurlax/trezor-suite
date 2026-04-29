@@ -18,7 +18,7 @@ export interface DebugModeOptions {
     transports: Extract<NonNullable<ConnectSettings['transports']>[number], string>[];
     isUnlockedBootloaderAllowed: boolean;
     showConnectLogs: boolean;
-    isN4w1BackupEnabled: boolean;
+    isNfcBackupEnabled: boolean;
     showTranslationKeys: boolean;
 }
 
@@ -76,7 +76,7 @@ export const suiteSettingsInitialState: SuiteSettingsState = {
         transports: [],
         isUnlockedBootloaderAllowed: false,
         showConnectLogs: false,
-        isN4w1BackupEnabled: false,
+        isNfcBackupEnabled: false,
         showTranslationKeys: false,
     },
     autodetect: {
