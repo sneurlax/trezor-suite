@@ -81,6 +81,17 @@ const suiteBaseTest = currentsTest.extend<SuiteTestOptions & SuiteBaseFixture>({
             use,
             testInfo,
         ) => {
+            // `device` is typed as non-null so page objects don't need to handle
+            // `device | undefined` at every call site. Tests that opt out (startEmulator: false
+            // or no model/firmwareVersion) must not consume page objects that depend on `device`.
+            const NO_DEVICE = undefined as unknown as DeviceFixture;
+
+            if (!startEmulator) {
+                await use(NO_DEVICE);
+
+                return;
+            }
+
             const setupPromise = (async () => {
                 await TrezorUserEnvLink.logTestDetails(
                     ` - - - EXECUTING TENV CLEANUP FOR TEST ${testInfo.titlePath.join(' - ')}`,
@@ -98,7 +109,7 @@ const suiteBaseTest = currentsTest.extend<SuiteTestOptions & SuiteBaseFixture>({
             });
 
             if (!model || !firmwareVersion) {
-                await use(undefined as unknown as DeviceFixture);
+                await use(NO_DEVICE);
 
                 return;
             }
@@ -156,13 +167,13 @@ const suiteBaseTest = currentsTest.extend<SuiteTestOptions & SuiteBaseFixture>({
         }
     },
 
-    page: async ({ target, context, electronApp }, use) => {
+    page: async ({ target, context, electronApp, startEmulator }, use) => {
         if (isDesktopProject(target)) {
             const window = await electronApp!.firstWindow();
             enhancePage(window);
             await use(window);
         } else {
-            const page = await webSetup(context);
+            const page = await webSetup(context, { startBridge: startEmulator });
             enhancePage(page);
             await use(page);
         }
