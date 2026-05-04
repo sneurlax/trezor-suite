@@ -11,9 +11,12 @@ type Attributes = {
 export const sendAddressFilledEvent: EventDef<Attributes, EventType.SendAddressFilled> = {
     name: EventType.SendAddressFilled,
     descriptionTrigger:
-        'Dispatched when user fills the recipient address in send form (manual entry or QR scan).',
-    changelog: [{ version: '24.10.1', notes: 'Added' }],
+        'User fills the recipient address in the send form either by manual entry or by scanning a QR code',
+    changelog: [{ version: '24.10.1', notes: 'added' }],
     attributes: {
-        method: { changelog: [{ version: '24.10.1', notes: 'added' }] },
+        method: {
+            description: 'How the address was provided: "manual" for keyboard entry, "qr" for QR code scan',
+            changelog: [{ version: '24.10.1', notes: 'added' }],
+        },
     },
 };
