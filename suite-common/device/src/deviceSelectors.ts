@@ -448,6 +448,14 @@ export const selectDeviceModel = createMemoizedSelector([selectSelectedDevice], 
     selectedDevice ? getDeviceInternalModel(selectedDevice) : null,
 );
 
+export const selectIsCreateAdditionalBackupAvailable = createMemoizedSelector(
+    [selectDeviceModel, selectHasExtendableShamirBackup, selectDeviceFeatures],
+    (deviceModel, hasExtendableShamirBackup, features) =>
+        deviceModel === DeviceModelInternal.T3W1 && // NOTE: FW will expose a capability flag for this, so it should be replaced with that than
+        hasExtendableShamirBackup &&
+        features?.backup_availability === 'NotAvailable',
+);
+
 export const selectFirmwareReleaseConfig = createMemoizedSelector(
     [selectSelectedDevice],
     device => device?.firmwareReleaseConfigInfo ?? null,

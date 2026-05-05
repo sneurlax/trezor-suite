@@ -1,9 +1,7 @@
 import { useSelector } from 'react-redux';
 
 import {
-    selectDeviceFeatures,
-    selectDeviceModel,
-    selectHasExtendableShamirBackup,
+    selectIsCreateAdditionalBackupAvailable,
     selectIsDeviceBackupUnfinished,
     selectIsDeviceInitialized,
 } from '@suite-common/device';
@@ -11,7 +9,6 @@ import { VStack } from '@suite-native/atoms';
 import { FeatureFlag, useFeatureFlag } from '@suite-native/feature-flags';
 import { Translation } from '@suite-native/intl';
 import { DynamicScreenHeader, Screen } from '@suite-native/navigation';
-import { DeviceModelInternal } from '@trezor/device-utils';
 
 import { CheckBackupCard } from '../components/CheckBackupCard';
 import { CreateAdditionalBackupCard } from '../components/CreateAdditionalBackupCard';
@@ -22,14 +19,10 @@ export const BackupAndPassphraseScreen = () => {
 
     const isDeviceInitialized = useSelector(selectIsDeviceInitialized);
     const isDeviceBackupUnfinished = useSelector(selectIsDeviceBackupUnfinished);
+    const hasAdditionalBackupSupport = useSelector(selectIsCreateAdditionalBackupAvailable);
+
     const isCheckBackupAvailable = isDeviceInitialized && !isDeviceBackupUnfinished;
-    const deviceModel = useSelector(selectDeviceModel);
-    const deviceFeatures = useSelector(selectDeviceFeatures);
-    const hasExtendableShamirBackup = useSelector(selectHasExtendableShamirBackup);
-    const isBackupDone = deviceFeatures?.backup_availability === 'NotAvailable';
-    const isT3W1 = deviceModel === DeviceModelInternal.T3W1;
-    const isCreateAdditionalBackupAvailable =
-        isNfcBackupEnabled && isT3W1 && hasExtendableShamirBackup && isBackupDone;
+    const isCreateAdditionalBackupAvailable = isNfcBackupEnabled && hasAdditionalBackupSupport;
 
     return (
         <Screen
