@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+<<<<<<< HEAD
 import styled from 'styled-components';
 
 import { events, selectDesktopAnalyticsDep } from '@suite/analytics';
@@ -7,6 +8,11 @@ import { Translation } from '@suite/intl';
 import { useServices } from '@suite-common/dependency-injection';
 import { Button, Column, Divider } from '@trezor/components';
 import { spacingsPx } from '@trezor/theme';
+=======
+import { events } from '@suite/analytics';
+import { Translation } from '@suite/intl';
+import { Button, Column, Divider, TextButton } from '@trezor/components';
+>>>>>>> 33e8822c7d (feat(suite): Add shortcuts help)
 
 import { setView } from 'src/actions/suite/guideActions';
 import {
@@ -17,10 +23,6 @@ import {
     GuideViewWrapper,
 } from 'src/components/guide';
 import { useDispatch, useSelector } from 'src/hooks/suite';
-
-const FeedbackLinkWrapper = styled.div`
-    padding: ${spacingsPx.md};
-`;
 
 export const Guide = () => {
     const [searchActive, setSearchActive] = useState(false);
@@ -35,6 +37,10 @@ export const Guide = () => {
         });
     };
 
+    const handleShortcutsClick = () => {
+        dispatch(setView('KEYBOARD_SHORTCUTS'));
+    };
+
     return (
         <GuideViewWrapper>
             <GuideHeader label={<Translation id="TR_GUIDE_VIEW_HEADLINE_LEARN_AND_DISCOVER" />} />
@@ -46,7 +52,17 @@ export const Guide = () => {
 
                 <div>
                     <Divider margin={{ bottom: 0, top: 0 }} />
-                    <FeedbackLinkWrapper>
+                    <Column gap={16} margin={16}>
+                        <TextButton
+                            onClick={handleShortcutsClick}
+                            size="small"
+                            intent="neutral"
+                            priority="secondary"
+                            data-testid="@guide/button-shortcuts"
+                            width="100%"
+                        >
+                            <Translation id="TR_GUIDE_KEYBOARD_SHORTCUTS" />
+                        </TextButton>
                         <Button
                             data-testid="@guide/button-feedback"
                             onClick={handleFeedbackButtonClick}
@@ -57,7 +73,7 @@ export const Guide = () => {
                         >
                             <Translation id="TR_GUIDE_SUPPORT_AND_FEEDBACK" />
                         </Button>
-                    </FeedbackLinkWrapper>
+                    </Column>
                 </div>
             </Column>
         </GuideViewWrapper>
