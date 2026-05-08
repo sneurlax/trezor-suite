@@ -62,7 +62,7 @@ export const TradingOfferExchangeSlippageModal = ({
     });
 
     useEffect(() => {
-        if (!slippageOptions.find(option => option.value === selectedQuote?.swapSlippage)) {
+        if (!slippageOptions.some(option => option.value === selectedQuote?.swapSlippage)) {
             setSlippage(CUSTOM_SLIPPAGE);
         }
     }, [selectedQuote?.swapSlippage]);
