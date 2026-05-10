@@ -36,17 +36,18 @@ All common parameters are optional.
 
 </Param>
 
-<Param name="useCardanoDerivation" type="boolean" required={false}>
-    default is set to `true` for all cardano related methods, otherwise it is set to `false`. 
-    This parameter determines whether device should derive cardano seed for current session. Derivation of cardano seed takes longer then it does for other coins. A wallet that works with both cardano and other coins might want to set this param to `true` for every call or it must be able to cope with the following scenario:
-
-    - Connected device is using passhprase
-    - Wallet calls `getPublicKey` with `useCardanoDerivation=false`, passhprase is entered, seed derived
-    - Wallet calls `cardanoGetPublicKey`.
-    - At this moment user will be prompted to enter passhprase again.
-
-</Param>
-
 <Param name="override" type="boolean" required={false}>
     Interrupt previous call, if any.
 </Param>
+
+## Application-level setup
+
+In addition to the per-call common parameters above, applications declare which networks they use up-front via:
+
+```ts
+TrezorConnect.setEnabledNetworks(['btc', 'eth', 'ada']);
+```
+
+Today the only network this affects is Cardano: including `'ada'` makes the device session capable of Cardano-aware operations, by setting `derive_cardano: true` on the next `Initialize` (applies to both THP and pre-THP sessions). The device then derives the Cardano root key alongside the BIP-39 seed, which makes `Initialize` slower — only declare `'ada'` if your app actually uses Cardano. Once enabled, `cardano*` methods work as expected; non-`cardano*` methods that operate on Cardano paths (e.g. `getAccountInfo({ coin: 'ada', path: ... })`) need this declaration because they don't auto-enable derivation by method name. `cardano*` methods always derive Cardano regardless.
+
+Mutations are broadcast via the `'enabled-networks-changed'` event; `getEnabledNetworks()` returns the current canonical set.

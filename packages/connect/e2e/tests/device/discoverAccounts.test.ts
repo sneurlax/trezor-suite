@@ -75,6 +75,10 @@ describe(`TrezorConnect.discoverAccounts`, () => {
         );
         */
 
+        // Cardano accounts in the bundle need a Cardano-aware session — `discoverAccounts`
+        // is not a `cardano*` method so it doesn't auto-enable derive_cardano.
+        await TrezorConnect.setEnabledNetworks(['ada']);
+
         const result = await TrezorConnect.discoverAccounts({
             coins: [
                 { symbol: 'btc', known: [{ type: 'legacy' }, { type: 'taproot' }] },
@@ -84,7 +88,6 @@ describe(`TrezorConnect.discoverAccounts`, () => {
                 { symbol: 'ada' },
                 { symbol: 'xrp' },
             ],
-            useCardanoDerivation: true,
         });
 
         TrezorConnect.off(UI_REQUEST.BUNDLE_PROGRESS, onBundleProgress);
