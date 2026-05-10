@@ -9,7 +9,7 @@ import { createErrorMessage } from '@trezor/connect-common/src/events';
 import { factory } from '@trezor/connect-common/src/factory';
 import { type ConnectDynamicSettings } from '@trezor/connect-common/src/impl/dynamic';
 import { WindowServiceWorkerChannel } from '@trezor/connect-common/src/messageChannel/window-serviceworker';
-import type { UpdateConnectSettings } from '@trezor/connect-common/src/types';
+import type { SetEnabledNetworks, UpdateConnectSettings } from '@trezor/connect-common/src/types';
 import { ConnectEmitter } from '@trezor/connect-common/src/types/emitter';
 import {
     type CancelParams,
@@ -88,6 +88,18 @@ const updateConnectSettings = (_params: UpdateConnectSettings) =>
             ),
         ),
     );
+
+const setEnabledNetworks = (_networks: SetEnabledNetworks) =>
+    Promise.resolve(
+        createErrorMessage(
+            ERRORS.TypedError(
+                'Method_InvalidPackage',
+                'setEnabledNetworks is not supported in this implementation',
+            ),
+        ),
+    );
+
+const getEnabledNetworks = () => Promise.resolve([] as string[]);
 const call: CallMethod = async (params: any) => {
     try {
         const response = await _channel.postMessage({
@@ -117,6 +129,8 @@ const TrezorConnect = factory({
     call,
     uiResponse,
     updateConnectSettings,
+    setEnabledNetworks,
+    getEnabledNetworks,
     cancel,
     dispose,
 });
