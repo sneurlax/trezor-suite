@@ -5,6 +5,7 @@ import {
     DEVICE_EVENT,
     ENABLED_NETWORKS_CHANGED,
     RESPONSE_EVENT,
+    SET_ENABLED_NETWORKS,
     TRANSPORT_EVENT,
     UI_EVENT,
     createErrorMessage,
@@ -42,7 +43,7 @@ export abstract class CoreInModule implements ConnectFactoryDependencies<Connect
     private coreManager;
     private log;
     private messagePromises;
-    private enabledNetworks: string[] = [];
+    private enabledNetworksCache: string[] = [];
 
     private readonly boundOnCoreEvent = this.onCoreEvent.bind(this);
 
@@ -107,6 +108,11 @@ export abstract class CoreInModule implements ConnectFactoryDependencies<Connect
                 this.eventEmitter.emit(type, payload);
                 break;
 
+            case ENABLED_NETWORKS_CHANGED:
+                this.enabledNetworksCache = [...payload];
+                this.eventEmitter.emit(ENABLED_NETWORKS_CHANGED, payload);
+                break;
+
             default:
                 this.log.warn('Undefined message', event, message);
         }
@@ -154,15 +160,10 @@ export abstract class CoreInModule implements ConnectFactoryDependencies<Connect
     }
 
     public setEnabledNetworks(networks: SetEnabledNetworks) {
-        const next = [...new Set(networks)];
-        const prev = this.enabledNetworks;
-        const changed =
-            next.length !== prev.length || next.some((symbol, idx) => symbol !== prev[idx]);
-
-        this.enabledNetworks = next;
-
-        if (changed) {
-            this.eventEmitter.emit(ENABLED_NETWORKS_CHANGED, next);
+        try {
+            this.handleCoreMessage({ type: SET_ENABLED_NETWORKS, payload: networks });
+        } catch (err) {
+            return Promise.resolve(createErrorMessage(err));
         }
 
         return Promise.resolve({
@@ -172,7 +173,7 @@ export abstract class CoreInModule implements ConnectFactoryDependencies<Connect
     }
 
     public getEnabledNetworks() {
-        return Promise.resolve([...this.enabledNetworks]);
+        return Promise.resolve([...this.enabledNetworksCache]);
     }
 
     public async call(params: CallMethodPayload) {
