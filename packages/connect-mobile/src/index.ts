@@ -18,7 +18,7 @@ import { createDeferredManager, removeTrailingSlashes } from '@trezor/utils';
 type BuildUrlParams = {
     method: string;
     id: string;
-    params: any;
+    params: Omit<CallMethodPayload, 'method'>;
     connectSrc: string | undefined;
     callbackUrl: string;
     manifest?: Manifest;
@@ -57,7 +57,11 @@ export class TrezorConnectDeeplink implements ConnectFactoryDependencies<Connect
         return Promise.resolve(createErrorMessage(ERRORS.TypedError('Method_InvalidPackage')));
     }
 
-    private openDeeplink: (method: string, id: string, params: any) => void = () => {
+    private openDeeplink: (
+        method: string,
+        id: string,
+        params: Omit<CallMethodPayload, 'method'>,
+    ) => void = () => {
         throw ERRORS.TypedError('Init_NotInitialized');
     };
 
@@ -173,7 +177,7 @@ export class TrezorConnectDeeplink implements ConnectFactoryDependencies<Connect
         this.messages.resolve(id, { id, payload, success });
     }
 
-    private resolveMessagePromises(payload: Record<string, any>) {
+    private resolveMessagePromises(payload: { success: boolean; error?: unknown }) {
         this.messages.resolveAll(id => ({ id, payload }));
     }
 }
