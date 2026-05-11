@@ -1,6 +1,9 @@
+import { type Dispatch } from 'redux';
+
 import { bluetoothActions, selectKnownDeviceByDeviceId } from '@suite-common/bluetooth';
 import {
     DEVICE_MODULE_PREFIX,
+    type DeviceRootState,
     PORTFOLIO_TRACKER_DEVICE_ID,
     deviceActions,
     portfolioTrackerDevice,
@@ -111,23 +114,24 @@ export const forgetDisconnectedDevices = createThunk(
  * Called from `suiteMiddleware`
  * Keep `suite` reducer synchronized with `devices` reducer
  */
-export const observeSelectedDevice = () => (dispatch: any, getState: any) => {
-    const devices = selectDevices(getState());
+export const observeSelectedDevice =
+    () => (dispatch: Dispatch, getState: () => DeviceRootState) => {
+        const devices = selectDevices(getState());
 
-    const selectedDevice = selectSelectedDevice(getState());
+        const selectedDevice = selectSelectedDevice(getState());
 
-    if (!selectedDevice) return false;
+        if (!selectedDevice) return false;
 
-    const deviceFromReducer = getSelectedDevice(selectedDevice, devices);
-    if (!deviceFromReducer) return true;
+        const deviceFromReducer = getSelectedDevice(selectedDevice, devices);
+        if (!deviceFromReducer) return true;
 
-    const changed = isChanged(selectedDevice, deviceFromReducer);
-    if (changed) {
-        dispatch(deviceActions.updateSelectedDevice(deviceFromReducer));
-    }
+        const changed = isChanged(selectedDevice, deviceFromReducer);
+        if (changed) {
+            dispatch(deviceActions.updateSelectedDevice(deviceFromReducer));
+        }
 
-    return changed;
-};
+        return changed;
+    };
 
 /**
  * Called from <AcquireDevice /> component
