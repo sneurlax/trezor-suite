@@ -1,4 +1,4 @@
-export const deepEqual = (a: any, b: any): boolean => {
+export const deepEqual = (a: unknown, b: unknown): boolean => {
     if (a === b) return true;
 
     if (typeof a !== typeof b) return false;
@@ -8,29 +8,36 @@ export const deepEqual = (a: any, b: any): boolean => {
     if (Array.isArray(a) !== Array.isArray(b)) return false;
 
     if (Array.isArray(a)) {
-        if (a.length !== b.length) return false;
+        const arrB = b as unknown[];
+        if (a.length !== arrB.length) return false;
 
         for (let i = 0; i < a.length; i++) {
-            if (!deepEqual(a[i], b[i])) return false;
+            if (!deepEqual(a[i], arrB[i])) return false;
         }
 
         return true;
     }
 
-    const keysA = Object.keys(a);
-    const keysB = Object.keys(b);
+    const objA = a as Record<string, unknown>;
+    const objB = b as Record<string, unknown>;
+    const keysA = Object.keys(objA);
+    const keysB = Object.keys(objB);
 
     if (keysA.length !== keysB.length) return false;
 
     for (const key of keysA) {
-        if (!Object.prototype.hasOwnProperty.call(b, key)) return false;
-        if (!deepEqual(a[key], b[key])) return false;
+        if (!Object.prototype.hasOwnProperty.call(objB, key)) return false;
+        if (!deepEqual(objA[key], objB[key])) return false;
     }
 
     return true;
 };
 
-export const isChanged = (prev?: any, current?: any, filter?: { [k: string]: string[] }) => {
+export const isChanged = (
+    prev?: unknown,
+    current?: unknown,
+    filter?: { [k: string]: string[] },
+): boolean => {
     // 1. both objects are the same (solves simple types like string, boolean and number)
     if (prev === current) return false;
     // 2. one of the objects is null/undefined
@@ -42,15 +49,19 @@ export const isChanged = (prev?: any, current?: any, filter?: { [k: string]: str
     if (prevType !== currentType) return true;
 
     if (currentType === '[object Array]') {
+        const arrPrev = prev as unknown[];
+        const arrCurrent = current as unknown[];
         // 4. Array length is different
-        if (prev.length !== current.length) return true;
+        if (arrPrev.length !== arrCurrent.length) return true;
         // observe array recursive
-        for (let i = 0; i < current.length; i++) {
-            if (isChanged(prev[i], current[i], filter)) return true;
+        for (let i = 0; i < arrCurrent.length; i++) {
+            if (isChanged(arrPrev[i], arrCurrent[i], filter)) return true;
         }
     } else if (currentType === '[object Object]') {
-        const prevKeys = Object.keys(prev);
-        const currentKeys = Object.keys(current);
+        const objPrev = prev as Record<string, unknown>;
+        const objCurrent = current as Record<string, unknown>;
+        const prevKeys = Object.keys(objPrev);
+        const currentKeys = Object.keys(objCurrent);
         // 5. simple validation of keys length
         if (prevKeys.length !== currentKeys.length) return true;
 
@@ -65,20 +76,20 @@ export const isChanged = (prev?: any, current?: any, filter?: { [k: string]: str
             if (
                 filter &&
                 Object.prototype.hasOwnProperty.call(filter, key) &&
-                prev[key] &&
-                current[key]
+                objPrev[key] &&
+                objCurrent[key]
             ) {
-                const prevFiltered = {};
-                const currentFiltered = {};
+                const prevFiltered: Record<string, unknown> = {};
+                const currentFiltered: Record<string, unknown> = {};
+                const prevAtKey = objPrev[key] as Record<string, unknown>;
+                const currentAtKey = objCurrent[key] as Record<string, unknown>;
                 for (let i2 = 0; i2 < filter[key].length; i2++) {
                     const field = filter[key][i2];
-                    // @ts-expect-error
-                    prevFiltered[field] = prev[key][field];
-                    // @ts-expect-error
-                    currentFiltered[field] = current[key][field];
+                    prevFiltered[field] = prevAtKey[field];
+                    currentFiltered[field] = currentAtKey[field];
                 }
                 if (isChanged(prevFiltered, currentFiltered)) return true;
-            } else if (isChanged(prev[key], current[key])) {
+            } else if (isChanged(objPrev[key], objCurrent[key])) {
                 return true;
             }
         }
