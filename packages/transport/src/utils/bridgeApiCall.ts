@@ -6,7 +6,7 @@ import { TRANSPORT_ERROR as ERRORS, error, success, unknownError } from '@trezor
 import { applyBridgeApiCallHeaders } from './applyBridgeApiCallHeaders';
 
 export type HttpRequestOptions = {
-    body?: Array<any> | Record<string, unknown> | string;
+    body?: unknown[] | Record<string, unknown> | string;
     url: string;
     method: 'POST' | 'GET';
     skipContentTypeHeader?: boolean;

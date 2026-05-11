@@ -24,7 +24,7 @@ import {
 import { versionUtils } from '@trezor/utils';
 
 import { ping } from '../pinger/ping';
-import { bridgeApiCall } from '../utils/bridgeApiCall';
+import { type HttpRequestOptions, bridgeApiCall } from '../utils/bridgeApiCall';
 import * as bridgeApiResult from '../utils/bridgeApiResult';
 import { type BridgeProtocolMessage, createProtocolMessage } from '../utils/bridgeProtocolMessage';
 
@@ -55,7 +55,7 @@ type R = Extract<
 
 type IncompleteRequestOptions = {
     params?: string;
-    body?: any;
+    body?: HttpRequestOptions['body'];
     timeout?: number;
     signal?: AbortController['signal'];
 };
