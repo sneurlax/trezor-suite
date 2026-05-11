@@ -1,5 +1,6 @@
 import { A, F, pipe } from '@mobily/ts-belt';
 
+import { type DeviceRootState } from '@suite-common/device';
 import {
     type TokenDefinitionsRootState,
     selectIsSpecificCoinDefinitionKnown,
@@ -23,6 +24,7 @@ import { BigNumber } from '@trezor/utils';
 
 import { MAX_AGE } from './fiatRatesConstants';
 import { type FiatRatesRootState } from './fiatRatesTypes';
+import { type AccountsRootState } from '../accounts/accountsReducer';
 import { selectDeviceAccounts } from '../accounts/accountsSelectors';
 
 export const selectCurrentFiatRates = (state: FiatRatesRootState): RatesByKey | undefined =>
@@ -86,9 +88,9 @@ export const selectShouldUpdateFiatRate = (
 };
 
 export const selectTickerFromAccounts = (
-    state: FiatRatesRootState & TokenDefinitionsRootState,
+    state: FiatRatesRootState & TokenDefinitionsRootState & AccountsRootState & DeviceRootState,
 ): TickerId[] => {
-    const accounts = selectDeviceAccounts(state as any);
+    const accounts = selectDeviceAccounts(state);
 
     return pipe(
         accounts,
@@ -121,7 +123,7 @@ export const selectTickerFromAccounts = (
 };
 
 export const selectTickersToBeUpdated = (
-    state: FiatRatesRootState & TokenDefinitionsRootState,
+    state: FiatRatesRootState & TokenDefinitionsRootState & AccountsRootState & DeviceRootState,
     currentTimestamp: Timestamp,
     fiatCurrency: BaseCurrencyCode,
     rateType: RateTypeWithoutHistoric,
