@@ -18,11 +18,14 @@ import { getMutex } from './getMutex';
 export const getSynchronize = (mutex?: ReturnType<typeof getMutex>) => {
     const lock = mutex ?? getMutex();
 
-    return <T>(
-        action: () => T,
-        lockId?: PropertyKey,
-    ): T extends Promise<unknown> ? T : Promise<T> =>
-        lock(lockId).then(unlock => Promise.resolve().then(action).finally(unlock)) as any;
+    return async <T>(action: () => T, lockId?: PropertyKey): Promise<Awaited<T>> => {
+        const unlock = await lock(lockId);
+        try {
+            return await action();
+        } finally {
+            unlock();
+        }
+    };
 };
 
 export type Synchronize = ReturnType<typeof getSynchronize>;
