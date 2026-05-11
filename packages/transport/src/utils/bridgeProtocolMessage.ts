@@ -13,7 +13,7 @@ export type BridgeProtocolMessage = {
 // - parsed json string (parsed protocol message)
 export function validateProtocolMessage(body: unknown, withData = true): BridgeProtocolMessage {
     const isHex = (s: string) => /^[0-9A-Fa-f]+$/g.test(s); // TODO: trezor/utils accepts 0x prefix (eth)
-    const isValidProtocol = (s: any): s is BridgeProtocolMessage['protocol'] =>
+    const isValidProtocol = (s: unknown): s is BridgeProtocolMessage['protocol'] =>
         s === 'v1' || s === 'v2' || s === 'bridge';
 
     // Legacy bridge results
@@ -25,12 +25,13 @@ export function validateProtocolMessage(body: unknown, withData = true): BridgeP
         }
     }
 
-    let json: Record<string, any> | undefined | null;
-    if (typeof body === 'object') {
-        json = body;
-    } else {
+    type JsonShape = { protocol?: unknown; data?: unknown; thpState?: unknown };
+    let json: JsonShape | undefined;
+    if (typeof body === 'object' && body !== null) {
+        json = body as JsonShape;
+    } else if (typeof body === 'string') {
         try {
-            json = JSON.parse(body as any);
+            json = JSON.parse(body);
         } catch {
             // silent, resolved below
         }
@@ -51,8 +52,8 @@ export function validateProtocolMessage(body: unknown, withData = true): BridgeP
 
     return {
         protocol: json.protocol,
-        data: json.data,
-        thpState: json.thpState,
+        data: json.data as string,
+        thpState: json.thpState as ThpChannelState | undefined,
     };
 }
 
