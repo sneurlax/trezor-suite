@@ -5,7 +5,7 @@ import { type KeysOfUnion } from '@trezor/type-utils';
 
 import { isSafeObjectKey } from './isSafeObjectKey';
 
-type TIndexValue<T, K extends PropertyKey, D = never> = T extends any
+type TIndexValue<T, K extends PropertyKey, D = never> = T extends unknown
     ? K extends keyof T
         ? T[K]
         : D
@@ -15,11 +15,11 @@ type TPartialKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>> exten
     ? { [P in keyof O]: O[P] }
     : never;
 
-type TFunction = (...a: any[]) => any;
+type TFunction = (...a: never[]) => unknown;
 
 type TPrimitives = string | number | boolean | bigint | symbol | Date | TFunction;
 
-type TMerged<T> = [T] extends [Array<any>]
+type TMerged<T> = [T] extends [readonly unknown[]]
     ? { [K in keyof T]: TMerged<T[K]> }
     : [T] extends [TPrimitives]
       ? T
@@ -28,7 +28,7 @@ type TMerged<T> = [T] extends [Array<any>]
         : T;
 
 // istanbul ignore next
-const isObject = (obj: any): obj is IObject => {
+const isObject = (obj: unknown): obj is IObject => {
     if (typeof obj === 'object' && obj !== null) {
         if (typeof Object.getPrototypeOf === 'function') {
             const prototype = Object.getPrototypeOf(obj);
@@ -46,7 +46,11 @@ interface IObject {
     [key: string]: any;
 }
 
-const mergeValuesWithPath = (target: any, value: any, [key, ...rest]: string[]): any => {
+const mergeValuesWithPath = (
+    target: unknown,
+    value: unknown,
+    [key, ...rest]: string[],
+): unknown => {
     if (key === undefined) {
         return mergeValues(target, value);
     } else if (!isObject(target)) {
@@ -56,7 +60,7 @@ const mergeValuesWithPath = (target: any, value: any, [key, ...rest]: string[]):
     }
 };
 
-const mergeValues = (target: any, value: any) => {
+const mergeValues = (target: unknown, value: unknown): unknown => {
     if (Array.isArray(target) && Array.isArray(value)) {
         return mergeDeepObject.options.mergeArrays
             ? Array.from(new Set((target as unknown[]).concat(value)))
@@ -69,7 +73,7 @@ const mergeValues = (target: any, value: any) => {
 };
 
 export const mergeDeepObject = <T extends IObject[]>(...objects: T): TMerged<T[number]> =>
-    objects.reduce((result, current) => {
+    objects.reduce<IObject>((result, current) => {
         if (Array.isArray(current)) {
             throw new TypeError('Arguments provided to ts-deepmerge must be objects, not arrays.');
         }
@@ -88,7 +92,7 @@ export const mergeDeepObject = <T extends IObject[]>(...objects: T): TMerged<T[n
         });
 
         return result;
-    }, {}) as any;
+    }, {}) as unknown as TMerged<T[number]>;
 
 interface IOptions {
     mergeArrays: boolean;
