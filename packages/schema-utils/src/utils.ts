@@ -5,12 +5,16 @@
  * @param param path to the value
  * @param value value to set
  */
-export function setDeepValue(obj: any, [prop, ...path]: string[], value: any) {
+export function setDeepValue(
+    obj: Record<string, unknown>,
+    [prop, ...path]: string[],
+    value: unknown,
+) {
     if (!path.length) {
         obj[prop] = value;
     } else {
         if (!(prop in obj)) obj[prop] = {};
-        setDeepValue(obj[prop], path, value);
+        setDeepValue(obj[prop] as Record<string, unknown>, path, value);
     }
 }
 
@@ -20,12 +24,15 @@ export function setDeepValue(obj: any, [prop, ...path]: string[], value: any) {
  * @param param path to the value
  * @returns value at the path
  */
-export function getDeepValue(obj: any, [prop, ...path]: (string | number)[]): any {
+export function getDeepValue(
+    obj: Record<string, unknown>,
+    [prop, ...path]: (string | number)[],
+): any {
     if (!path.length) {
         return obj[prop];
     } else {
         if (!(prop in obj)) return undefined;
 
-        return getDeepValue(obj[prop], path);
+        return getDeepValue(obj[prop] as Record<string, unknown>, path);
     }
 }
