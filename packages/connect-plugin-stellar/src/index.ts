@@ -127,16 +127,16 @@ export const transformTransaction = (path: string, transaction: Transaction) => 
     const assets = ['asset', 'sendAsset', 'destAsset', 'selling', 'buying', 'line'];
 
     const operations = transaction.operations.map((o, i) => {
-        const operation: any = { ...o };
+        const operation: Record<string, unknown> = { ...o };
 
         // transform Signer
         if (operation.signer) {
-            operation.signer = transformSigner(operation.signer);
+            operation.signer = transformSigner(operation.signer as Signer);
         }
 
         // transform asset path
         if (operation.path) {
-            operation.path = operation.path.map(transformAsset);
+            operation.path = (operation.path as Asset[]).map(transformAsset);
         }
 
         // transform "price" field to { n: number, d: number }
@@ -151,27 +151,31 @@ export const transformTransaction = (path: string, transaction: Transaction) => 
 
         // transform amounts
         amounts.forEach(field => {
-            if (typeof operation[field] === 'string') {
-                operation[field] = transformAmount(operation[field]);
+            const value = operation[field];
+            if (typeof value === 'string') {
+                operation[field] = transformAmount(value);
             }
         });
 
         // transform assets
         assets.forEach(field => {
             if (operation[field]) {
-                operation[field] = transformAsset(operation[field]);
+                operation[field] = transformAsset(operation[field] as Asset);
             }
         });
 
         // add missing field
         if (operation.type === 'allowTrust') {
-            const allowTrustAsset = new Asset(operation.assetCode, operation.trustor);
+            const allowTrustAsset = new Asset(
+                operation.assetCode as string,
+                operation.trustor as string,
+            );
             operation.assetType = transformAsset(allowTrustAsset).type;
         }
 
         if (operation.type === 'manageData' && operation.value) {
             // stringify is not necessary, Buffer is also accepted
-            operation.value = operation.value.toString('hex');
+            operation.value = (operation.value as Buffer).toString('hex');
         }
         if (operation.type === 'manageBuyOffer') {
             operation.amount = operation.buyAmount;
