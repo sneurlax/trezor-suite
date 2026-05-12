@@ -158,10 +158,10 @@ export abstract class AbstractMetadataProvider {
         } as const;
     }
 
-    scheduleApiRequest<T extends () => ReturnType<R>, R extends (...args: any) => Result<any>>(
-        fn: T,
-        options: { retries: number; delay: number } = { retries: 3, delay: 1000 },
-    ) {
+    scheduleApiRequest<
+        T extends () => ReturnType<R>,
+        R extends (...args: any[]) => Result<unknown>,
+    >(fn: T, options: { retries: number; delay: number } = { retries: 3, delay: 1000 }) {
         let retried = 0;
 
         return new Promise<Awaited<ReturnType<R>>>(resolve => {
