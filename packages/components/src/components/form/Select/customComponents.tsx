@@ -164,7 +164,7 @@ export const Option = ({
     children,
     ...props
 }: OptionComponentProps) => {
-    const ref = useRef<HTMLDivElement>(undefined);
+    const ref = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         if (props.isSelected) {
@@ -176,7 +176,9 @@ export const Option = ({
     return (
         <components.Option
             {...props}
-            innerRef={ref as any}
+            innerRef={node => {
+                ref.current = node;
+            }}
             innerProps={
                 {
                     ...props.innerProps,
