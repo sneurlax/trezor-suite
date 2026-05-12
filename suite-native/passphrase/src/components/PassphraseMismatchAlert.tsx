@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useNavigation } from '@react-navigation/native';
@@ -15,6 +14,7 @@ import { Translation } from '@suite-native/intl';
 import {
     type AuthorizeDeviceStackParamList,
     AuthorizeDeviceStackRoutes,
+    PassphraseStackRoutes,
     type RootStackParamList,
     RootStackRoutes,
     type StackToStackCompositeNavigationProps,
@@ -30,18 +30,16 @@ type NavigationProp = StackToStackCompositeNavigationProps<
     RootStackParamList
 >;
 
-export const PassphraseMismatchAlert = ({ children }: { children?: React.ReactNode }) => {
-    const dispatch = useDispatch();
+export const usePassphraseMismatchAlert = () => {
+    const { showAlert } = useAlert();
     const analytics = useAnalytics();
     const navigation = useNavigation<NavigationProp>();
+    const dispatch = useDispatch();
     const device = useSelector(selectSelectedDevice);
     const navigateToInitialScreen = useNavigateToInitialScreen();
-
-    const { showAlert } = useAlert();
-
     const hasPassphraseMismatchError = useSelector(selectHasPassphraseMismatchError);
 
-    useEffect(() => {
+    const onPassphraseMismatchAlert = () => {
         // Wrong passphrase was entered during verifying empty wallet
         if (hasPassphraseMismatchError) {
             analytics.report({ type: events.passphraseMismatchEvent.name });
@@ -55,8 +53,6 @@ export const PassphraseMismatchAlert = ({ children }: { children?: React.ReactNo
                 primaryButtonTitle: (
                     <Translation id="modulePassphrase.emptyPassphraseWallet.verifyEmptyWallet.passphraseMismatchAlert.primaryButton" />
                 ),
-                // TODO this needs to be done based on the location where it's used
-                // In passphrase creation it cannot navigate to AuthorizeDeviceStack so the onPress handlers need to be passed as props.
                 onPressPrimaryButton: () => {
                     if (!device) return;
 
@@ -69,8 +65,8 @@ export const PassphraseMismatchAlert = ({ children }: { children?: React.ReactNo
                         }),
                     );
                     dispatch(runDiscoveryThunk(device));
-                    navigation.navigate(RootStackRoutes.AuthorizeDeviceStack, {
-                        screen: AuthorizeDeviceStackRoutes.PassphraseForm,
+                    navigation.navigate(RootStackRoutes.PassphraseStack, {
+                        screen: PassphraseStackRoutes.PassphraseForm,
                     });
                 },
                 primaryButtonColorProps: { intent: 'critical', priority: 'primary' },
@@ -91,15 +87,7 @@ export const PassphraseMismatchAlert = ({ children }: { children?: React.ReactNo
                 pictogramVariant: 'critical',
             });
         }
-    }, [
-        device,
-        dispatch,
-        hasPassphraseMismatchError,
-        analytics,
-        navigateToInitialScreen,
-        navigation,
-        showAlert,
-    ]);
+    };
 
-    return children ?? null;
+    return { onPassphraseMismatchAlert };
 };
