@@ -88,7 +88,7 @@ const updateConnectSettings = (_params: UpdateConnectSettings) =>
             ),
         ),
     );
-const call: CallMethod = async (params: any) => {
+const call: CallMethod = async params => {
     try {
         const response = await _channel.postMessage({
             type: CORE_CALL,
