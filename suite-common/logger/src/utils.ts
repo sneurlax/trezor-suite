@@ -24,7 +24,7 @@ export const REDACTED_REPLACEMENT = '[redacted]';
 
 export const startTime = new Date().toUTCString();
 
-export const prettifyLog = (json: Record<any, any>) => JSON.stringify(json, null, 2);
+export const prettifyLog = (json: unknown) => JSON.stringify(json, null, 2);
 
 export const redactAccount = (account: DeepPartial<Account> | undefined) => {
     if (!account) return undefined;
