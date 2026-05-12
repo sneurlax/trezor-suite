@@ -340,7 +340,7 @@ export const fetchFiatRatesThunk = createThunk(
                 ),
         );
 
-        tickerChunks.reduce<Promise<any>>(
+        tickerChunks.reduce<Promise<unknown>>(
             (chain, chunk) =>
                 chain.then(() =>
                     dispatch(
