@@ -9,8 +9,7 @@ on:
         default: false
         type: boolean
       currents_ci_build_id:
-        description: "Custom CI build ID for Currents reporting, default is
-          pr-run-RUN_ID-RUN_ATTEMPT"
+        description: "Custom CI build ID for Currents reporting, default is pr-run-RUN_ID-RUN_ATTEMPT"
         required: false
         default: pr-run-${{ github.run_id }}-${{ github.run_attempt }}
         type: string
@@ -42,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        TEST_GROUP: [ 0 ]
+        TEST_GROUP: [0]
 
     steps:
       - name: Checkout project
@@ -145,7 +144,8 @@ jobs:
           ram-size: 4096M
           force-avd-creation: true
           avd-name: ${{ steps.device.outputs.AVD_NAME }}
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio
+          emulator-options:
+            -no-window -gpu swiftshader_indirect -no-snapshot -noaudio
             -no-boot-anim -grpc 8554
           script: |
             yarn test:e2e --config=${{ inputs.runner_config }} --headless suiteSync.test.ts

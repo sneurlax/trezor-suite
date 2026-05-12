@@ -32,7 +32,7 @@ services:
 
   suite-sync:
     container_name: suite-sync
-    image: ghcr.io/trezor/suite-sync:main
+    image: ghcr.io/trezor/suite-sync:debug-build-test-image-qa
     environment:
       POSTGRES_GATE_USER: suite-sync
       POSTGRES_GATE_PASSWORD: password
