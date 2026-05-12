@@ -27,12 +27,6 @@ export const isPassphraseDiscoveryFailure = (
     return false;
 };
 
-export const selectHasPassphraseMismatchError = (state: DiscoveryRootState & DeviceRootState) => {
-    const discovery = selectDiscoveryByDevicePath(state, state.device.selectedDevice?.path);
-
-    return discovery?.status === 'passphrase-mismatch';
-};
-
 export const selectHasPassphraseIncorrectError = (state: DiscoveryRootState & DeviceRootState) => {
     const discovery = selectDiscoveryByDevicePath(state, state.device.selectedDevice?.path);
 
@@ -56,34 +50,4 @@ export const selectPassphraseDeviceNotEmpty = (state: DiscoveryRootState & Devic
         default:
             return null;
     }
-};
-
-export const selectPassphraseDiscoveryCompleted = (state: DiscoveryRootState & DeviceRootState) => {
-    const discovery = selectDiscoveryByDevicePath(state, state.device.selectedDevice?.path);
-
-    if (!discovery || !discovery.isAddingHiddenWallet) {
-        return null;
-    }
-
-    return (
-        discovery.status === 'complete' ||
-        (discovery.status === 'progress' && discovery.hasLoadedAnyNonEmptyAccount)
-    );
-};
-
-export const selectHasPassphraseError = (state: DiscoveryRootState & DeviceRootState) => {
-    const discovery = selectDiscoveryByDevicePath(state, state.device.selectedDevice?.path);
-
-    return (
-        discovery?.isAddingExistingWallet &&
-        ['failed', 'cancelled', 'passphrase-mismatch'].includes(discovery.status)
-    );
-};
-
-export const selectHasVerificationCancelledError = (
-    state: DiscoveryRootState & DeviceRootState,
-) => {
-    const discovery = selectDiscoveryByDevicePath(state, state.device.selectedDevice?.path);
-
-    return discovery?.status === 'cancelled';
 };

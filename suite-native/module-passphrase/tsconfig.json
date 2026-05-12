@@ -6,6 +6,10 @@
         {
             "path": "../../suite-common/wallet-core"
         },
+        {
+            "path": "../../suite-common/wallet-types"
+        },
+        { "path": "../alerts" },
         { "path": "../analytics" },
         { "path": "../atoms" },
         { "path": "../device" },
@@ -18,6 +22,7 @@
         {
             "path": "../../packages/styles-native"
         },
+        { "path": "../../packages/type-utils" },
         { "path": "../../packages/urls" },
         { "path": "../../packages/requirements" }
     ]

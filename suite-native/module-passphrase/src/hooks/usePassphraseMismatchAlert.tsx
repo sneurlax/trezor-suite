@@ -4,8 +4,10 @@ import { useNavigation } from '@react-navigation/native';
 
 import { selectSelectedDevice } from '@suite-common/device';
 import {
+    type DiscoveryRootState,
     cancelDiscoveryThunk,
     runDiscoveryThunk,
+    selectDiscoveryByDevicePath,
     startDiscoveryThunk,
 } from '@suite-common/wallet-core';
 import { useAlert } from '@suite-native/alerts';
@@ -22,8 +24,6 @@ import {
 } from '@suite-native/navigation';
 import { useAnalytics } from '@suite-native/services';
 
-import { selectHasPassphraseMismatchError } from '../passphraseSelectors';
-
 type NavigationProp = StackToStackCompositeNavigationProps<
     AuthorizeDeviceStackParamList,
     AuthorizeDeviceStackRoutes.PassphraseForm,
@@ -37,11 +37,13 @@ export const usePassphraseMismatchAlert = () => {
     const dispatch = useDispatch();
     const device = useSelector(selectSelectedDevice);
     const navigateToInitialScreen = useNavigateToInitialScreen();
-    const hasPassphraseMismatchError = useSelector(selectHasPassphraseMismatchError);
+    const discovery = useSelector((state: DiscoveryRootState) =>
+        selectDiscoveryByDevicePath(state, device?.path),
+    );
 
     const onPassphraseMismatchAlert = () => {
         // Wrong passphrase was entered during verifying empty wallet
-        if (hasPassphraseMismatchError) {
+        if (discovery?.status === 'passphrase-mismatch') {
             analytics.report({ type: events.passphraseMismatchEvent.name });
             showAlert({
                 title: (
