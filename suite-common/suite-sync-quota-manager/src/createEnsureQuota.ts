@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { type Dispatch } from '@reduxjs/toolkit';
 
 import { isTrezorDeviceWithState } from '@suite-common/device';
@@ -48,23 +49,37 @@ export const createEnsureQuota =
 
         const device = deps.getDeviceForStaticSessionId(deviceStaticSessionId);
 
+        console.log(
+            `[SuiteSync] ensureQuota START ownerId=${owner.ownerId} isWriteMode=${isWriteMode} deviceId=${device?.id ?? 'null'}`,
+        );
+
         if (device === null || !isNotNullOrUndefined(device.id)) {
+            console.log('[SuiteSync] ensureQuota: no device, skipping quota check');
+
             return ok();
         }
 
-        if (deps.getDeviceHasAllowance(device.id, walletDescriptor)) {
+        const deviceHasAllowance = deps.getDeviceHasAllowance(device.id, walletDescriptor);
+        console.log(`[SuiteSync] ensureQuota: deviceHasAllowance=${deviceHasAllowance}`);
+
+        if (deviceHasAllowance) {
+            console.log('[SuiteSync] ensureQuota: device allowance cached, returning ok');
+
             return ok();
         }
 
         if (isNotNull(device) && isTrezorDeviceWithState(device)) {
+            console.log('[SuiteSync] ensureQuota: calling ensureDeviceHasQuotaThunk');
             await deps.dispatch(
                 ensureDeviceHasQuotaThunk({
                     device,
                     delegatedKey,
                 }),
             );
+            console.log('[SuiteSync] ensureQuota: ensureDeviceHasQuotaThunk done');
         }
 
+        console.log('[SuiteSync] ensureQuota: calling ensureOwnerHasAllocatedQuotaThunk');
         const allocatedQuota = await deps.dispatch(
             ensureOwnerHasAllocatedQuotaThunk({
                 deviceStaticSessionId,
@@ -72,6 +87,10 @@ export const createEnsureQuota =
                 delegatedKey,
                 isWriteMode,
             }),
+        );
+
+        console.log(
+            `[SuiteSync] ensureQuota: allocatedQuota success=${allocatedQuota.success} errorType=${!allocatedQuota.success ? allocatedQuota.error.type : 'none'}`,
         );
 
         if (

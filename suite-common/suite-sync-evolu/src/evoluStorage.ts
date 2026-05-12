@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { type Evolu, createOwnerWebSocketTransport } from '@evolu/common';
 
 import { type CreateSuiteStorage, type SuiteSyncStorage } from '@suite-common/suite-sync-storage';
@@ -32,10 +33,14 @@ export const createEvoluStorageFactory =
         const updateRelayUrl = async (url: string) => {
             const owner = await evolu.appOwner;
 
+            console.log(
+                `[SuiteSync] updateRelayUrl: connecting ownerId=${owner.id} url=${url}`,
+            );
             unuseOwner();
             unuseOwner = evolu.useOwner(owner, [
                 createOwnerWebSocketTransport({ url, ownerId: owner.id }),
             ]);
+            console.log('[SuiteSync] updateRelayUrl: WebSocket transport registered');
         };
 
         return {

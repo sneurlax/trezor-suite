@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { type Dispatch } from '@reduxjs/toolkit';
 
 import {
@@ -29,19 +30,33 @@ export const ensureDeviceHasQuotaThunk =
 
         const delegatedKeyPublic = getPublicIdentityKeyFromDelegatedKey(delegatedKey);
 
+        console.log(
+            `[SuiteSync] ensureDeviceQuota START deviceId=${device.id} quotaManagerBaseUrl=${quotaManagerBaseUrl}`,
+        );
+
         const hasPublicKeyStorage = await checkStorageByPublicKey({
             baseUrl: quotaManagerBaseUrl,
             publicKey: delegatedKeyPublic,
         });
 
         if (!hasPublicKeyStorage.success) {
+            console.log(
+                `[SuiteSync] ensureDeviceQuota: checkStorageByPublicKey failed type=${hasPublicKeyStorage.error.type} message=${hasPublicKeyStorage.error.message}`,
+            );
             dispatch(quotaManagerFetchError({ error: hasPublicKeyStorage.error.message }));
 
             return;
         }
 
+        console.log(
+            `[SuiteSync] ensureDeviceQuota: checkStorageByPublicKey status=${hasPublicKeyStorage.payload.status}`,
+        );
+
         // already registered, don't need to register again
         if (hasPublicKeyStorage.payload.status === 'Allocated') {
+            console.log(
+                `[SuiteSync] ensureDeviceQuota: device already registered totalSpace=${hasPublicKeyStorage.payload.totalSpace} unspentSpace=${hasPublicKeyStorage.payload.unspentSpace}`,
+            );
             dispatch(
                 quotaManagerDeviceFetched({
                     deviceId: device.id,
@@ -53,11 +68,15 @@ export const ensureDeviceHasQuotaThunk =
             return;
         }
 
+        console.log('[SuiteSync] ensureDeviceQuota: device not registered, fetching challenge');
         const sessionChallenge = await prepareChallengeSession({
             baseUrl: quotaManagerBaseUrl,
         });
 
         if (!sessionChallenge.success) {
+            console.log(
+                `[SuiteSync] ensureDeviceQuota: challenge failed message=${sessionChallenge.error.message}`,
+            );
             dispatch(quotaManagerFetchError({ error: sessionChallenge.error.message }));
 
             return;
@@ -72,13 +91,22 @@ export const ensureDeviceHasQuotaThunk =
             }),
         });
 
-        if (!proofOfDelegatedIdentity.success) return;
+        if (!proofOfDelegatedIdentity.success) {
+            console.log('[SuiteSync] ensureDeviceQuota: proof of delegated identity failed');
 
+            return;
+        }
+
+        console.log('[SuiteSync] ensureDeviceQuota: calling TrezorConnect.evoluSignRegistrationRequest');
         const registrationRequestResult = await TrezorConnect.evoluSignRegistrationRequest({
             challenge_from_server: sessionChallenge.payload.challenge,
             size_to_acquire: DEFAULT_DEVICE_SIZE_QUOTA,
             proof_of_delegated_identity: proofOfDelegatedIdentity.payload,
         });
+
+        console.log(
+            `[SuiteSync] ensureDeviceQuota: evoluSignRegistrationRequest success=${registrationRequestResult.success}`,
+        );
 
         if (registrationRequestResult.success) {
             dispatch(

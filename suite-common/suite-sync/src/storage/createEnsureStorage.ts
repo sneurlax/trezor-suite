@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {
     type EnsureQuotaDep,
     type GetOwnerHasAllowanceDep,
@@ -63,6 +64,10 @@ export const createEnsureStorage =
         const storageId = createStorageIdFromDeviceStaticSessionId(deviceStaticSessionId);
         const { walletDescriptor } = parseDeviceStaticSessionId(deviceStaticSessionId);
 
+        console.log(
+            `[SuiteSync] ensureStorage START isWriteMode=${isWriteMode} walletDescriptor=${walletDescriptor}`,
+        );
+
         const existingStorage = deps.suiteSyncStorageRepository.get(storageId);
 
         // Return cached storage if it exists and user has owner quota.
@@ -70,20 +75,35 @@ export const createEnsureStorage =
         // the owner quota from QM server (we do it so other user devices can allocate more quota, thus here it would be outdated).
 
         if (isNotNull(existingStorage) && deps.getOwnerHasAllowance(walletDescriptor)) {
+            console.log('[SuiteSync] ensureStorage: cache hit with owner allowance, returning early');
+
             return ok(existingStorage);
         }
+
+        console.log(
+            `[SuiteSync] ensureStorage: existingStorage=${isNotNull(existingStorage)} ownerHasAllowance=${deps.getOwnerHasAllowance(walletDescriptor)}, proceeding with full init`,
+        );
 
         const device = deps.getDeviceForStaticSessionId(deviceStaticSessionId);
 
         if (device === null) {
+            console.log('[SuiteSync] ensureStorage ERROR: device not found');
+
             return err(SuiteSyncUnavailableOnDeviceError());
         }
 
+        console.log('[SuiteSync] ensureStorage: calling ensureSuiteSyncKeys');
         const keysResult = await deps.ensureSuiteSyncKeys({ device });
 
         if (!keysResult.success) {
+            console.log(
+                `[SuiteSync] ensureStorage ERROR: ensureSuiteSyncKeys failed type=${keysResult.error.type}`,
+            );
+
             return keysResult;
         }
+
+        console.log('[SuiteSync] ensureStorage: ensureSuiteSyncKeys OK, calling ensureQuota');
 
         const { owner, delegatedKey } = keysResult.payload;
 
@@ -98,20 +118,34 @@ export const createEnsureStorage =
             isWriteMode,
         });
 
+        console.log(
+            `[SuiteSync] ensureStorage: ensureQuota done success=${quotaResult.success} errorType=${!quotaResult.success ? quotaResult.error.type : 'none'}`,
+        );
+
         // `WriteModeRequiredForAllocation` means we won't connect Storage to server,
         // but other errors are bad and need to be propagated
         if (!quotaResult.success && quotaResult.error.type !== 'WriteModeRequiredForAllocation') {
+            console.log(
+                `[SuiteSync] ensureStorage ERROR: quota failed with ${quotaResult.error.type}, relay URL NOT set`,
+            );
+
             return err(quotaResult.error);
         }
 
         // Only connect to the relay if quota is actually allocated.
         if (quotaResult.success) {
-            await storage.updateRelayUrl(deps.getRelayUrl());
+            const relayUrl = deps.getRelayUrl();
+            console.log(`[SuiteSync] ensureStorage: quota allocated, setting relay URL=${relayUrl}`);
+            await storage.updateRelayUrl(relayUrl);
+        } else {
+            console.log('[SuiteSync] ensureStorage: WriteModeRequiredForAllocation, relay URL NOT set');
         }
 
         if (!isNotNull(existingStorage)) {
             deps.suiteSyncStorageRepository.set(storageId, storage);
         }
+
+        console.log('[SuiteSync] ensureStorage DONE');
 
         return ok(storage);
     };

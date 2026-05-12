@@ -50,6 +50,9 @@ export const quotaManagerFetch = async ({
         });
     }
 
+    // eslint-disable-next-line no-console
+    console.log(`[SuiteSync] quotaManagerFetch ${method} ${url.toString()}`);
+
     try {
         const response = await fetch(url.toString(), {
             method,
@@ -59,6 +62,9 @@ export const quotaManagerFetch = async ({
             },
             body: body ? JSON.stringify(body) : null,
         });
+
+        // eslint-disable-next-line no-console
+        console.log(`[SuiteSync] quotaManagerFetch ${method} ${path} → HTTP ${response.status}`);
 
         if (!response.ok) {
             return err({
@@ -72,6 +78,9 @@ export const quotaManagerFetch = async ({
 
         return ok(data);
     } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log(`[SuiteSync] quotaManagerFetch ${method} ${path} → FetchError: ${e.message}`);
+
         return err({
             type: 'FetchError' as const,
             message: e.message,
