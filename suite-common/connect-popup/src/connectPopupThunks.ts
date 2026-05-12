@@ -42,8 +42,7 @@ export const connectPopupCallThunkInner = createThunk<
     `${CONNECT_POPUP_MODULE}/callThunk`,
     async ({ method, payload, source }, { dispatch, getState, extra }) => {
         try {
-            if (!connectCallableMethods.includes(method as any))
-                throw TypedError('Method_Unsupported');
+            if (!connectCallableMethods.includes(method)) throw TypedError('Method_Unsupported');
 
             const methodInfo = await TrezorConnect.call({
                 ...payload,
@@ -230,7 +229,11 @@ export const connectPopupCallThunkInner = createThunk<
 export const connectPopupCallThunk = <M extends CallMethodKeys>(
     params: ConnectPopupCallThunkParams<M>,
 ): AsyncThunkAction<void, ConnectPopupCallThunkParams<M>, CustomThunkAPI> =>
-    connectPopupCallThunkInner(params) as any;
+    connectPopupCallThunkInner(params) as AsyncThunkAction<
+        void,
+        ConnectPopupCallThunkParams<M>,
+        CustomThunkAPI
+    >;
 
 export const connectPopupDeeplinkThunk = createThunk<void, { url: string }>(
     `${CONNECT_POPUP_MODULE}/deeplinkThunk`,
