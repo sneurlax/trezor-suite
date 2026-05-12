@@ -1,4 +1,9 @@
-import { type UseFormSetValue } from 'react-hook-form';
+import {
+    type FieldPath,
+    type FieldPathValue,
+    type FieldValues,
+    type UseFormSetValue,
+} from 'react-hook-form';
 
 import { toChecksumAddress } from 'web3-utils';
 
@@ -98,17 +103,19 @@ export const isHexValid = (value: string, prefix?: string) => {
     return true;
 };
 
-export const checkIsAddressNotUsedNotChecksummed = (
+export const checkIsAddressNotUsedNotChecksummed = <T extends FieldValues>(
     address: string,
     history: AccountInfo['history'],
-    inputName: string,
-    setValue: UseFormSetValue<any>,
+    inputName: FieldPath<T>,
+    setValue: UseFormSetValue<T>,
     setHasAddressChecksummed: (value: boolean) => void,
 ) => {
     const hasHistory = history.total !== 0;
 
     if (hasHistory) {
-        setValue(inputName, toChecksumAddress(address), { shouldValidate: true });
+        setValue(inputName, toChecksumAddress(address) as FieldPathValue<T, typeof inputName>, {
+            shouldValidate: true,
+        });
         setHasAddressChecksummed(true);
 
         return false;
