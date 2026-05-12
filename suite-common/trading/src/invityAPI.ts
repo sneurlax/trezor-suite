@@ -164,13 +164,13 @@ class InvityAPI {
         };
     }
 
-    private async request(
+    private async request<T = unknown>(
         url: string,
         body: BodyType = {},
         method = 'POST',
         apiHeaderValue?: string,
         signal?: SignalType,
-    ): Promise<any> {
+    ): Promise<T> {
         const finalUrl = `${this.getApiServerUrl()}${url}`;
         const opts = this.options(body, method, apiHeaderValue, signal);
 
@@ -200,7 +200,7 @@ class InvityAPI {
 
     getInfo = async (): Promise<InfoResponse> => {
         try {
-            const response = await this.request(this.INFO, {}, 'GET');
+            const response = await this.request<InfoResponse>(this.INFO, {}, 'GET');
             if (response) {
                 return response;
             }
@@ -213,7 +213,11 @@ class InvityAPI {
 
     getExchangeList = async (): Promise<ExchangeListResponse> => {
         try {
-            const response = await this.request(this.EXCHANGE_LIST, {}, 'GET');
+            const response = await this.request<ExchangeListResponse>(
+                this.EXCHANGE_LIST,
+                {},
+                'GET',
+            );
 
             if (response) {
                 return response;
@@ -230,7 +234,7 @@ class InvityAPI {
         signal?: SignalType,
     ): Promise<ExchangeTrade[] | undefined> => {
         try {
-            const response: ExchangeTradeQuoteResponse = await this.request(
+            const response = await this.request<ExchangeTradeQuoteResponse>(
                 this.EXCHANGE_QUOTES,
                 params,
                 'POST',
@@ -251,7 +255,7 @@ class InvityAPI {
         signal?: SignalType,
     ): Promise<ExchangeTrade> => {
         try {
-            const response: ExchangeTrade = await this.request(
+            const response = await this.request<ExchangeTrade>(
                 this.EXCHANGE_DO_TRADE,
                 tradeRequest,
                 'POST',
@@ -269,7 +273,7 @@ class InvityAPI {
 
     getBuyList = async (): Promise<BuyListResponse | undefined> => {
         try {
-            const response = await this.request(this.BUY_LIST, {}, 'GET');
+            const response = await this.request<BuyListResponse>(this.BUY_LIST, {}, 'GET');
 
             return response;
         } catch (error) {
@@ -282,7 +286,7 @@ class InvityAPI {
         signal?: SignalType,
     ): Promise<BuyTradeQuoteResponse | undefined> => {
         try {
-            const response: BuyTradeQuoteResponse = await this.request(
+            const response = await this.request<BuyTradeQuoteResponse>(
                 this.BUY_QUOTES,
                 params,
                 'POST',
@@ -300,7 +304,7 @@ class InvityAPI {
 
     doBuyTrade = async (tradeRequest: BuyTradeRequest): Promise<BuyTradeResponse> => {
         try {
-            const response: BuyTradeResponse = await this.request(
+            const response = await this.request<BuyTradeResponse>(
                 this.BUY_DO_TRADE,
                 tradeRequest,
                 'POST',
@@ -316,7 +320,7 @@ class InvityAPI {
 
     getBuyTradeForm = async (tradeRequest: BuyTradeRequest): Promise<BuyTradeFormResponse> => {
         try {
-            const response: BuyTradeFormResponse = await this.request(
+            const response = await this.request<BuyTradeFormResponse>(
                 this.BUY_GET_TRADE_FORM,
                 tradeRequest,
                 'POST',
@@ -332,7 +336,7 @@ class InvityAPI {
 
     getSellList = async (): Promise<SellListResponse | undefined> => {
         try {
-            const response = await this.request(this.SELL_LIST, {}, 'GET');
+            const response = await this.request<SellListResponse>(this.SELL_LIST, {}, 'GET');
 
             return response;
         } catch (error) {
@@ -345,7 +349,7 @@ class InvityAPI {
         signal?: SignalType,
     ): Promise<SellFiatTrade[] | undefined> => {
         try {
-            const response: SellFiatTradeQuoteResponse = await this.request(
+            const response = await this.request<SellFiatTradeQuoteResponse>(
                 this.SELL_FIAT_QUOTES,
                 params,
                 'POST',
@@ -363,7 +367,7 @@ class InvityAPI {
 
     doSellTrade = async (tradeRequest: SellFiatTradeRequest): Promise<SellFiatTradeResponse> => {
         try {
-            const response: SellFiatTradeResponse = await this.request(
+            const response = await this.request<SellFiatTradeResponse>(
                 this.SELL_FIAT_DO_TRADE,
                 tradeRequest,
                 'POST',
@@ -379,7 +383,7 @@ class InvityAPI {
 
     doSellConfirm = async (trade: SellFiatTrade): Promise<SellFiatTrade> => {
         try {
-            const response: SellFiatTrade = await this.request(
+            const response = await this.request<SellFiatTrade>(
                 this.SELL_FIAT_CONFIRM,
                 trade,
                 'POST',
@@ -433,7 +437,7 @@ class InvityAPI {
         const tradesData = this.getWatchTradeData(tradeType);
 
         try {
-            const response: TradingWatchTradeResponsePropsMap[T] = await this.request(
+            const response = await this.request<TradingWatchTradeResponsePropsMap[T]>(
                 tradesData.url.replace('{{counter}}', counter.toString()),
                 tradeData,
                 'POST',
@@ -449,7 +453,7 @@ class InvityAPI {
 
     getOTCData = async (): Promise<TradingOTC | undefined> => {
         try {
-            const response = await this.request(this.OTC_INFO, {}, 'GET');
+            const response = await this.request<TradingOTC>(this.OTC_INFO, {}, 'GET');
 
             if (response) {
                 return response;
@@ -466,7 +470,7 @@ class InvityAPI {
         params: P,
     ): Promise<T | undefined> => {
         try {
-            const response = await this.request(this.TRADE_SIGN, params, 'POST');
+            const response = await this.request<T>(this.TRADE_SIGN, params, 'POST');
 
             if (response) {
                 return response;
