@@ -40,7 +40,7 @@ const transportsPerDeviceType = {
         android: [NativeUsbTransport, NativeBluetoothTransport],
     }),
     emulator: [bridgeTransport],
-} as const;
+};
 
 const transports = transportsPerDeviceType[deviceType];
 

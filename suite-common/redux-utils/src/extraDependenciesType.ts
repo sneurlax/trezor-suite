@@ -32,6 +32,11 @@ export type ConnectInitSettings = {
     manifest: Manifest;
 } & Partial<ConnectSettings>;
 
+export type DebugSettings = {
+    transports?: ConnectSettings['transports'];
+    showConnectLogs?: boolean;
+};
+
 export type CommonServices = SuiteSyncDep &
     Bip329Dep &
     EnsureDelegatedIdentityKeyDep &
@@ -61,9 +66,7 @@ export type ExtraDependenciesStatic = {
         // TODO when tokens are implemented 1:1 in both apps, delete from extras
         // wallet-core selector is used in desktop, but suite-native has its own implementation
         selectTokenDefinitionsEnabledNetworks: SuiteCompatibleSelector<NetworkSymbol[]>;
-        // todo: we do not want to, so far, transfer coinjoin to @suite-common
-        // but this is exactly what I need to get DebugModeOptions type instead of any
-        selectDebugSettings: SuiteCompatibleSelector<any>;
+        selectDebugSettings: SuiteCompatibleSelector<DebugSettings>;
         selectDesktopBinDir: SuiteCompatibleSelector<string | undefined>;
         selectLanguage: SuiteCompatibleSelector<string>;
         selectIsWindowVisible: SuiteCompatibleSelector<boolean>;
