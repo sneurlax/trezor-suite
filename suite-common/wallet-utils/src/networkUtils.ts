@@ -1,4 +1,10 @@
-export const httpRequest = async (url: string, type = 'text'): Promise<any> => {
+export function httpRequest(url: string, type: 'json'): Promise<unknown>;
+export function httpRequest(url: string, type: 'binary'): Promise<ArrayBuffer>;
+export function httpRequest(url: string, type?: 'text'): Promise<string>;
+export async function httpRequest(
+    url: string,
+    type: 'text' | 'json' | 'binary' = 'text',
+): Promise<unknown> {
     const response: Response = await fetch(url, { credentials: 'same-origin' });
     if (response.ok) {
         if (type === 'json') {
@@ -13,7 +19,7 @@ export const httpRequest = async (url: string, type = 'text'): Promise<any> => {
         return response.text();
     }
     throw new Error(`${url} ${response.statusText}`);
-};
+}
 
 interface RequestUrlParams<
     Base extends string,
