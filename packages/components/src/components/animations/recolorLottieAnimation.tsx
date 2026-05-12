@@ -33,35 +33,36 @@ export const recolorLottieAnimation = (
         return null;
     };
 
-    const walk = (node: any) => {
+    const isNumberQuartet = (segment: unknown[]): segment is number[] =>
+        segment.length === 4 && segment.every(n => typeof n === 'number');
+
+    const walk = (node: unknown) => {
         if (Array.isArray(node)) {
+            const arr = node as unknown[];
             // Find RGBA quartets in row (e.g. in gradients)
-            for (let i = 0; i <= node.length - 4; i++) {
-                const segment = node.slice(i, i + 4);
-                if (segment.every(n => typeof n === 'number')) {
+            for (let i = 0; i <= arr.length - 4; i++) {
+                const segment = arr.slice(i, i + 4);
+                if (isNumberQuartet(segment)) {
                     const replacement = findReplacement(segment);
                     if (replacement) {
-                        node.splice(i, 4, ...replacement);
+                        arr.splice(i, 4, ...replacement);
                         i += 3;
                     }
                 }
             }
 
-            node.forEach(walk);
+            arr.forEach(walk);
         } else if (typeof node === 'object' && node !== null) {
-            for (const key in node) {
-                if (Object.prototype.hasOwnProperty.call(node, key)) {
-                    const value = node[key];
+            const obj = node as Record<string, unknown>;
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    const value = obj[key];
 
                     // Simple rgba color
-                    if (
-                        Array.isArray(value) &&
-                        value.length === 4 &&
-                        value.every(n => typeof n === 'number')
-                    ) {
+                    if (Array.isArray(value) && isNumberQuartet(value)) {
                         const replacement = findReplacement(value);
                         if (replacement) {
-                            node[key] = replacement;
+                            obj[key] = replacement;
                             continue;
                         }
                     }
