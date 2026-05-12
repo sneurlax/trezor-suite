@@ -27,7 +27,7 @@ export function setDeepValue(
 export function getDeepValue(
     obj: Record<string, unknown>,
     [prop, ...path]: (string | number)[],
-): any {
+): unknown {
     if (!path.length) {
         return obj[prop];
     } else {

@@ -98,7 +98,7 @@ export const onCodeChange = (value: string) => (dispatch: Dispatch, getState: Ge
 
             if (field.type === 'array') {
                 // ensure the array has the correct number of items
-                if (value) {
+                if (Array.isArray(value)) {
                     for (let i = field.items.length; i < value.length; i++) {
                         dispatch(onBatchAdd(field, field.batch[0].fields));
                     }
