@@ -60,7 +60,7 @@ export const ensureOwnerHasAllocatedQuotaThunk =
         const { walletDescriptor, deviceId } = parseDeviceStaticSessionId(deviceStaticSessionId);
         const quotaManagerBaseUrl = selectQuotaManagerBaseUrl(getState());
 
-        console.log(
+        console.error(
             `[SuiteSync] ensureOwnerQuota START ownerId=${ownerId} isWriteMode=${isWriteMode} quotaManagerBaseUrl=${quotaManagerBaseUrl}`,
         );
 
@@ -70,20 +70,20 @@ export const ensureOwnerHasAllocatedQuotaThunk =
         });
 
         if (!hasOwnerStorage.success) {
-            console.log(
+            console.error(
                 `[SuiteSync] ensureOwnerQuota ERROR: checkStorageByOwnerId failed type=${hasOwnerStorage.error.type} code=${hasOwnerStorage.error.type === 'HttpError' ? (hasOwnerStorage.error as any).code : 'n/a'} message=${hasOwnerStorage.error.message}`,
             );
 
             return err(HttpError());
         }
 
-        console.log(
+        console.error(
             `[SuiteSync] ensureOwnerQuota: checkStorageByOwnerId status=${hasOwnerStorage.payload.status}`,
         );
 
         // Storage exists for this owner
         if (hasOwnerStorage.payload.status === 'Allocated') {
-            console.log(
+            console.error(
                 `[SuiteSync] ensureOwnerQuota: owner quota allocated totalSpace=${hasOwnerStorage.payload.totalSpace}`,
             );
             dispatch(
@@ -97,35 +97,35 @@ export const ensureOwnerHasAllocatedQuotaThunk =
         }
 
         if (isWriteMode === false) {
-            console.log('[SuiteSync] ensureOwnerQuota: NoQuota + readMode → WriteModeRequiredForAllocation');
+            console.error('[SuiteSync] ensureOwnerQuota: NoQuota + readMode → WriteModeRequiredForAllocation');
             // we want to allocate on-demand
             return err(WriteModeRequiredForAllocation());
         }
 
-        console.log('[SuiteSync] ensureOwnerQuota: NoQuota + writeMode → allocating');
+        console.error('[SuiteSync] ensureOwnerQuota: NoQuota + writeMode → allocating');
 
         const leftDeviceQuota = selectLeftDeviceQuota(getState(), deviceId);
         const sizeToAllocate = getAccountIncrementSizeQuota({
             unspentStorage: leftDeviceQuota ?? DEFAULT_DEVICE_SIZE_QUOTA,
         });
 
-        console.log(
+        console.error(
             `[SuiteSync] ensureOwnerQuota: leftDeviceQuota=${leftDeviceQuota} sizeToAllocate=${sizeToAllocate}`,
         );
 
         if (sizeToAllocate === 0) {
-            console.log('[SuiteSync] ensureOwnerQuota ERROR: NoQuotaLeftToAllocate');
+            console.error('[SuiteSync] ensureOwnerQuota ERROR: NoQuotaLeftToAllocate');
 
             return err(NoQuotaLeftToAllocate());
         }
 
-        console.log('[SuiteSync] ensureOwnerQuota: fetching challenge session');
+        console.error('[SuiteSync] ensureOwnerQuota: fetching challenge session');
         const sessionChallenge = await prepareChallengeSession({
             baseUrl: quotaManagerBaseUrl,
         });
 
         if (!sessionChallenge.success) {
-            console.log(
+            console.error(
                 `[SuiteSync] ensureOwnerQuota ERROR: challenge session failed message=${sessionChallenge.error.message}`,
             );
 
@@ -144,12 +144,12 @@ export const ensureOwnerHasAllocatedQuotaThunk =
         });
 
         if (!proofOfDelegatedIdentity.success) {
-            console.log('[SuiteSync] ensureOwnerQuota ERROR: proof of delegated identity failed');
+            console.error('[SuiteSync] ensureOwnerQuota ERROR: proof of delegated identity failed');
 
             return err(ProofOfDelegatedIdentityFailed());
         }
 
-        console.log('[SuiteSync] ensureOwnerQuota: transferring storage');
+        console.error('[SuiteSync] ensureOwnerQuota: transferring storage');
         await dispatch(
             transferStorageThunk({
                 params: {
@@ -165,7 +165,7 @@ export const ensureOwnerHasAllocatedQuotaThunk =
             }),
         );
 
-        console.log('[SuiteSync] ensureOwnerQuota: transfer done, returning ok');
+        console.error('[SuiteSync] ensureOwnerQuota: transfer done, returning ok');
 
         return ok();
     };
