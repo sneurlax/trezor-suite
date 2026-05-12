@@ -1,8 +1,8 @@
 import type { AllowedQueryKey } from '../types';
 
 export const commonQueryKeys = {
-    networkTxSimulation: (input?: any) => ['network-tx-simulation', input],
-    supplyTxSimulation: (input?: any) => ['tx-simulation-supply', input],
+    networkTxSimulation: (input?: unknown) => ['network-tx-simulation', input],
+    supplyTxSimulation: (input?: unknown) => ['tx-simulation-supply', input],
     dappScan: (url?: string) => ['dapp-scan', url],
     validatorsQueue: (accountKey: string, timestamp?: number) => [
         'everstake',
@@ -10,11 +10,11 @@ export const commonQueryKeys = {
         accountKey,
         timestamp ?? 'no-ts',
     ],
-    solanaRewards: (...args: any[]) => ['solana-rewards', ...args],
+    solanaRewards: (...args: unknown[]) => ['solana-rewards', ...args],
     solanaRewardsTotal: (address: string) => ['solana-rewards-total', address],
-    yieldOpportunities: (...args: any[]) => ['yield-opportunities', ...args],
-    merkleRewards: (...args: any[]) => ['merkle-rewards', ...args],
-    missingRateTickers: (...args: any[]) => ['missing-rate-tickers', ...args],
+    yieldOpportunities: (...args: unknown[]) => ['yield-opportunities', ...args],
+    merkleRewards: (...args: unknown[]) => ['merkle-rewards', ...args],
+    missingRateTickers: (...args: unknown[]) => ['missing-rate-tickers', ...args],
 } as const satisfies Record<string, AllowedQueryKey>;
 
 export const desktopQueryKeys = {
