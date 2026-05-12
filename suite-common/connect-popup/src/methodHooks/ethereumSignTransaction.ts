@@ -11,6 +11,7 @@ import type {
     CallMethodKeys,
     EthereumSignTransaction,
     EthereumSignTypedData,
+    EthereumSignTypedDataTypes,
     MethodInfo,
 } from '@trezor/connect';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- TODO: extract pathUtils to a shared location and remove this exception (see #27376 deferred work)
@@ -64,7 +65,7 @@ const preCallHook = async <M extends CallMethodKeys>({
         let path: Bip43Path;
         let chainId = 1;
         if (method === 'ethereumSignTransaction') {
-            const typedPayload = payload as any as EthereumSignTransaction;
+            const typedPayload = payload as unknown as EthereumSignTransaction;
             path = getSerializedPath(validatePath(typedPayload.path)) as Bip43Path;
             chainId = typedPayload.transaction.chainId || 1;
 
@@ -72,7 +73,8 @@ const preCallHook = async <M extends CallMethodKeys>({
                 dispatch(_storePrecomposedTransaction({ typedPayload, txSigningPrecomposed }));
             }
         } else if (method === 'ethereumSignTypedData') {
-            const typedPayload = payload as any as EthereumSignTypedData<any>;
+            const typedPayload =
+                payload as unknown as EthereumSignTypedData<EthereumSignTypedDataTypes>;
             path = getSerializedPath(validatePath(typedPayload.path)) as Bip43Path;
             chainId = Number(typedPayload.data.domain.chainId) || 1;
         } else {
@@ -111,7 +113,7 @@ const preCallHook = async <M extends CallMethodKeys>({
             const device = selectSelectedDevice(getState());
             if (!device) throw new Error('No device selected');
             const accountAddress = await TrezorConnect.ethereumGetAddress({
-                path: (payload as any).path,
+                path: (payload as unknown as { path: string | number[] }).path,
                 device: {
                     path: device.path,
                     instance: device.instance,
@@ -132,7 +134,7 @@ const preCallHook = async <M extends CallMethodKeys>({
         // Modify payload to include selected fee, if present
         if (method === 'ethereumSignTransaction' && source.type === 'walletconnect') {
             const currentPopupCall = selectConnectPopupCall(getState());
-            const typedPayload = payload as any as EthereumSignTransaction;
+            const typedPayload = payload as unknown as EthereumSignTransaction;
             if (
                 (currentPopupCall?.state === 'ongoing' ||
                     currentPopupCall?.state === 'tx-simulation') &&
@@ -155,11 +157,11 @@ const preCallHook = async <M extends CallMethodKeys>({
                 if (!methodInfo.success) {
                     throw methodInfo.error;
                 }
-                txSigningPrecomposed = (methodInfo.payload as any as MethodInfo).precomposed;
+                txSigningPrecomposed = (methodInfo.payload as unknown as MethodInfo).precomposed;
                 if (txSigningPrecomposed)
                     dispatch(_storePrecomposedTransaction({ typedPayload, txSigningPrecomposed }));
 
-                return modifiedPayload as any as typeof payload;
+                return modifiedPayload as unknown as typeof payload;
             }
         }
     } catch (error) {
