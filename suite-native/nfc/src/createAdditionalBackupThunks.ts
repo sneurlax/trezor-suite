@@ -25,42 +25,34 @@ export const createAdditionalBackupThunk = createThunk<
 
         const isAlreadyInBackupMode = selectIsAdditionalShamirBackupInProgress(getState());
 
-        if (!isAlreadyInBackupMode) {
-            const unlockMutexResponse = await requestPrioritizedDeviceAccess(() =>
-                TrezorConnect.recoveryDevice({
+        const mutexResponse = await requestPrioritizedDeviceAccess(async () => {
+            if (!isAlreadyInBackupMode) {
+                const unlockResponse = await TrezorConnect.recoveryDevice({
                     type: 'UnlockRepeatedBackup',
                     input_method: PROTO.RecoveryDeviceInputMethod.Matrix,
                     enforce_wordlist: true,
                     device: {
                         path: device.path,
                     },
-                }),
-            );
+                });
 
-            if (!unlockMutexResponse.success) {
-                return rejectWithValue(unlockMutexResponse.error);
+                if (!unlockResponse.success) {
+                    return unlockResponse;
+                }
             }
 
-            const unlockResponse = unlockMutexResponse.payload;
-
-            if (!unlockResponse.success) {
-                return unlockResponse;
-            }
-        }
-
-        const backupMutexResponse = await requestPrioritizedDeviceAccess(() =>
-            TrezorConnect.backupDevice({
+            return TrezorConnect.backupDevice({
                 backup_method: PROTO.BackupMethod.N4W1,
                 device: {
                     path: device.path,
                 },
-            }),
-        );
+            });
+        });
 
-        if (!backupMutexResponse.success) {
-            return rejectWithValue(backupMutexResponse.error);
+        if (!mutexResponse.success) {
+            return rejectWithValue(mutexResponse.error);
         }
 
-        return backupMutexResponse.payload;
+        return mutexResponse.payload;
     },
 );
