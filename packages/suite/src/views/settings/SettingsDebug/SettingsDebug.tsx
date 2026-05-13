@@ -93,12 +93,8 @@ export const SettingsDebug = () => {
                 <Devkit />
                 <CheckFirmwareAuthenticity />
                 <ClearDevicePersistentData />
-<<<<<<< HEAD
-                <N4w1Backup />
-                <PingDevice />
-=======
                 <NfcBackup />
->>>>>>> 002f912f08 (feat(suite-native): wire create additional backup into device settings)
+                <PingDevice />
             </SettingsSection>
             <SettingsSection isBelowLaptop={isBelowLaptop} title="Testing">
                 <ThrowTestingError />
