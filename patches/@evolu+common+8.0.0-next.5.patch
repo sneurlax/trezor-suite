@@ -57,7 +57,9 @@ diff --git a/node_modules/@evolu/common/dist/src/WebSocket.js b/node_modules/@ev
              socket = new WebSocketConstructor(url, String.is(protocols) ? protocols : protocols && [...protocols]);
              if (binaryType)
                  socket.binaryType = binaryType;
-@@ -107,4 +109,5 @@
+@@ -107,6 +109,7 @@
+                 onMessage?.(event.data);
+             };
              socket.onerror = (event) => {
 +                globalThis.console.error("[EvoluSync] createWebSocket SOCKET_ERROR url=" + url + " isOpen=" + isOpen + " event=" + String(event?.message ?? event));
                  const error = isOpen
