@@ -1,24 +1,31 @@
 #!/usr/bin/env bash
 
-# validate that installing connect package using npm works
+# Validate that installing @trezor/connect* from the npm registry works for
+# each consumer shape covered by install-smoke/fixtures.
 
 set -e
 
-trap "cd .. && rm -rf connect-implementation" EXIT
+PACKAGE_VERSION="${1:?package version (e.g. 9.7.3 or "latest") required as first argument}"
+export PACKAGE_VERSION
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/install-smoke/helpers.sh"
+
+TEST_ROOT="$(mktemp -d -t connect-install-smoke-npm.XXXXXX)"
+trap 'rm -rf "$TEST_ROOT"' EXIT
+
+cd "$TEST_ROOT"
 npm --version
 node --version
 
-mkdir connect-implementation
-cd connect-implementation
-npm init -y
-npm pkg set type=module
-npm install tslib --save # peer dependency
-npm install @trezor/connect@"$1" --save
-npm install @trezor/connect-web@"$1" --save
+run_install_smoke connect registry-npm runtime
+run_install_smoke connect-web registry-npm runtime
+run_install_smoke connect-mobile registry-npm runtime
+# @trezor/connect-webextension is skipped for registry scenarios: the published
+# v9 line ships a browser webpack bundle that references `self` at module top,
+# which throws ReferenceError under plain Node. The package is still smoke-tested
+# in the local scenario against the v10 ESM tarball built from develop.
 
-cat package.json
-
-# ESM smoke: @trezor/connect and its entire closure are ESM-only since v10, must work via import.
-printf "import TrezorConnect from '@trezor/connect';\nimport TrezorConnectWeb from '@trezor/connect-web';\nimport { cloneObject } from '@trezor/utils';\nconsole.log('typeof TrezorConnect: '+typeof TrezorConnect);\nconsole.log('typeof TrezorConnectWeb: '+typeof TrezorConnectWeb);\nconsole.log('typeof cloneObject: '+typeof cloneObject);" >./index.mjs
-node index.mjs
+echo ""
+echo "All npm install-smoke fixtures passed."

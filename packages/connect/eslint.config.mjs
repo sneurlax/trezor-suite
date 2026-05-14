@@ -3,6 +3,9 @@ import { eslint, restrictedImportsPatterns } from '@trezor/eslint';
 export default [
     ...eslint,
     {
+        ignores: ['e2e/install-smoke/fixtures/**'],
+    },
+    {
         rules: {
             'no-bitwise': 'off', // airbnb-base: used in hardending
             'no-underscore-dangle': 'off', // underscore is used

@@ -18,6 +18,9 @@ on:
       - "scripts/ci/pack-packages.ts"
       - "scripts/publish/**"
       - "packages/connect/e2e/test-connect-local.sh"
+      - "packages/connect/e2e/test-npm-install.sh"
+      - "packages/connect/e2e/test-yarn-install.sh"
+      - "packages/connect/e2e/install-smoke/**"
       - ".github/workflows/test-connect-misc.yml"
   workflow_dispatch:
 

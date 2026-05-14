@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Validate that installing local connect packages are working.
+# Validate that installing locally-packed @trezor/connect* tarballs works for
+# each consumer shape covered by install-smoke/fixtures.
 
 set -e
 
@@ -21,104 +22,24 @@ if [ ! -f "$OVERRIDES_FILE" ]; then
     exit 1
 fi
 
-OVERRIDES_CONTENT=$(cat "$OVERRIDES_FILE")
-CONNECT_PATH=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; console.log(JSON.parse(readFileSync('$OVERRIDES_FILE'))['@trezor/connect'])")
-CONNECT_WEB_PATH=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; console.log(JSON.parse(readFileSync('$OVERRIDES_FILE'))['@trezor/connect-web'])")
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/install-smoke/helpers.sh"
 
-trap "cd .. && rm -rf connect-implementation-local" EXIT
+TEST_ROOT="$(mktemp -d -t connect-install-smoke-local.XXXXXX)"
+trap 'rm -rf "$TEST_ROOT"' EXIT
 
+cd "$TEST_ROOT"
 npm --version
 node --version
 
-mkdir ../connect-implementation-local
-cd ../connect-implementation-local
+export PACKED_PACKAGES_DIR
+export OVERRIDES_FILE
 
-cat > package.json << EOF
-{
-  "name": "connect-implementation-local",
-  "version": "1.0.0",
-  "description": "Test local @trezor/connect packages",
-  "type": "module",
-  "main": "index.mjs",
-  "dependencies": {
-    "@trezor/connect": "${CONNECT_PATH}",
-    "@trezor/connect-web": "${CONNECT_WEB_PATH}",
-    "tsx": "^4.21.0",
-    "typescript": "^5.8.3"
-  },
-  "overrides": ${OVERRIDES_CONTENT}
-}
-EOF
-
-echo "Installing dependencies..."
-npm install
-
-cat package.json
-
-cat > index.mjs << 'EOF'
-import assert from 'node:assert';
-import TrezorConnect from '@trezor/connect';
-import TrezorConnectWeb from '@trezor/connect-web';
-
-assert.ok(TrezorConnect, 'TrezorConnect should be defined');
-console.log('TrezorConnect:', TrezorConnect);
-assert.strictEqual(typeof TrezorConnect.init, 'function', 'TrezorConnect.init should be a function');
-
-assert.ok(TrezorConnectWeb, 'TrezorConnectWeb should be defined');
-assert.strictEqual(typeof TrezorConnectWeb.init, 'function', 'TrezorConnectWeb.init should be a function');
-
-console.log('All ESM assertions passed.');
-EOF
-
-cat > tsconfig.json << 'EOF'
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true
-  },
-  "include": ["type-check.ts"]
-}
-EOF
-
-cat > type-check.ts << 'EOF'
-import TrezorConnect from '@trezor/connect';
-import TrezorConnectWeb from '@trezor/connect-web';
-
-// Exercise subpath-imported types from devDependencies inlined into d.ts.
-// If any inline `import("@trezor/*/libESM/...")` target is not resolvable
-// (e.g. due to a missing exports-map entry in the producer package),
-// tsc --noEmit would fail here, signalling a regression that the runtime
-// smoke tests below cannot detect.
-type ChangeLanguageParams = Parameters<typeof TrezorConnect.changeLanguage>[0];
-type FirmwareUpdateParams = Parameters<typeof TrezorConnect.firmwareUpdate>[0];
-type EthereumSignTypedDataParams = Parameters<typeof TrezorConnect.ethereumSignTypedData>[0];
-type CardanoSignTransactionParams = Parameters<typeof TrezorConnect.cardanoSignTransaction>[0];
-
-const _connect: typeof TrezorConnect = TrezorConnect;
-const _connectWeb: typeof TrezorConnectWeb = TrezorConnectWeb;
-
-// Force usage so TS does not discard the types above.
-export type { ChangeLanguageParams, FirmwareUpdateParams, EthereumSignTypedDataParams, CardanoSignTransactionParams };
-export { _connect, _connectWeb };
-EOF
+run_install_smoke connect local type-check runtime
+run_install_smoke connect-web local type-check runtime
+run_install_smoke connect-mobile local type-check runtime
+run_install_smoke connect-webextension local runtime
 
 echo ""
-echo "=== Type-checking consumer (tsc --noEmit) ==="
-./node_modules/.bin/tsc --noEmit --project tsconfig.json
-
-echo ""
-echo "=== Testing ESM with tsx (yarn tsx index.mjs) ==="
-yarn tsx index.mjs
-
-echo ""
-echo "=== Testing ESM with node (node index.mjs) ==="
-node index.mjs
-
-echo ""
-echo "All tests passed!"
+echo "All local install-smoke fixtures passed."

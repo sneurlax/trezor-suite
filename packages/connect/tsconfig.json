@@ -9,6 +9,23 @@
             "w3c-web-usb"
         ]
     },
+    "exclude": [
+        "**/node_modules",
+        "**/lib",
+        "**/libESM",
+        "**/libDev",
+        "**/build",
+        "**/build-electron",
+        "**/build-webextension",
+        "**/dist",
+        "**/coverage",
+        "**/public",
+        "**/protobuf-patches",
+        "**/trezor-common",
+        "**/jest.config.*js",
+        "**/rollup.*.config.mjs",
+        "e2e/install-smoke/fixtures/**"
+    ],
     "references": [
         { "path": "../blockchain-link" },
         { "path": "../blockchain-link-types" },

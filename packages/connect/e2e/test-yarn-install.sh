@@ -1,28 +1,37 @@
 #!/usr/bin/env bash
 
-# validate that installing connect package using yarn works
+# Validate that installing @trezor/connect* from the npm registry via yarn
+# works for each consumer shape covered by install-smoke/fixtures.
 
 set -e
 
-trap "cd .. && rm -rf connect-implementation" EXIT
+PACKAGE_VERSION="${1:?package version (e.g. 9.7.3 or "latest") required as first argument}"
+export PACKAGE_VERSION
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/install-smoke/helpers.sh"
+
+TEST_ROOT="$(mktemp -d -t connect-install-smoke-yarn.XXXXXX)"
+trap 'rm -rf "$TEST_ROOT"' EXIT
+
+cd "$TEST_ROOT"
 npm --version
 node --version
 yarn --version
 
-mkdir connect-implementation
-cd connect-implementation
-npm init -y
-npm pkg set type=module
-touch yarn.lock
+# Registry scenarios test the latest published connect from npm, which is
+# a different version line than `develop`. Skip the per-fixture type-check
+# pass — it asserts on current-develop API surface that the published
+# package may not yet expose. Runtime smoke is enough here: if the package
+# is corrupt or its exports map is broken, node will fail to load it.
+run_install_smoke connect registry-yarn runtime
+run_install_smoke connect-web registry-yarn runtime
+run_install_smoke connect-mobile registry-yarn runtime
+# @trezor/connect-webextension is skipped for registry scenarios: the published
+# v9 line ships a browser webpack bundle that references `self` at module top,
+# which throws ReferenceError under plain Node. The package is still smoke-tested
+# in the local scenario against the v10 ESM tarball built from develop.
 
-echo "npmMinimalAgeGate: 0" > .yarnrc.yml
-
-# install connect package
-yarn add @trezor/connect@"$1"
-# prepare minimal typescript implementation
-echo import TrezorConnect from \"@trezor/connect\" >index.ts
-
-# compile with typescript — @trezor/connect is ESM-only since v10, so use NodeNext.
-yarn add typescript@5.8.3 @types/node@22.13.10
-yarn tsc ./index.ts --types node,w3c-web-usb --esModuleInterop --target ES2024 --module NodeNext --moduleResolution NodeNext
+echo ""
+echo "All yarn install-smoke fixtures passed."
