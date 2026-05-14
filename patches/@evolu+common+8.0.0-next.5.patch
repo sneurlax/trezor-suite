@@ -37,3 +37,29 @@
                                      console.debug("useOwner", {
                                          id: instance.id,
                                          action,
+--- a/node_modules/@evolu/common/dist/src/WebSocket.js
++++ b/node_modules/@evolu/common/dist/src/WebSocket.js
+@@ -63,6 +63,7 @@
+ import { ArrayBuffer, String, Uint8Array } from "./Type.js";
+ /** Create a new {@link WebSocket}. */
+ export const createWebSocket = (url, { protocols, binaryType, onOpen, onClose, shouldRetryOnClose = lazyTrue, onMessage, onError, schedule = jitter(1)(maxDelay("30s")(exponential("100ms"))), WebSocketConstructor = globalThis.WebSocket, } = {}) => async (run) => {
++    globalThis.console.error("[EvoluSync] createWebSocket TASK url=" + url);
+     const env_1 = { stack: [], error: void 0, hasError: false };
+     try {
+         const disposer = __addDisposableResource(env_1, new AsyncDisposableStack(), true);
+@@ -86,6 +87,7 @@
+          */
+         const connect = callback(({ err, ok }) => {
+             closeSocket();
++            globalThis.console.error("[EvoluSync] createWebSocket CONNECT url=" + url + " constructor=" + (WebSocketConstructor?.name ?? String(WebSocketConstructor)));
+             socket = new WebSocketConstructor(url, String.is(protocols) ? protocols : protocols && [...protocols]);
+             if (binaryType)
+                 socket.binaryType = binaryType;
+@@ -107,6 +109,7 @@
+                 onMessage?.(event.data);
+             };
+             socket.onerror = (event) => {
++                globalThis.console.error("[EvoluSync] createWebSocket SOCKET_ERROR url=" + url + " isOpen=" + isOpen + " event=" + String(event?.message ?? event));
+                 const error = isOpen
+                     ? { type: "WebSocketConnectionError", event }
+                     : { type: "WebSocketConnectError", event };

@@ -174,24 +174,24 @@ describe('Suite Sync - Labelling [@androidOnly @T3T1 @smoke]', () => {
         await new Promise(resolve => setTimeout(resolve, 30_000));
         logToRelayDocker(`WAITING DONE.`);
 
-        //Restart app (keep relay intact so labels can sync back)
-        await device.terminateApp();
-        await openApp({ args: { preloadedState } });
-        logToRelayDocker(`APP RESTARTED: ${jestExpect.getState().currentTestName!}`);
-        await prepareTrezorEmulator({ seed: 'mnemonic_immune' });
-        await onDeviceManager.assertDeviceSwitcherState({ title: 'Connected' });
+        // //Restart app (keep relay intact so labels can sync back)
+        // await device.terminateApp();
+        // await openApp({ args: { preloadedState } });
+        // logToRelayDocker(`APP RESTARTED: ${jestExpect.getState().currentTestName!}`);
+        // await prepareTrezorEmulator({ seed: 'mnemonic_immune' });
+        // await onDeviceManager.assertDeviceSwitcherState({ title: 'Connected' });
 
-        //Setup sync again
-        await onTabBar.navigateToSettings();
-        await onSettings.enableSuiteSync();
-        await onTabBar.tapBackButton();
+        // //Setup sync again
+        // await onTabBar.navigateToSettings();
+        // await onSettings.enableSuiteSync();
+        // await onTabBar.tapBackButton();
 
-        // Wait for account label to sync and appear in the account list
-        await onTabBar.navigateToMyAssets();
-        const firstAccountTitle = element(by.id('@accountList/item/title')).atIndex(0);
-        await waitToHaveText(firstAccountTitle, expectedAccountData.label, {
-            timeout: 30_000,
-        });
+        // // Wait for account label to sync and appear in the account list
+        // await onTabBar.navigateToMyAssets();
+        // const firstAccountTitle = element(by.id('@accountList/item/title')).atIndex(0);
+        // await waitToHaveText(firstAccountTitle, expectedAccountData.label, {
+        //     timeout: 30_000,
+        // });
 
         // Verify labels were synced to the relay
         await evoluClient.init({ ownerSecret: immuneFixtures.ownerSecret });

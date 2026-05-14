@@ -29,7 +29,11 @@ Fixes https://github.com/trezor/trezor-suite/issues/26487.
 
 **Temporary diagnostic patch — remove after Suite Sync relay sync issue is resolved.**
 
-Adds `globalThis.console.error` logging to the Evolu WebSocket sync internals so the events survive React Native's production build console stripping. Logs four events: `transportOpen`, `transportClose`, `transportError`, `sendProtocolMessage`, and `useOwner`. These appear in CI logcat (`ci.device.log`) tagged as `E ReactNativeJS` prefixed with `[EvoluSync]`.
+Adds `globalThis.console.error` logging to the Evolu WebSocket sync internals so the events survive React Native's production build console stripping. All entries appear in CI logcat (`ci.device.log`) tagged as `E ReactNativeJS` prefixed with `[EvoluSync]`.
+
+Logged events in `Shared.js`: `useOwner`, `transportOpen`, `transportClose`, `transportError`, `sendProtocolMessage`.
+
+Logged events in `WebSocket.js`: `createWebSocket TASK` (confirms the async task was scheduled and executed by the Effect runner), `createWebSocket CONNECT` (confirms `new WebSocket()` was called, includes the constructor name), `createWebSocket SOCKET_ERROR` (native socket error before open).
 
 ## expo-modules-core
 
