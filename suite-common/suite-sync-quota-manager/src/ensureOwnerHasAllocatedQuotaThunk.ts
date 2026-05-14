@@ -97,7 +97,9 @@ export const ensureOwnerHasAllocatedQuotaThunk =
         }
 
         if (isWriteMode === false) {
-            console.error('[SuiteSync] ensureOwnerQuota: NoQuota + readMode → WriteModeRequiredForAllocation');
+            console.error(
+                '[SuiteSync] ensureOwnerQuota: NoQuota + readMode → WriteModeRequiredForAllocation',
+            );
             // we want to allocate on-demand
             return err(WriteModeRequiredForAllocation());
         }

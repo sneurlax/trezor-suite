@@ -25,6 +25,12 @@ It's a known issue that `patch-package` does not work well with `yarn workspaces
 
 Fixes https://github.com/trezor/trezor-suite/issues/26487.
 
+## @evolu/common
+
+**Temporary diagnostic patch — remove after Suite Sync relay sync issue is resolved.**
+
+Adds `globalThis.console.error` logging to the Evolu WebSocket sync internals so the events survive React Native's production build console stripping. Logs four events: `transportOpen`, `transportClose`, `transportError`, `sendProtocolMessage`, and `useOwner`. These appear in CI logcat (`ci.device.log`) tagged as `E ReactNativeJS` prefixed with `[EvoluSync]`.
+
 ## expo-modules-core
 
 Native-only, but does not break any CI.

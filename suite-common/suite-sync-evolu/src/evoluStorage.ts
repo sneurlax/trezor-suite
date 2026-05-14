@@ -33,9 +33,7 @@ export const createEvoluStorageFactory =
         const updateRelayUrl = async (url: string) => {
             const owner = await evolu.appOwner;
 
-            console.error(
-                `[SuiteSync] updateRelayUrl: connecting ownerId=${owner.id} url=${url}`,
-            );
+            console.error(`[SuiteSync] updateRelayUrl: connecting ownerId=${owner.id} url=${url}`);
             unuseOwner();
             unuseOwner = evolu.useOwner(owner, [
                 createOwnerWebSocketTransport({ url, ownerId: owner.id }),

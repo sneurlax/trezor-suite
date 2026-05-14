@@ -75,7 +75,9 @@ export const createEnsureStorage =
         // the owner quota from QM server (we do it so other user devices can allocate more quota, thus here it would be outdated).
 
         if (isNotNull(existingStorage) && deps.getOwnerHasAllowance(walletDescriptor)) {
-            console.error('[SuiteSync] ensureStorage: cache hit with owner allowance, returning early');
+            console.error(
+                '[SuiteSync] ensureStorage: cache hit with owner allowance, returning early',
+            );
 
             return ok(existingStorage);
         }
@@ -135,10 +137,14 @@ export const createEnsureStorage =
         // Only connect to the relay if quota is actually allocated.
         if (quotaResult.success) {
             const relayUrl = deps.getRelayUrl();
-            console.error(`[SuiteSync] ensureStorage: quota allocated, setting relay URL=${relayUrl}`);
+            console.error(
+                `[SuiteSync] ensureStorage: quota allocated, setting relay URL=${relayUrl}`,
+            );
             await storage.updateRelayUrl(relayUrl);
         } else {
-            console.error('[SuiteSync] ensureStorage: WriteModeRequiredForAllocation, relay URL NOT set');
+            console.error(
+                '[SuiteSync] ensureStorage: WriteModeRequiredForAllocation, relay URL NOT set',
+            );
         }
 
         if (!isNotNull(existingStorage)) {

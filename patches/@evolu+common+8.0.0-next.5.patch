@@ -1,0 +1,39 @@
+--- a/node_modules/@evolu/common/dist/src/local-first/Shared.js
++++ b/node_modules/@evolu/common/dist/src/local-first/Shared.js
+@@ -118,6 +118,7 @@
+             binaryType: "arraybuffer",
+             onOpen: () => {
+                 const ownerIds = transports.getClaimsForResource(transport);
++                globalThis.console.error("[EvoluSync] transportOpen url=" + transport.url + " ownerIds=" + [...ownerIds].join(","));
+                 console.debug("transportOpen", {
+                     url: transport.url,
+                     ownerIds: [...ownerIds],
+@@ -126,6 +127,12 @@
+                     tenant.requestCreateSyncMessages(ownerIds);
+                 });
+             },
++            onClose: (event) => {
++                globalThis.console.error("[EvoluSync] transportClose url=" + transport.url + " code=" + event?.code + " reason=" + event?.reason + " wasClean=" + event?.wasClean);
++            },
++            onError: (error) => {
++                globalThis.console.error("[EvoluSync] transportError url=" + transport.url + " error=" + String(error));
++            },
+             onMessage(data) {
+                 if (!(data instanceof ArrayBuffer))
+                     return;
+@@ -399,6 +406,7 @@
+                     const webSocket = deps.transports.getResource(transport);
+                     if (!webSocket?.isOpen())
+                         continue;
++                    globalThis.console.error("[EvoluSync] sendProtocolMessage ownerId=" + ownerId + " url=" + transport.url + " bytes=" + protocolMessage.byteLength);
+                     console.debug("sendProtocolMessage", {
+                         ownerId,
+                         url: transport.url,
+@@ -490,6 +498,7 @@
+                         case "UseOwner": {
+                             void tenantRun(instance.useOwnerMutex.withLock(async (run) => {
+                                 for (const { owner, action } of message.actions) {
++                                    globalThis.console.error("[EvoluSync] useOwner action=" + action + " ownerId=" + owner.owner.id + " urls=" + owner.transports.map(({ url }) => url).join(","));
+                                     console.debug("useOwner", {
+                                         id: instance.id,
+                                         action,

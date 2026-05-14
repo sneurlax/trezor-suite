@@ -97,7 +97,9 @@ export const ensureDeviceHasQuotaThunk =
             return;
         }
 
-        console.error('[SuiteSync] ensureDeviceQuota: calling TrezorConnect.evoluSignRegistrationRequest');
+        console.error(
+            '[SuiteSync] ensureDeviceQuota: calling TrezorConnect.evoluSignRegistrationRequest',
+        );
         const registrationRequestResult = await TrezorConnect.evoluSignRegistrationRequest({
             challenge_from_server: sessionChallenge.payload.challenge,
             size_to_acquire: DEFAULT_DEVICE_SIZE_QUOTA,
