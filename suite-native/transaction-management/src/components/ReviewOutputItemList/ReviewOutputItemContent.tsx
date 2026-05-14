@@ -169,7 +169,7 @@ export const ReviewOutputItemContent = ({
 
             if (!isApproveDataExchangeFlow) {
                 console.warn(
-                    `ReviewOutputItemContent: Unsupported output type "${outputType}" with value "${value}".`,
+                    `ReviewOutputItemContent: Unsupported output type "${outputType}" with value "${value}", flowType: ${flowType}.`,
                 );
 
                 return null;
@@ -257,7 +257,7 @@ export const ReviewOutputItemContent = ({
         default:
             // TODO: handle other output types when are other coins supported (ETH feeGas etc.)
             console.warn(
-                `ReviewOutputItemContent: Unsupported output type "${outputType}" with value "${value}".`,
+                `ReviewOutputItemContent: Unsupported output type "${outputType}" with value "${value}" and flow "${flowType}".`,
             );
 
             return null;
