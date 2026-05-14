@@ -1,3 +1,4 @@
+diff --git a/node_modules/@evolu/common/dist/src/local-first/Shared.js b/node_modules/@evolu/common/dist/src/local-first/Shared.js
 --- a/node_modules/@evolu/common/dist/src/local-first/Shared.js
 +++ b/node_modules/@evolu/common/dist/src/local-first/Shared.js
 @@ -118,6 +118,7 @@
@@ -37,6 +38,7 @@
                                      console.debug("useOwner", {
                                          id: instance.id,
                                          action,
+diff --git a/node_modules/@evolu/common/dist/src/WebSocket.js b/node_modules/@evolu/common/dist/src/WebSocket.js
 --- a/node_modules/@evolu/common/dist/src/WebSocket.js
 +++ b/node_modules/@evolu/common/dist/src/WebSocket.js
 @@ -63,6 +63,7 @@
@@ -55,9 +57,7 @@
              socket = new WebSocketConstructor(url, String.is(protocols) ? protocols : protocols && [...protocols]);
              if (binaryType)
                  socket.binaryType = binaryType;
-@@ -107,6 +109,7 @@
-                 onMessage?.(event.data);
-             };
+@@ -107,4 +109,5 @@
              socket.onerror = (event) => {
 +                globalThis.console.error("[EvoluSync] createWebSocket SOCKET_ERROR url=" + url + " isOpen=" + isOpen + " event=" + String(event?.message ?? event));
                  const error = isOpen
