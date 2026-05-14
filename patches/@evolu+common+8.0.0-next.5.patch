@@ -27,17 +27,56 @@ diff --git a/node_modules/@evolu/common/dist/src/local-first/Shared.js b/node_mo
                      if (!webSocket?.isOpen())
                          continue;
 +                    globalThis.console.error("[EvoluSync] sendProtocolMessage ownerId=" + ownerId + " url=" + transport.url + " bytes=" + protocolMessage.byteLength);
-                     console.debug("sendProtocolMessage", {
-                         ownerId,
-                         url: transport.url,
-@@ -490,6 +498,7 @@
-                         case "UseOwner": {
-                             void tenantRun(instance.useOwnerMutex.withLock(async (run) => {
-                                 for (const { owner, action } of message.actions) {
+                 console.debug("sendProtocolMessage", {
+                     ownerId,
+                     url: transport.url,
+@@ -422,7 +430,10 @@
+         const toggleSyncOwner = (instance, syncOwner, action) => async (run) => {
+             if (action === "add") {
+                 instance.usedSyncOwners.increment(syncOwner);
+-                return await run(deps.transports.addClaim(syncOwner.owner.id, syncOwner.transports));
++                globalThis.console.error("[EvoluSync] toggleSyncOwner BEFORE_ADDCLAIM ownerId=" + syncOwner.owner.id);
++                const claimResult = await run(deps.transports.addClaim(syncOwner.owner.id, syncOwner.transports));
++                globalThis.console.error("[EvoluSync] toggleSyncOwner AFTER_ADDCLAIM ownerId=" + syncOwner.owner.id + " ok=" + claimResult?.ok + " err=" + JSON.stringify(claimResult?.error));
++                return claimResult;
+             }
+             else {
+                 instance.usedSyncOwners.decrement(syncOwner);
+@@ -490,6 +501,7 @@
+                     case "UseOwner": {
+                         void tenantRun(instance.useOwnerMutex.withLock(async (run) => {
+                             for (const { owner, action } of message.actions) {
 +                                    globalThis.console.error("[EvoluSync] useOwner action=" + action + " ownerId=" + owner.owner.id + " urls=" + owner.transports.map(({ url }) => url).join(","));
-                                     console.debug("useOwner", {
-                                         id: instance.id,
-                                         action,
+                                 console.debug("useOwner", {
+                                     id: instance.id,
+                                     action,
+diff --git a/node_modules/@evolu/common/dist/src/Resource.js b/node_modules/@evolu/common/dist/src/Resource.js
+--- a/node_modules/@evolu/common/dist/src/Resource.js
++++ b/node_modules/@evolu/common/dist/src/Resource.js
+@@ -147,6 +147,7 @@
+                     idleDisposeFiber = undefined;
+                 }
+                 if (!current) {
++                    globalThis.console.error("[EvoluSync] sharedResource ACQUIRE_BEFORE_CREATE");
+                     const resource = await run(create);
+                     if (!resource.ok)
+                         return resource;
+@@ -342,6 +343,7 @@
+             const disposables = disposer.move();
+             return ok({
+                 addClaim: (claim, resourceKeys) => unabortable(() => sharedResourceClaimsRun(async (run) => {
++                    globalThis.console.error("[EvoluSync] addClaim TASK_START claim=" + claim + " keys=" + resourceKeys.length);
+                     assertNoDuplicateResourceKeys(resourceKeys);
+                     for (const resourceKey of resourceKeys) {
+                         const added = await run(mutexByKey.withLock(resourceKey, async (run) => {
+@@ -357,6 +359,7 @@
+                                 return ok();
+                             }
+                             const hasClaimsForKey = keyByClaim.hasB(resourceKey);
++                            globalThis.console.error("[EvoluSync] addClaim MUTEX_BEFORE_ACQUIRE hasClaimsForKey=" + hasClaimsForKey + " url=" + (resourceKey?.url ?? String(resourceKey)));
+                             let firstResource;
+                             if (!hasClaimsForKey) {
+                                 const resourceResult = await run(sharedResourcesByKey.acquire(resourceKey));
 diff --git a/node_modules/@evolu/common/dist/src/WebSocket.js b/node_modules/@evolu/common/dist/src/WebSocket.js
 --- a/node_modules/@evolu/common/dist/src/WebSocket.js
 +++ b/node_modules/@evolu/common/dist/src/WebSocket.js
