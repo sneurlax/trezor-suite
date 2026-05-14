@@ -45,6 +45,7 @@ export interface TradingInfo {
     platforms?: Platforms;
     coins?: Coins;
     paymentMethods: TradingPaymentMethodListProps[];
+    config?: InfoResponse['config'];
 }
 
 export interface TradingPrefilledFromAccount {
@@ -92,6 +93,7 @@ export const initialState: TradingState = {
         platforms: undefined,
         coins: undefined,
         paymentMethods: [],
+        config: undefined,
     },
     buy: buyInitialState,
     exchange: exchangeInitialState,
@@ -135,6 +137,7 @@ const tradingCommonSlice = createSlice({
         saveInfo(state, action: PayloadAction<InfoResponse>) {
             state.info.coins = action.payload.coins;
             state.info.platforms = action.payload.platforms;
+            state.info.config = action.payload.config;
         },
         savePaymentMethods(state, action: PayloadAction<TradingPaymentMethodListProps[]>) {
             state.info.paymentMethods = action.payload;

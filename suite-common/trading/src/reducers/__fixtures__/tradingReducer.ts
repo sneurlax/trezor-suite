@@ -76,6 +76,7 @@ const symbolsInfo: InfoResponse = {
             },
         },
     },
+    config: {},
 };
 
 const paymentMethods: TradingPaymentMethodListProps[] = [
@@ -241,6 +242,7 @@ export const tradingFixtures = [
                 platforms: symbolsInfo.platforms,
                 coins: symbolsInfo.coins,
                 paymentMethods: [],
+                config: symbolsInfo.config,
             },
         },
     },

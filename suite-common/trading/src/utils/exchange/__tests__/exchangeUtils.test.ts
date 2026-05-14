@@ -1,10 +1,19 @@
 import { type CryptoId } from 'invity-api';
 
+import { type Network } from '@suite-common/wallet-config';
+import { type Account } from '@suite-common/wallet-types';
+import TrezorConnect from '@trezor/connect';
+
 import {
+    deriveBitcoinSwapFromAddresses,
     getApprovalStatus,
     requiresTokenApproval,
     tokenSupportsIncreasingAllowance,
 } from '../exchangeUtils';
+
+jest.mock('@trezor/connect', () => ({
+    composeTransaction: jest.fn(),
+}));
 
 describe('requiresTokenApproval', () => {
     it('should return false when no quote is provided', () => {
@@ -170,5 +179,133 @@ describe('tokenSupportsIncreasingAllowance', () => {
     it('should return false for empty string', () => {
         const result = tokenSupportsIncreasingAllowance('');
         expect(result).toBe(false);
+    });
+});
+
+describe('deriveBitcoinSwapFromAddresses', () => {
+    const account = {
+        networkType: 'bitcoin',
+        addresses: {
+            unused: [{ address: 'unused-address', path: "m/44'/0'/0'/0/0" }],
+            used: [{ address: 'used-address', path: "m/44'/0'/0'/0/1" }],
+            change: [{ address: 'change-address', path: "m/44'/0'/0'/1/0" }],
+        },
+        utxo: [{ address: 'used-address', path: "m/44'/0'/0'/0/1" }],
+        availableBalance: '10000',
+        path: "m/44'/0'/0'",
+    } as unknown as Account;
+
+    const network = {
+        symbol: 'btc',
+        decimals: 8,
+    } as unknown as Network;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('should return undefined if btcSwapDummyData is not provided', async () => {
+        const result = await deriveBitcoinSwapFromAddresses({
+            account,
+            network,
+            sendStringAmount: '0.0001',
+            decimals: 8,
+        });
+
+        expect(result).toBeUndefined();
+    });
+
+    it('should calculate swap from address with default mock config', async () => {
+        (TrezorConnect.composeTransaction as jest.Mock).mockResolvedValue({
+            success: true,
+            payload: [
+                {
+                    type: 'final',
+                    inputs: [{ address_n: [2147483692, 2147483648, 2147483648, 0, 1] }],
+                    outputs: [{ amount: '5000' }],
+                },
+            ],
+        });
+
+        const result = await deriveBitcoinSwapFromAddresses({
+            account,
+            network,
+            sendStringAmount: '0.0001',
+            decimals: 8,
+            btcSwapDummyData: {
+                opreturn: {
+                    dataHex:
+                        '3078306632656166663639313734646264333963366533346661366465653966326266626566663363313139366462303666636238356339313364376531663466643d7c6c6966696351',
+                },
+                feePercentage: 2,
+            },
+        });
+
+        expect(result).toEqual({
+            addresses: ['used-address'],
+            amount: '5000',
+        });
+        expect(TrezorConnect.composeTransaction).toHaveBeenCalledWith(
+            expect.objectContaining({
+                outputs: expect.arrayContaining([
+                    expect.objectContaining({
+                        type: 'opreturn',
+                        dataHex:
+                            '3078306632656166663639313734646264333963366533346661366465653966326266626566663363313139366462303666636238356339313364376531663466643d7c6c6966696351',
+                    }),
+                    expect.objectContaining({
+                        type: 'payment',
+                        amount: '200', // 10000 satoshis (0.0001 BTC) * 2% fee = 200
+                        address: 'unused-address',
+                    }),
+                ]),
+            }),
+        );
+    });
+
+    it('should calculate swap from address with custom btcSwapDummyData config', async () => {
+        (TrezorConnect.composeTransaction as jest.Mock).mockResolvedValue({
+            success: true,
+            payload: [
+                {
+                    type: 'final',
+                    inputs: [{ address_n: [2147483692, 2147483648, 2147483648, 0, 1] }],
+                    outputs: [{ amount: '4000' }],
+                },
+            ],
+        });
+
+        const result = await deriveBitcoinSwapFromAddresses({
+            account,
+            network,
+            sendStringAmount: '0.0001',
+            decimals: 8,
+            btcSwapDummyData: {
+                opreturn: {
+                    dataHex: 'custom_opreturn',
+                },
+                feePercentage: 5,
+            },
+        });
+
+        expect(result).toEqual({
+            addresses: ['used-address'],
+            amount: '4000',
+        });
+        expect(TrezorConnect.composeTransaction).toHaveBeenCalledWith(
+            expect.objectContaining({
+                outputs: expect.arrayContaining([
+                    expect.objectContaining({
+                        type: 'opreturn',
+                        dataHex: 'custom_opreturn',
+                    }),
+                    expect.objectContaining({
+                        type: 'payment',
+                        amount: '500', // 10000 satoshis (0.0001 BTC) * 5% fee = 500
+                        address: 'unused-address',
+                    }),
+                ]),
+            }),
+        );
     });
 });

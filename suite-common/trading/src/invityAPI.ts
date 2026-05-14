@@ -208,7 +208,7 @@ class InvityAPI {
             console.error('[getInfo]', error);
         }
 
-        return { platforms: {}, coins: {} };
+        return { platforms: {}, coins: {}, config: {} };
     };
 
     getExchangeList = async (): Promise<ExchangeListResponse> => {

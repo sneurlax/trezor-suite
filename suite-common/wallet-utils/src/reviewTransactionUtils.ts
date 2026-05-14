@@ -118,6 +118,7 @@ const constructOldFlow = ({
 }: ConstructOutputsParams): ReviewOutput[] => {
     const outputs: ReviewOutput[] = [];
 
+    const isBitcoin = account.networkType === 'bitcoin';
     const isCardano = isCardanoTx(account, precomposedTx);
     const isStellar = account.networkType === 'stellar';
     const { networkType } = account;
@@ -237,6 +238,7 @@ const constructOldFlow = ({
         outputs.push({ type: 'note', value: precomposedForm.tronDataAscii });
     } else {
         if (
+            !isBitcoin && // do not show PSBT hex data for bitcoin
             precomposedForm.transactionData &&
             (!precomposedTx.token || precomposedForm.yieldMetadata)
         ) {
@@ -286,6 +288,7 @@ const constructNewFlow = ({
 }): ReviewOutput[] => {
     const outputs: ReviewOutput[] = [];
 
+    const isBitcoin = account.networkType === 'bitcoin';
     const isCardano = isCardanoTx(account, precomposedTx);
     const isSolana = account.networkType === 'solana';
     const isStellar = account.networkType === 'stellar';
@@ -356,11 +359,12 @@ const constructNewFlow = ({
         outputs.push({ type: 'note', value: precomposedForm.tronDataAscii });
     } else {
         if (
-            (precomposedForm.transactionData && !precomposedTx.token && !isEvmApproval) ||
-            (precomposedForm.transactionData && isEvmApproval && !isApprovalFlowSupported) ||
-            (precomposedForm.transactionData &&
-                precomposedForm.yieldMetadata &&
-                !isUpdatedEthereumSendFlow)
+            !isBitcoin && // do not show PSBT hex data for bitcoin
+            ((precomposedForm.transactionData && !precomposedTx.token && !isEvmApproval) ||
+                (precomposedForm.transactionData && isEvmApproval && !isApprovalFlowSupported) ||
+                (precomposedForm.transactionData &&
+                    precomposedForm.yieldMetadata &&
+                    !isUpdatedEthereumSendFlow))
         ) {
             outputs.push({ type: 'data', value: precomposedForm.transactionData });
         }
@@ -449,6 +453,7 @@ const constructNewFlow = ({
                     outputs.push({ type: 'address', value: o.address });
                 } else if (
                     !isTron &&
+                    !isBitcoin &&
                     ((precomposedForm.transactionData && !isEvmApproval) ||
                         (isEvmApproval && !isApprovalFlowSupported))
                 ) {
