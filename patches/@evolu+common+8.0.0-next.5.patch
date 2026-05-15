@@ -61,15 +61,24 @@ diff --git a/node_modules/@evolu/common/dist/src/Resource.js b/node_modules/@evo
                      const resource = await run(create);
                      if (!resource.ok)
                          return resource;
-@@ -342,6 +343,7 @@
+@@ -296,6 +297,7 @@
+         const env_6 = { stack: [], error: void 0, hasError: false };
+         try {
+             const sharedResourceClaimsRun = run.create();
++            globalThis.console.error("[EvoluSync] createSharedResourceByKeyWithClaims INIT");
+             const disposer = __addDisposableResource(env_6, new AsyncDisposableStack(), true);
+             const keyByClaim = createRelation({
+                 lookupA: claimLookup,
+@@ -342,6 +344,8 @@
              const disposables = disposer.move();
              return ok({
                  addClaim: (claim, resourceKeys) => unabortable(() => sharedResourceClaimsRun(async (run) => {
 +                    globalThis.console.error("[EvoluSync] addClaim TASK_START claim=" + claim + " keys=" + resourceKeys.length);
                      assertNoDuplicateResourceKeys(resourceKeys);
                      for (const resourceKey of resourceKeys) {
++                        globalThis.console.error("[EvoluSync] addClaim BEFORE_WITHLOCK url=" + (resourceKey?.url ?? String(resourceKey)) + " mutex=" + JSON.stringify(mutexByKey.snapshot(resourceKey)));
                          const added = await run(mutexByKey.withLock(resourceKey, async (run) => {
-@@ -357,6 +359,7 @@
+@@ -357,19 +361,23 @@
                                  return ok();
                              }
                              const hasClaimsForKey = keyByClaim.hasB(resourceKey);
@@ -77,6 +86,31 @@ diff --git a/node_modules/@evolu/common/dist/src/Resource.js b/node_modules/@evo
                              let firstResource;
                              if (!hasClaimsForKey) {
                                  const resourceResult = await run(sharedResourcesByKey.acquire(resourceKey));
++                                globalThis.console.error("[EvoluSync] addClaim ACQUIRE_RESULT url=" + (resourceKey?.url ?? String(resourceKey)) + " ok=" + resourceResult?.ok + " err=" + JSON.stringify(resourceResult?.error));
+                                 assertNotAborted(resourceResult);
+                                 firstResource = resourceResult.value;
+                             }
+                             assert(keyByClaim.add(claim, resourceKey), "Claim-resource relation must be absent before first retain.");
+                             pairRefCountByKey.increment(resourceKey);
+                             if (firstResource) {
++                                globalThis.console.error("[EvoluSync] addClaim FIRST_CLAIM_ADDED url=" + (resourceKey?.url ?? String(resourceKey)));
+                                 onFirstClaimAdded?.(claim, firstResource, resourceKey);
+                             }
+                             return ok();
+                         }));
++                        globalThis.console.error("[EvoluSync] addClaim AFTER_WITHLOCK url=" + (resourceKey?.url ?? String(resourceKey)) + " ok=" + added?.ok + " err=" + JSON.stringify(added?.error));
+                         assertNotAborted(added);
+                     }
+                     return ok();
+@@ -376,6 +384,8 @@
+                 })),
+                 removeClaim: (claim, resourceKeys) => unabortable(() => sharedResourceClaimsRun(async (run) => {
++                    globalThis.console.error("[EvoluSync] removeClaim TASK_START claim=" + claim + " keys=" + resourceKeys.length);
+                     assertNoDuplicateResourceKeys(resourceKeys);
+                     for (const resourceKey of resourceKeys) {
++                        globalThis.console.error("[EvoluSync] removeClaim BEFORE_WITHLOCK url=" + (resourceKey?.url ?? String(resourceKey)) + " mutex=" + JSON.stringify(mutexByKey.snapshot(resourceKey)));
+                         const removed = await run(mutexByKey.withLock(resourceKey, async (run) => {
+                             const pairRefCountByKey = pairRefCountsByClaim.get(claim);
 diff --git a/node_modules/@evolu/common/dist/src/WebSocket.js b/node_modules/@evolu/common/dist/src/WebSocket.js
 --- a/node_modules/@evolu/common/dist/src/WebSocket.js
 +++ b/node_modules/@evolu/common/dist/src/WebSocket.js
