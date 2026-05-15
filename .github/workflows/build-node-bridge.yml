@@ -38,7 +38,7 @@ jobs:
           job-summary: errors
       - name: Install deps and build libs
         run: |
-          sfw --silent yarn install --immutable
+          sfw --silent yarn workspaces focus @trezor/transport-bridge
 
       - name: Build bin.js file
         run: |

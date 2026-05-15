@@ -111,5 +111,5 @@ jobs:
         with:
           mode: firewall-free
           job-summary: errors
-      - run: sfw --silent yarn install --immutable
+      - run: sfw --silent yarn workspaces focus @trezor/protobuf
       - run: yarn workspace @trezor/protobuf update:protobuf

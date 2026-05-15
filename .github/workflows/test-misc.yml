@@ -31,7 +31,7 @@ jobs:
         with:
           mode: firewall-free
           job-summary: errors
-      - run: sfw --silent yarn install --immutable
+      - run: sfw --silent yarn workspaces focus @suite/intl
       - run: yarn workspace @suite/intl translations:list-unused
 
   media-duplicates:

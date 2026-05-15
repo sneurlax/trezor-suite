@@ -28,5 +28,5 @@ jobs:
         with:
           mode: firewall-free
           job-summary: errors
-      - run: sfw --silent yarn install --immutable
+      - run: sfw --silent yarn workspaces focus @trezor/urls
       - run: yarn workspace @trezor/urls test:e2e

@@ -72,7 +72,7 @@ jobs:
       - if: ${{ inputs.testEnv == 'web' }}
         run: |
           sfw --silent yarn workspaces focus @trezor/connect-web
-          sfw --silent yarn && yarn build:libs
+          yarn build:libs
       - name: Install Playwright chromium
         if: ${{ inputs.testEnv == 'web' }}
         run: yarn workspace @trezor/connect-web exec playwright install --with-deps chromium

@@ -43,7 +43,7 @@ jobs:
           mode: firewall-free
           job-summary: errors
       - name: Install dependencies
-        run: sfw --silent yarn install
+        run: sfw --silent yarn workspaces focus @suite/intl @suite-native/intl
 
       - name: Set source branch
         run: echo "SOURCE_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
