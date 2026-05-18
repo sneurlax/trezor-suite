@@ -1,8 +1,6 @@
-import {
-    selectIsAdditionalShamirBackupInProgress,
-    selectSelectedDevice,
-} from '@suite-common/device';
+import { selectSelectedDevice } from '@suite-common/device';
 import { createThunk } from '@suite-common/redux-utils';
+import { selectIsAdditionalShamirBackupInProgress } from '@suite-native/backup';
 import { requestPrioritizedDeviceAccess } from '@suite-native/device-mutex';
 import TrezorConnect, { type OkWithDevice, PROTO } from '@trezor/connect';
 import { type SerializedError } from '@trezor/connect-common/src/constants/errors';

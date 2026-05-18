@@ -15,6 +15,7 @@
         "@suite-common/device": "workspace:*",
         "@suite-common/redux-utils": "workspace:*",
         "@suite-native/atoms": "workspace:*",
+        "@suite-native/backup": "workspace:*",
         "@suite-native/device-mutex": "workspace:*",
         "@suite-native/intl": "workspace:*",
         "@suite-native/swipeable-walkthrough": "workspace:*",

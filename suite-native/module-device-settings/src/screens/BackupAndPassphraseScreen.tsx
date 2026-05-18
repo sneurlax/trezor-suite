@@ -1,11 +1,8 @@
 import { useSelector } from 'react-redux';
 
-import {
-    selectIsCreateAdditionalBackupAvailable,
-    selectIsDeviceBackupUnfinished,
-    selectIsDeviceInitialized,
-} from '@suite-common/device';
+import { selectIsDeviceBackupUnfinished, selectIsDeviceInitialized } from '@suite-common/device';
 import { VStack } from '@suite-native/atoms';
+import { selectIsCreateAdditionalBackupAvailable } from '@suite-native/backup';
 import { FeatureFlag, useFeatureFlag } from '@suite-native/feature-flags';
 import { Translation } from '@suite-native/intl';
 import { DynamicScreenHeader, Screen } from '@suite-native/navigation';

@@ -11768,6 +11768,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@suite-native/backup@workspace:*, @suite-native/backup@workspace:suite-native/backup":
+  version: 0.0.0-use.local
+  resolution: "@suite-native/backup@workspace:suite-native/backup"
+  dependencies:
+    "@suite-common/device": "workspace:*"
+    "@suite-common/redux-utils": "workspace:*"
+    "@trezor/connect": "workspace:*"
+    "@trezor/device-utils": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@suite-native/banner-flags@workspace:*, @suite-native/banner-flags@workspace:suite-native/banner-flags":
   version: 0.0.0-use.local
   resolution: "@suite-native/banner-flags@workspace:suite-native/banner-flags"
@@ -12896,6 +12907,7 @@ __metadata:
     "@suite-common/wallet-core": "workspace:*"
     "@suite-native/alerts": "workspace:*"
     "@suite-native/atoms": "workspace:*"
+    "@suite-native/backup": "workspace:*"
     "@suite-native/bluetooth": "workspace:*"
     "@suite-native/device": "workspace:*"
     "@suite-native/device-authorization": "workspace:*"
@@ -13447,6 +13459,7 @@ __metadata:
     "@suite-common/device": "workspace:*"
     "@suite-common/redux-utils": "workspace:*"
     "@suite-native/atoms": "workspace:*"
+    "@suite-native/backup": "workspace:*"
     "@suite-native/device-mutex": "workspace:*"
     "@suite-native/intl": "workspace:*"
     "@suite-native/swipeable-walkthrough": "workspace:*"

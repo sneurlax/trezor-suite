@@ -20,6 +20,7 @@
             "path": "../../suite-common/wallet-core"
         },
         { "path": "../alerts" },
+        { "path": "../backup" },
         { "path": "../atoms" },
         { "path": "../bluetooth" },
         { "path": "../device" },

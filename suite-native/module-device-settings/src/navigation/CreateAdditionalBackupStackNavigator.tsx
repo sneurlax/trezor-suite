@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { selectIsAdditionalShamirBackupInProgress } from '@suite-common/device';
+import { selectIsAdditionalShamirBackupInProgress } from '@suite-native/backup';
 import {
     DeviceConnectionGuardScreen,
     useDeviceConnectionGuard,
