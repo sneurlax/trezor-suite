@@ -10,7 +10,7 @@ import { type TestStore, act, renderWithStoreProvider } from '@suite-native/test
 import { mockTransaction } from '@suite-native/tokens';
 import { exchangeQuotes } from '@suite-native/trading-fixtures';
 import {
-    useNavigationRemoveInterceptor,
+    useNavigationRemoveInterceptorAlert,
     useTransactionDetails,
 } from '@suite-native/transaction-management';
 
@@ -21,7 +21,7 @@ const mockOpenInBlockchain = jest.fn();
 
 jest.mock('@suite-native/transaction-management', () => ({
     ...jest.requireActual('@suite-native/transaction-management'),
-    useNavigationRemoveInterceptor: jest.fn(),
+    useNavigationRemoveInterceptorAlert: jest.fn(),
     useTransactionDetails: jest.fn(),
 }));
 
@@ -39,7 +39,7 @@ jest.mock('../../hooks/exchange/Approval/useApprovalFlow', () => ({
 }));
 
 const mockUseTransactionDetails = useTransactionDetails as jest.Mock;
-const mockUseNavigationRemoveInterceptor = jest.mocked(useNavigationRemoveInterceptor);
+const mockUseNavigationRemoveInterceptorAlert = jest.mocked(useNavigationRemoveInterceptorAlert);
 
 const testQuote = exchangeQuotes[0];
 
@@ -283,7 +283,7 @@ describe('TradingConfirmingScreen', () => {
     it('should clear selected quote on back navigation', () => {
         renderScreen();
 
-        const { onRemoveConfirmed } = mockUseNavigationRemoveInterceptor.mock.calls[0][0];
+        const { onRemoveConfirmed } = mockUseNavigationRemoveInterceptorAlert.mock.calls[0][0];
         act(() => {
             onRemoveConfirmed();
         });
@@ -302,7 +302,7 @@ describe('TradingConfirmingScreen', () => {
 
         renderScreen();
 
-        expect(mockUseNavigationRemoveInterceptor).toHaveBeenCalledWith(
+        expect(mockUseNavigationRemoveInterceptorAlert).toHaveBeenCalledWith(
             expect.objectContaining({
                 shouldPrevent: false,
             }),
