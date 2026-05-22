@@ -232,6 +232,7 @@ import {
     MoneroTransactionSignInputRequest,
     MoneroWatchKey,
 } from './messages-monero';
+import { NostrEventSignature, NostrGetPubkey, NostrPubkey, NostrSignEvent } from './messages-nostr';
 import { RippleAddress, RippleGetAddress, RippleSignTx, RippleSignedTx } from './messages-ripple';
 import {
     SolanaAddress,
@@ -320,6 +321,7 @@ export * from './messages-ethereum';
 export * from './messages-ethereum-eip712';
 export * from './messages-evolu';
 export * from './messages-monero';
+export * from './messages-nostr';
 export * from './messages-ripple';
 export * from './messages-solana';
 export * from './messages-stellar';
@@ -543,6 +545,10 @@ export const MessageType = Type.Object(
         MoneroLiveRefreshFinalAck,
         DebugMoneroDiagRequest,
         DebugMoneroDiagAck,
+        NostrGetPubkey,
+        NostrPubkey,
+        NostrSignEvent,
+        NostrEventSignature,
         RippleGetAddress,
         RippleAddress,
         RippleSignTx,
@@ -727,6 +733,8 @@ export type WireInMessage =
     | 'MoneroLiveRefreshStepRequest'
     | 'MoneroLiveRefreshFinalRequest'
     | 'DebugMoneroDiagRequest'
+    | 'NostrGetPubkey'
+    | 'NostrSignEvent'
     | 'RippleGetAddress'
     | 'RippleSignTx'
     | 'SolanaGetPublicKey'
@@ -855,6 +863,8 @@ export type WireOutMessage =
     | 'MoneroLiveRefreshStepAck'
     | 'MoneroLiveRefreshFinalAck'
     | 'DebugMoneroDiagAck'
+    | 'NostrPubkey'
+    | 'NostrEventSignature'
     | 'RippleAddress'
     | 'RippleSignedTx'
     | 'SolanaPublicKey'
