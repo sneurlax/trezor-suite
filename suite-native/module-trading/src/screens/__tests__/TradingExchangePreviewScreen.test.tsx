@@ -18,8 +18,8 @@ import {
     mercuryoFixedWorstQuote,
     oneInchFusionPlusWithEip712SignDataQuote,
 } from '@suite-native/trading-fixtures';
+import { createTradingLightStore } from '@suite-native/trading-state/testUtils';
 
-import { createTradingLightStore } from '../../__tests__/tradingTestUtils';
 import {
     TradingExchangePreviewScreen,
     type TradingExchangePreviewScreenProps,

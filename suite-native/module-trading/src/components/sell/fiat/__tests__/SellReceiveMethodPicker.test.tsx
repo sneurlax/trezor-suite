@@ -9,14 +9,14 @@ import {
     screen,
 } from '@suite-native/test-utils-store';
 import { banxaBankTransferSellQuote, sellQuotes } from '@suite-native/trading-fixtures';
-import { type SellFormType } from '@suite-native/trading-types';
-import { getIndexOrThrow } from '@trezor/utils';
-
 import {
     type PreloadedStatePartial,
     type TradingTestPreloadedState,
     createTradingPreloadedState,
-} from '../../../../__tests__/tradingTestUtils';
+} from '@suite-native/trading-state/testUtils';
+import type { SellFormType } from '@suite-native/trading-types';
+import { getIndexOrThrow } from '@trezor/utils';
+
 import { useSellForm } from '../../../../hooks/sell/useSellForm';
 import { SellReceiveMethodPicker } from '../SellReceiveMethodPicker';
 

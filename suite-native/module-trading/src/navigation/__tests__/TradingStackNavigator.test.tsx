@@ -1,9 +1,9 @@
 import { mockMessageSystemStateWithFeatureFlags } from '@suite-common/message-system/mocks';
-
 import {
     createTradingFeatureFlags,
     renderWithTradingProvider,
-} from '../../__tests__/tradingTestUtils';
+} from '@suite-native/trading-state/testUtils';
+
 import { TradingStackNavigator } from '../TradingStackNavigator';
 
 jest.mock('../../hooks/buy/useBuyData', () => ({

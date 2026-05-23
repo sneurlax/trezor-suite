@@ -11,9 +11,9 @@ import {
     selectBuySelectedReceiveAccount,
     selectExchangeSelectedReceiveAccount,
 } from '@suite-native/trading-state';
+import { createTradingLightStore } from '@suite-native/trading-state/testUtils';
 import { type TradeableAsset } from '@suite-native/trading-types';
 
-import { createTradingLightStore } from '../../../../__tests__/tradingTestUtils';
 import { useReceiveAccountPreselectionEffect } from '../useReceiveAccountPreselectionEffect';
 
 const btc1AccountKey = btc1NormalAccount.key;

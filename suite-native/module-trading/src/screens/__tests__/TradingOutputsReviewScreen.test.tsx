@@ -8,11 +8,11 @@ import type {
     StackProps,
 } from '@suite-native/navigation';
 import { type TestStore } from '@suite-native/test-utils-store';
-
 import {
     createTradingLightStore,
     renderWithTradingProvider,
-} from '../../__tests__/tradingTestUtils';
+} from '@suite-native/trading-state/testUtils';
+
 import {
     TradingExchangeOutputsReviewScreen,
     TradingSellOutputsReviewScreen,

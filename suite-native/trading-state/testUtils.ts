@@ -28,7 +28,8 @@ import {
     renderWithStoreProvider,
 } from '@suite-native/test-utils-store';
 import { getWalletState } from '@suite-native/trading-fixtures';
-import { tradingSlice } from '@suite-native/trading-state';
+
+import { tradingSlice } from './src';
 
 export type { PreloadedStatePartial } from '@suite-native/test-utils-store';
 

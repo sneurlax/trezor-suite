@@ -6,12 +6,12 @@ import {
     eth1NormalAccount,
     verifiedBankAccount,
 } from '@suite-native/trading-fixtures';
-
 import {
     type PreloadedStatePartial,
     type TradingTestPreloadedState,
     renderWithTradingProvider,
-} from '../../../../../__tests__/tradingTestUtils';
+} from '@suite-native/trading-state/testUtils';
+
 import { SellBankAccountPicker } from '../SellBankAccountPicker';
 
 // Mock the SellBankAccountSheet component to isolate the picker component

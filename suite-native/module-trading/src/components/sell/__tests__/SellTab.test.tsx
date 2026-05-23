@@ -1,7 +1,7 @@
 import { mockMessageSystemStateWithFeatureFlags } from '@suite-common/message-system/mocks';
 import { act } from '@suite-native/test-utils-store';
+import { renderWithTradingProvider } from '@suite-native/trading-state/testUtils';
 
-import { renderWithTradingProvider } from '../../../__tests__/tradingTestUtils';
 import { SellTab } from '../SellTab';
 
 let mockIsDeviceInViewOnlyMode = false;

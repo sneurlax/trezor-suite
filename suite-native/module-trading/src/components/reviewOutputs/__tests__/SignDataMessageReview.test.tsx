@@ -4,12 +4,12 @@ import {
     oneInchFusionPlusWithEip712SignDataQuote,
     oneInchFusionPlusWithoutEip712SignDataQuote,
 } from '@suite-native/trading-fixtures';
-
 import {
     type PreloadedStatePartial,
     type TradingTestPreloadedState,
     renderWithTradingProvider,
-} from '../../../__tests__/tradingTestUtils';
+} from '@suite-native/trading-state/testUtils';
+
 import { SignDataMessageReview } from '../SignDataMessageReview';
 
 const ethAccount = getEthAccount('eth-account-key' as AccountKey);

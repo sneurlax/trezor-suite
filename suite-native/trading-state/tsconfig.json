@@ -45,8 +45,15 @@
         { "path": "../../packages/type-utils" },
         { "path": "../../packages/utils" },
         {
+            "path": "../../suite-common/geolocation"
+        },
+        {
             "path": "../../suite-common/test-utils"
         },
+        { "path": "../bluetooth" },
+        { "path": "../device-authorization" },
+        { "path": "../intl" },
+        { "path": "../test-utils-store" },
         { "path": "../trading-fixtures" },
         { "path": "../trading-types" }
     ],
