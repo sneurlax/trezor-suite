@@ -14826,8 +14826,13 @@ __metadata:
   resolution: "@suite/tor@workspace:suite/tor"
   dependencies:
     "@reduxjs/toolkit": "npm:2.11.2"
+    "@suite/intl": "workspace:*"
+    "@trezor/components": "workspace:*"
+    "@trezor/env-utils": "workspace:*"
     "@trezor/urls": "workspace:*"
     "@trezor/utils": "workspace:*"
+    react: "npm:19.2.4"
+    react-redux: "npm:9.2.0"
   languageName: unknown
   linkType: soft
 

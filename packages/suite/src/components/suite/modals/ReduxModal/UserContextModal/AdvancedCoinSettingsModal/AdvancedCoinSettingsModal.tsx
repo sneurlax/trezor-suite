@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Translation } from '@suite/intl';
 import { selectModalType } from '@suite/modal';
 import { selectHasExperimentalFeature } from '@suite/settings';
-import { selectTorState } from '@suite/tor';
+import { TorModal, type TorResult, selectTorState } from '@suite/tor';
 import { type NetworkSymbol, getNetwork } from '@suite-common/wallet-config';
 import {
     Badge,
@@ -27,7 +27,6 @@ import { useDispatch, useSelector } from 'src/hooks/suite';
 import { BackendUrls } from './BackendUrls/BackendUrls';
 import { BackendTypeSelect } from './CustomBackends/BackendTypeSelect';
 import ConnectionInfo from './CustomBackends/ConnectionInfo';
-import { TorModal, type TorResult } from './CustomBackends/TorModal';
 import { ExplorerConfigForm } from './ExplorerConfigForm';
 
 type AdvancedCoinSettingsModalProps = {

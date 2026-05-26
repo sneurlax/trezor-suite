@@ -2,7 +2,11 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": { "outDir": "libDev" },
     "references": [
-        { "path": "../../packages/utils" },
-        { "path": "../../packages/urls" }
+        { "path": "../intl" },
+        { "path": "../../packages/components" },
+        { "path": "../../packages/env-utils" },
+        { "path": "../../packages/theme" },
+        { "path": "../../packages/urls" },
+        { "path": "../../packages/utils" }
     ]
 }

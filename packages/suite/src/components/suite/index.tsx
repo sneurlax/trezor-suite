@@ -35,7 +35,6 @@ import { CoinGroup } from './CoinGroup/CoinGroup';
 import { CoinList } from './CoinList/CoinList';
 import { StatusLight } from './StatusLight';
 import { AmountUnitSwitchWrapper } from './AmountUnitSwitchWrapper';
-import { TorLoader } from './TorLoader/TorLoader';
 import { CountdownTimer } from './CountdownTimer';
 import { QrCode } from './QrCode';
 import { CoinBalance } from './CoinBalance';
@@ -81,7 +80,6 @@ export {
     CoinList,
     StatusLight,
     AmountUnitSwitchWrapper,
-    TorLoader,
     CountdownTimer,
     QrCode,
     CoinBalance,
