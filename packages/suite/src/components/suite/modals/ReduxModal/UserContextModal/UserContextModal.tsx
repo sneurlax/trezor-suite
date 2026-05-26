@@ -131,25 +131,21 @@ export const UserContextModal = ({ payload }: ReduxModalProps<typeof MODAL_CONTE
         case 'safety-checks':
             return <SafetyChecksModal onCancel={onCancel} />;
         case 'disable-tor': {
-            const onionBackends = customBackends
-                .filter(({ urls }) => urls.every(isOnionUrl))
-                .map(({ symbol, urls }) => ({ symbol, urls }));
+            const onionBackends = customBackends.filter(({ urls }) => urls.every(isOnionUrl));
 
             return (
                 <DisableTorModal
                     onionBackends={onionBackends}
                     onDisableTor={() => {
-                        customBackends
-                            .filter(({ urls }) => urls.every(isOnionUrl))
-                            .forEach(({ symbol, type, urls }) =>
-                                dispatch(
-                                    blockchainActions.setBackend({
-                                        symbol,
-                                        type,
-                                        urls: urls.filter(url => !isOnionUrl(url)),
-                                    }),
-                                ),
-                            );
+                        onionBackends.forEach(({ symbol, type, urls }) =>
+                            dispatch(
+                                blockchainActions.setBackend({
+                                    symbol,
+                                    type,
+                                    urls: urls.filter(url => !isOnionUrl(url)),
+                                }),
+                            ),
+                        );
                         payload.decision.resolve(true);
                         onCancel();
                     }}

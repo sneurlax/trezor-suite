@@ -4,12 +4,15 @@ export { DisableTorStopCoinjoinModal } from './DisableTorStopCoinjoinModal';
 export { RequestEnableTorModal } from './RequestEnableTorModal';
 export { TorLoader } from './TorLoader';
 export { TorModal, type TorResult } from './TorModal';
-export { getIsTorDomain, getIsTorEnabled, getIsTorLoading, isOnionUrl } from './torUtils';
+export { getIsTorDomain, isOnionUrl } from './torUtils';
 export {
+    selectIsTorDisabled,
     selectIsTorEnabled,
+    selectIsTorEnabling,
+    selectIsTorError,
     selectIsTorLoading,
     selectTorBootstrap,
-    selectTorState,
     selectTorStatus,
 } from './torSelectors';
 export { type TorRootState, torActions, torReducer, torSlice } from './torSlice';
+export { setTorBootstrap, setTorBootstrapSlow } from './torThunks';

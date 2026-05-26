@@ -5,13 +5,7 @@ import type { TranslationKey } from '@suite/intl';
 import { openDeferredModal } from '@suite/modal';
 import { selectRouterUrl } from '@suite/router';
 import { suiteSettingsActions } from '@suite/settings';
-import {
-    type TorBootstrap,
-    TorStatus,
-    isOnionUrl,
-    selectTorBootstrap,
-    torActions,
-} from '@suite/tor';
+import { TorStatus, isOnionUrl, selectTorBootstrap, torActions } from '@suite/tor';
 import { type deviceActions } from '@suite-common/device';
 import { type ExtraDependencies } from '@suite-common/redux-utils';
 import { notificationsActions } from '@suite-common/toast-notifications';
@@ -143,46 +137,6 @@ export const toggleTor =
 
             return Promise.reject();
         }
-    };
-
-export const setTorBootstrap =
-    (torBootstrap: TorBootstrap) => (dispatch: Dispatch, getState: GetState) => {
-        const previousTorBootstrap = selectTorBootstrap(getState());
-
-        const payload: TorBootstrap = {
-            current: torBootstrap.current,
-            total: torBootstrap.total,
-            isSlow: previousTorBootstrap ? previousTorBootstrap.isSlow : false,
-        };
-
-        dispatch(torActions.setTorBootstrap(payload));
-    };
-
-export const setTorBootstrapSlow =
-    (isSlow: boolean) => (dispatch: Dispatch, getState: GetState) => {
-        const previousTorBootstrap = selectTorBootstrap(getState());
-
-        if (!previousTorBootstrap) {
-            // Does not make sense to set bootstrap to slow when there is no bootstrap happening.
-            return;
-        }
-
-        if (isSlow && !previousTorBootstrap?.isSlow) {
-            dispatch(
-                notificationsActions.addToast({
-                    type: 'tor-is-slow',
-                    autoClose: false,
-                }),
-            );
-        }
-
-        const payload: TorBootstrap = {
-            current: previousTorBootstrap.current,
-            total: previousTorBootstrap.total,
-            isSlow,
-        };
-
-        dispatch(torActions.setTorBootstrap(payload));
     };
 
 export const hideCoinjoinReceiveWarning = () => (dispatch: Dispatch) =>

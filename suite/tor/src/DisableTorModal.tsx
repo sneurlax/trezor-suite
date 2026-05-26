@@ -8,6 +8,7 @@ import { spacings } from '@trezor/theme';
 
 export type OnionBackend = {
     symbol: NetworkSymbol;
+    type: string;
     urls: string[];
 };
 
