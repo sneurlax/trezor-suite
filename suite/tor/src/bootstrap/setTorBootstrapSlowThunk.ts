@@ -2,23 +2,10 @@ import type { Dispatch } from '@reduxjs/toolkit';
 
 import { notificationsActions } from '@suite-common/toast-notifications';
 
-import { selectTorBootstrap } from './torSelectors';
-import { type TorBootstrap, type TorRootState, torActions } from './torSlice';
+import { selectTorBootstrap } from '../torSelectors';
+import { type TorBootstrap, type TorRootState, torActions } from '../torSlice';
 
-export const setTorBootstrap =
-    (torBootstrap: TorBootstrap) => (dispatch: Dispatch, getState: () => TorRootState) => {
-        const previousTorBootstrap = selectTorBootstrap(getState());
-
-        const payload: TorBootstrap = {
-            current: torBootstrap.current,
-            total: torBootstrap.total,
-            isSlow: previousTorBootstrap ? previousTorBootstrap.isSlow : false,
-        };
-
-        dispatch(torActions.setTorBootstrap(payload));
-    };
-
-export const setTorBootstrapSlow =
+export const setTorBootstrapSlowThunk =
     (isSlow: boolean) => (dispatch: Dispatch, getState: () => TorRootState) => {
         const previousTorBootstrap = selectTorBootstrap(getState());
 

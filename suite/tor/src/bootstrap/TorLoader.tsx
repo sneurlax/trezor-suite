@@ -15,8 +15,8 @@ import {
 } from '@trezor/components';
 import { spacings } from '@trezor/theme';
 
-import { selectIsTorError, selectTorBootstrap } from './torSelectors';
-import { TorStatus, torActions } from './torSlice';
+import { selectIsTorError, selectTorBootstrap } from '../torSelectors';
+import { TorStatus, torActions } from '../torSlice';
 
 type TorLoaderProps = {
     callback: (value: boolean) => void;

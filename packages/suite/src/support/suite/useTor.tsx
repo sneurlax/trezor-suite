@@ -5,8 +5,8 @@ import {
     getIsTorDomain,
     selectIsTorEnabling,
     selectTorBootstrap,
-    setTorBootstrap,
-    setTorBootstrapSlow,
+    setTorBootstrapSlowThunk,
+    setTorBootstrapThunk,
     torActions,
 } from '@suite/tor';
 import { notificationsActions } from '@suite-common/toast-notifications';
@@ -54,12 +54,12 @@ export const useTor = () => {
         if (isDesktop()) {
             desktopApi.on('tor/bootstrap', (bootstrapEvent: BootstrapTorEvent) => {
                 if (bootstrapEvent.type === 'slow') {
-                    dispatch(setTorBootstrapSlow(true));
+                    dispatch(setTorBootstrapSlowThunk(true));
                 }
 
                 if (bootstrapEvent.type === 'progress') {
                     dispatch(
-                        setTorBootstrap({
+                        setTorBootstrapThunk({
                             current: bootstrapEvent.progress.current,
                             total: bootstrapEvent.progress.total,
                         }),
