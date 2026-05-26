@@ -1,4 +1,4 @@
-import { type ComponentType, type ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Translation } from '@suite/intl';
@@ -15,11 +15,10 @@ import {
 } from '@trezor/components';
 import { spacings } from '@trezor/theme';
 
-import { selectTorState } from './torSelectors';
+import { selectIsTorError, selectTorBootstrap } from './torSelectors';
 import { TorStatus, torActions } from './torSlice';
 
 type TorLoaderProps = {
-    ModalWrapper?: ComponentType<{ children: ReactNode }>;
     callback: (value: boolean) => void;
     onToggleTor: (shouldEnable: boolean) => Promise<void>;
 };
@@ -30,7 +29,8 @@ export const TorLoader = ({ callback, onToggleTor }: TorLoaderProps) => {
     // since if we use Tor state, the information is real about the Tor state
     // and we want to show user the fake loading feedback.
     const [isDisabling, setIsDisabling] = useState<boolean>(false);
-    const { torBootstrap, isTorError } = useSelector(selectTorState);
+    const torBootstrap = useSelector(selectTorBootstrap);
+    const isTorError = useSelector(selectIsTorError);
     const dispatch = useDispatch();
 
     useEffect(() => {

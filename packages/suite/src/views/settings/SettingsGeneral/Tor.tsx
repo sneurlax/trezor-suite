@@ -4,7 +4,7 @@ import { LearnMoreButton } from '@suite/external-links';
 import { Translation } from '@suite/intl';
 import { openDeferredModal, selectModalType } from '@suite/modal';
 import { Anchor, SettingsAnchor } from '@suite/router';
-import { selectTorState } from '@suite/tor';
+import { selectIsTorEnabled, selectIsTorEnabling, selectIsTorLoading } from '@suite/tor';
 import { Switch } from '@trezor/components';
 import { ActionColumn, SectionItem, TextColumn } from '@trezor/product-components';
 import { HELP_CENTER_TOR_URL } from '@trezor/urls';
@@ -17,7 +17,9 @@ export const Tor = () => {
     const [hasTorError, setHasTorError] = useState(false);
     const coinjoinAccounts = useSelector((state: any) => selectCoinjoinAccounts(state));
     const isCoinjoinAccount = coinjoinAccounts.length > 0;
-    const { isTorEnabled, isTorLoading, isTorEnabling } = useSelector(selectTorState);
+    const isTorEnabled = useSelector(selectIsTorEnabled);
+    const isTorLoading = useSelector(selectIsTorLoading);
+    const isTorEnabling = useSelector(selectIsTorEnabling);
     const modalType = useSelector(selectModalType);
     const dispatch = useDispatch();
 

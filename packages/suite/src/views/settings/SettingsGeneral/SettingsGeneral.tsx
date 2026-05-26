@@ -3,7 +3,7 @@ import { Translation } from '@suite/intl';
 import { LabelingSettings } from '@suite/labeling';
 import { selectIsLegacyLabelingVisible, selectSelectedProviderForLabels } from '@suite/metadata';
 import { selectHasExperimentalFeature } from '@suite/settings';
-import { selectTorState } from '@suite/tor';
+import { selectIsTorEnabled, selectIsTorEnabling } from '@suite/tor';
 import { Context } from '@suite-common/message-system';
 import { selectIsMevProtectionSettingsVisible } from '@suite-common/mev';
 import { getNetwork } from '@suite-common/wallet-config';
@@ -54,7 +54,8 @@ export const SettingsGeneral = () => {
         selectIsSettingsDesktopAppPromoBannerShown,
     );
 
-    const { isTorEnabled, isTorEnabling } = useSelector(selectTorState);
+    const isTorEnabled = useSelector(selectIsTorEnabled);
+    const isTorEnabling = useSelector(selectIsTorEnabling);
     const enabledNetworks = useSelector(selectEnabledNetworks);
     const desktopUpdate = useSelector(state => state.desktopUpdate);
     const isLegacyLabelingVisible = useSelector(selectIsLegacyLabelingVisible);

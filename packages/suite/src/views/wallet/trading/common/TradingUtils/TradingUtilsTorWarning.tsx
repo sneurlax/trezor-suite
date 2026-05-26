@@ -1,6 +1,6 @@
 import { Translation, type TranslationKey } from '@suite/intl';
 import { SettingsAnchor, goto } from '@suite/router';
-import { selectTorState } from '@suite/tor';
+import { selectIsTorEnabled } from '@suite/tor';
 import { type TradingType } from '@suite-common/trading';
 import { Banner, Column } from '@trezor/components';
 import { spacings } from '@trezor/theme';
@@ -36,7 +36,7 @@ export const TradingUtilsTorWarning = ({
 }: TradingUtilsTorWarningProps) => {
     const dispatch = useDispatch();
 
-    const { isTorEnabled } = useSelector(selectTorState);
+    const isTorEnabled = useSelector(selectIsTorEnabled);
     if (!isTorEnabled) return null;
 
     const handleGoToSettings = () => {

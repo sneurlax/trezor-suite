@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { getTorUrlIfAvailable } from '@suite/external-links';
 import { goto } from '@suite/router';
 import { selectLanguage, selectTorOnionLinks } from '@suite/settings';
-import { selectTorState } from '@suite/tor';
+import { selectIsTorEnabled } from '@suite/tor';
 import {
     type ContextDomain,
     messageSystemActions,
@@ -20,7 +20,7 @@ type ContextMessageProps = {
 export const ContextMessage = ({ context }: ContextMessageProps) => {
     const language = useSelector(selectLanguage);
     const message = useSelector(state => selectContextMessageContent(state, context, language));
-    const { isTorEnabled } = useSelector(selectTorState);
+    const isTorEnabled = useSelector(selectIsTorEnabled);
     const torOnionLinks = useSelector(selectTorOnionLinks);
     const dispatch = useDispatch();
 

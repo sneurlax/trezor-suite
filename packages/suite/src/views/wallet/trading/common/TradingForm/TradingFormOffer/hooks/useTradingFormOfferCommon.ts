@@ -1,6 +1,6 @@
 import type { BuyTrade, ExchangeTrade, SellFiatTrade } from 'invity-api';
 
-import { selectTorState } from '@suite/tor';
+import { selectIsTorEnabled } from '@suite/tor';
 import type { TradingType } from '@suite-common/trading';
 import { selectAreFeesLoading, selectHasRunningDiscovery } from '@suite-common/wallet-core';
 
@@ -36,7 +36,7 @@ export const useTradingFormOfferCommon = <T extends TradingType>() => {
 
     const { amountInCrypto } = watch();
 
-    const { isTorEnabled } = useSelector(selectTorState);
+    const isTorEnabled = useSelector(selectIsTorEnabled);
     const areFeesLoading = useSelector(suiteState =>
         selectAreFeesLoading(suiteState, account.symbol),
     );

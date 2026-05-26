@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Translation } from '@suite/intl';
 import { selectModalType } from '@suite/modal';
 import { selectHasExperimentalFeature } from '@suite/settings';
-import { TorModal, type TorResult, selectTorState } from '@suite/tor';
+import { TorModal, type TorResult, selectIsTorEnabled } from '@suite/tor';
 import { type NetworkSymbol, getNetwork } from '@suite-common/wallet-config';
 import {
     Badge,
@@ -36,7 +36,7 @@ type AdvancedCoinSettingsModalProps = {
 
 export const AdvancedCoinSettingsModal = ({ symbol, onCancel }: AdvancedCoinSettingsModalProps) => {
     const network = getNetwork(symbol);
-    const { isTorEnabled } = useSelector(selectTorState);
+    const isTorEnabled = useSelector(selectIsTorEnabled);
     const modalType = useSelector(selectModalType);
     const dispatch = useDispatch();
     const [torModalOpen, setTorModalOpen] = useState(false);

@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { Translation } from '@suite/intl';
 import { openDeferredModal, openModal, selectModalType } from '@suite/modal';
-import { selectTorState } from '@suite/tor';
+import { selectIsTorEnabled } from '@suite/tor';
 import { selectSelectedDevice } from '@suite-common/device';
 import { RequestEnableTorResponse } from '@suite-common/suite-config';
 import { isDevEnv } from '@suite-common/suite-utils';
@@ -53,7 +53,7 @@ interface AddCoinjoinAccountProps {
 export const AddCoinjoinAccountButton = ({ network, selectedAccount }: AddCoinjoinAccountProps) => {
     const [isLoading, setIsLoading] = useState(false);
 
-    const { isTorEnabled } = useSelector(selectTorState);
+    const isTorEnabled = useSelector(selectIsTorEnabled);
     const device = useSelector(selectSelectedDevice);
     const accounts = useSelector(state => state.wallet.accounts);
     const modalType = useSelector(selectModalType);

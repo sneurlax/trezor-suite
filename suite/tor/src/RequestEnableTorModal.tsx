@@ -6,7 +6,7 @@ import { RequestEnableTorResponse } from '@suite-common/suite-config';
 import { Banner, Modal } from '@trezor/components';
 import { spacings } from '@trezor/theme';
 
-import { selectTorState } from './torSelectors';
+import { selectIsTorEnabled, selectIsTorLoading } from './torSelectors';
 
 type RequestEnableTorModalProps = {
     decision: { resolve: (value: RequestEnableTorResponse) => void };
@@ -14,7 +14,8 @@ type RequestEnableTorModalProps = {
 };
 
 export const RequestEnableTorModal = ({ onCancel, decision }: RequestEnableTorModalProps) => {
-    const { isTorLoading, isTorEnabled } = useSelector(selectTorState);
+    const isTorLoading = useSelector(selectIsTorLoading);
+    const isTorEnabled = useSelector(selectIsTorEnabled);
 
     useEffect(() => {
         if (isTorEnabled) {
