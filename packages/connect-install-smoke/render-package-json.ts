@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { readFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -15,8 +14,7 @@ const { values } = parseArgs({
 });
 
 const fixtureDir = values['fixture-dir'];
-const scenario = values.scenario;
-const version = values.version;
+const { scenario, version } = values;
 const overridesFile = values['overrides-file'];
 const packedDir = values['packed-dir'];
 const withTypeCheck = Boolean(values['with-type-check']);
@@ -30,19 +28,21 @@ const manifest = JSON.parse(readFileSync(resolve(fixtureDir, 'manifest.json'), '
 const fixtureName = basename(fixtureDir);
 const { rootPackage, main, extraDependencies = {} } = manifest;
 
-let rootPackageSource;
-let overrides;
+let rootPackageSource: string;
+let overrides: Record<string, string> | undefined;
 
 if (scenario === 'local') {
     if (!overridesFile || !packedDir) {
         console.error('local scenario requires --overrides-file and --packed-dir');
         process.exit(1);
     }
-    const rawOverrides = JSON.parse(readFileSync(overridesFile, 'utf8'));
+    const rawOverrides: Record<string, string> = JSON.parse(readFileSync(overridesFile, 'utf8'));
     const normalized = Object.fromEntries(
         Object.entries(rawOverrides).map(([name, path]) => {
             if (!path.startsWith('file:')) return [name, path];
+
             const tarball = basename(path.slice('file:'.length));
+
             return [name, `file:${join(packedDir, tarball)}`];
         }),
     );
@@ -71,7 +71,7 @@ if (withTypeCheck) {
     Object.assign(dependencies, extraDependencies.withTypeCheck ?? {});
 }
 
-const pkg = {
+const pkg: Record<string, unknown> = {
     name: `${fixtureName}-fixture`,
     version: '1.0.0',
     private: true,

@@ -1,4 +1,4 @@
-# Install smoke tests
+# @trezor/connect-install-smoke
 
 Per-fixture install-and-import smoke tests for the `@trezor/connect*` family.
 Each fixture is a self-contained mini-consumer that gets installed into a
@@ -11,14 +11,17 @@ packages via `import`.
 ## Layout
 
 ```
-install-smoke/
+connect-install-smoke/
 ├── helpers.sh                # run_install_smoke() entry point
 ├── render-package-json.mjs   # builds package.json from a fixture manifest
-├── fixtures/
-│   ├── connect/
-│   ├── connect-mobile/
-│   ├── connect-web/
-│   └── connect-webextension/
+├── test-connect-local.sh     # local (packed tarball) scenario
+├── test-npm-install.sh       # npm registry scenario
+├── test-yarn-install.sh      # yarn registry scenario
+└── fixtures/
+    ├── connect/
+    ├── connect-mobile/
+    ├── connect-web/
+    └── connect-webextension/
 ```
 
 Each fixture directory contains:
@@ -40,13 +43,17 @@ The three top-level entry scripts each cover one install path:
 | `test-npm-install.sh`   | `registry-npm`  | Latest published `@trezor/connect@<version>` (npm)  |
 | `test-yarn-install.sh`  | `registry-yarn` | Latest published `@trezor/connect@<version>` (yarn) |
 
+## Running locally
+
+```bash
+yarn workspace @trezor/connect-install-smoke test:install:npm latest
+yarn workspace @trezor/connect-install-smoke test:install:yarn latest
+yarn workspace @trezor/connect-install-smoke test:install:local
+```
+
 ## Adding a fixture
 
 1. `mkdir fixtures/<name>` and drop in `manifest.json` + `index.mjs`. Add
    `tsconfig.json` + `type-check.ts` if you want a type-check pass.
 2. Call `run_install_smoke <name> <scenario> [type-check] [runtime]` from
    the relevant top-level script(s).
-
-The fixture directory is excluded from `@trezor/connect`'s `tsconfig` and
-`eslint` so its consumer-shaped files don't leak into connect's own
-type-check and lint passes.

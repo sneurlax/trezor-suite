@@ -2,8 +2,8 @@
 # Shared helpers for connect install-smoke scripts.
 # Source from bash; do not execute directly.
 
-INSTALL_SMOKE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_SMOKE_FIXTURES_DIR="$INSTALL_SMOKE_DIR/fixtures"
+SMOKE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SMOKE_FIXTURES_DIR="$SMOKE_DIR/fixtures"
 
 log_step() {
     echo ""
@@ -41,7 +41,7 @@ run_install_smoke() {
         ops=("runtime")
     fi
 
-    local fixture_src="$INSTALL_SMOKE_FIXTURES_DIR/$fixture_name"
+    local fixture_src="$SMOKE_FIXTURES_DIR/$fixture_name"
     local manifest="$fixture_src/manifest.json"
     if [ ! -f "$manifest" ]; then
         echo "Fixture manifest not found: $manifest" >&2
@@ -88,7 +88,7 @@ run_install_smoke() {
                 ;;
         esac
 
-        node "$INSTALL_SMOKE_DIR/render-package-json.mjs" "${render_args[@]}" > package.json
+        node "$SMOKE_DIR/render-package-json.ts" "${render_args[@]}" > package.json
         cat package.json
 
         case "$scenario" in

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Validate that installing @trezor/connect* from the npm registry works for
-# each consumer shape covered by install-smoke/fixtures.
+# each consumer shape covered by fixtures/.
 
 set -e
 
@@ -10,7 +10,7 @@ export PACKAGE_VERSION
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
-source "$SCRIPT_DIR/install-smoke/helpers.sh"
+source "$SCRIPT_DIR/helpers.sh"
 
 TEST_ROOT="$(mktemp -d -t connect-install-smoke-npm.XXXXXX)"
 trap 'rm -rf "$TEST_ROOT"' EXIT

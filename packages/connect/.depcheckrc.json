@@ -1,5 +1,5 @@
 {
-    "ignore-patterns": ["libDev", "lib", "e2e/install-smoke/fixtures"],
+    "ignore-patterns": ["libDev", "lib"],
     "ignores": [
         "@babel/preset-typescript",
         "@trezor/connect",
