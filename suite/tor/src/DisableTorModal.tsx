@@ -1,45 +1,36 @@
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
 import { Translation } from '@suite/intl';
-import { isOnionUrl } from '@suite/tor';
-import { type UserContextPayload } from '@suite-common/suite-types';
 import { type NetworkSymbol, getNetwork } from '@suite-common/wallet-config';
-import { blockchainActions } from '@suite-common/wallet-core';
 import { Banner, Button, Card, Column, H3, Modal, Paragraph, Row } from '@trezor/components';
 import { CoinLogo } from '@trezor/product-components';
 import { spacings } from '@trezor/theme';
 
-import { useCustomBackends } from 'src/hooks/settings/backends';
-import { useDispatch } from 'src/hooks/suite';
-
-import { AdvancedCoinSettingsModal } from './AdvancedCoinSettingsModal/AdvancedCoinSettingsModal';
-
-type DisableTorModalProps = Omit<Extract<UserContextPayload, { type: 'disable-tor' }>, 'type'> & {
-    onCancel: () => void;
+export type OnionBackend = {
+    symbol: NetworkSymbol;
+    urls: string[];
 };
 
-export const DisableTorModal = ({ onCancel, decision }: DisableTorModalProps) => {
-    const dispatch = useDispatch();
-    const [symbol, setSymbol] = useState<NetworkSymbol>();
-    const onionBackends = useCustomBackends().filter(({ urls }) => urls.every(isOnionUrl));
+type DisableTorModalProps = {
+    onionBackends: OnionBackend[];
+    onDisableTor: () => void;
+    onCancel: () => void;
+    renderCoinSettings: (symbol: NetworkSymbol, onClose: () => void) => ReactNode;
+};
 
-    const onDisableTor = () => {
-        onionBackends.forEach(({ symbol, type, urls }) =>
-            dispatch(
-                blockchainActions.setBackend({
-                    symbol,
-                    type,
-                    urls: urls.filter(url => !isOnionUrl(url)),
-                }),
-            ),
-        );
-        decision.resolve(true);
-        onCancel();
-    };
+export const DisableTorModal = ({
+    onionBackends,
+    onDisableTor,
+    onCancel,
+    renderCoinSettings,
+}: DisableTorModalProps) => {
+    const [settingsSymbol, setSettingsSymbol] = useState<NetworkSymbol>();
 
-    return symbol ? (
-        <AdvancedCoinSettingsModal symbol={symbol} onCancel={() => setSymbol(undefined)} />
-    ) : (
+    if (settingsSymbol) {
+        return <>{renderCoinSettings(settingsSymbol, () => setSettingsSymbol(undefined))}</>;
+    }
+
+    return (
         <Modal
             onCancel={onCancel}
             intent={onionBackends.length ? 'warning' : 'brand'}
@@ -96,7 +87,7 @@ export const DisableTorModal = ({ onCancel, decision }: DisableTorModalProps) =>
                                     <Button
                                         intent="neutral"
                                         priority="secondary"
-                                        onClick={() => setSymbol(symbol)}
+                                        onClick={() => setSettingsSymbol(symbol)}
                                         iconLeft="gear"
                                         size="small"
                                         margin={{ left: 'auto' }}

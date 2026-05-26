@@ -14826,9 +14826,13 @@ __metadata:
   resolution: "@suite/tor@workspace:suite/tor"
   dependencies:
     "@reduxjs/toolkit": "npm:2.11.2"
+    "@suite-common/suite-config": "workspace:*"
+    "@suite-common/wallet-config": "workspace:*"
     "@suite/intl": "workspace:*"
     "@trezor/components": "workspace:*"
     "@trezor/env-utils": "workspace:*"
+    "@trezor/product-components": "workspace:*"
+    "@trezor/theme": "workspace:*"
     "@trezor/urls": "workspace:*"
     "@trezor/utils": "workspace:*"
     react: "npm:19.2.4"

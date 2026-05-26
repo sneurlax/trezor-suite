@@ -1,16 +1,15 @@
 import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 import { Translation } from '@suite/intl';
-import { selectTorState } from '@suite/tor';
 import { RequestEnableTorResponse } from '@suite-common/suite-config';
-import { type UserContextPayload } from '@suite-common/suite-types';
 import { Banner, Modal } from '@trezor/components';
 import { spacings } from '@trezor/theme';
 
-import { useSelector } from 'src/hooks/suite';
+import { selectTorState } from './torSelectors';
 
 type RequestEnableTorModalProps = {
-    decision: Extract<UserContextPayload, { type: 'request-enable-tor' }>['decision'];
+    decision: { resolve: (value: RequestEnableTorResponse) => void };
     onCancel: () => void;
 };
 

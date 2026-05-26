@@ -1,5 +1,12 @@
 import { MetadataProviderModal } from '@suite/metadata';
 import { type MODAL_CONTEXT_USER, closeModal as closeModalAction } from '@suite/modal';
+import {
+    DisableTorModal,
+    DisableTorStopCoinjoinModal,
+    RequestEnableTorModal,
+    isOnionUrl,
+} from '@suite/tor';
+import { blockchainActions } from '@suite-common/wallet-core';
 import { type AccountKey } from '@suite-common/wallet-types';
 import { UI_REQUEST } from '@trezor/connect';
 import { exhaustive } from '@trezor/type-utils';
@@ -13,6 +20,7 @@ import {
 } from 'src/components/earn';
 import { ConnectPopupTxSimulationModal } from 'src/components/tx-simulation/connect-popup';
 import { EarnYieldTxSimulationModal } from 'src/components/tx-simulation/earn-stablecoin';
+import { useCustomBackends } from 'src/hooks/settings/backends';
 import { useDispatch } from 'src/hooks/suite';
 import type { AcquiredDevice } from 'src/types/suite';
 
@@ -41,14 +49,11 @@ import { ConnectLoadingModal } from './ConnectLoadingModal';
 import { ConnectPermissionsModal } from './ConnectPermissionsModal';
 import { CriticalCoinjoinPhaseModal } from './CriticalCoinjoinPhaseModal/CriticalCoinjoinPhaseModal';
 import { DeviceAuthenticityOptOutModal } from './DeviceAuthenticityOptOutModal';
-import { DisableTorModal } from './DisableTorModal';
-import { DisableTorStopCoinjoinModal } from './DisableTorStopCoinjoinModal';
 import { FirmwareRevisionOptOutModal } from './FirmwareRevisionOptOutModal';
 import { ImportTransactionModal } from './ImportTransactionModal/ImportTransactionModal';
 import { MoreRoundsNeededModal } from './MoreRoundsNeededModal';
 import { PinMismatchModal } from './PinMismatchModal';
 import { QrScannerModal } from './QrScannerModal/QrScannerModal';
-import { RequestEnableTorModal } from './RequestEnableTorModal';
 import { SafetyChecksModal } from './SafetyChecksModal';
 import { StakeChangeDelegateModal } from './StakeChangeDelegateModal/StakeChangeDelegateModal';
 import { TorLoadingModal } from './TorLoadingModal';
@@ -61,6 +66,7 @@ import { WipeDeviceSuccessModal } from './WipeDeviceSuccessModal';
 /** Modals opened as a result of user action */
 export const UserContextModal = ({ payload }: ReduxModalProps<typeof MODAL_CONTEXT_USER>) => {
     const dispatch = useDispatch();
+    const customBackends = useCustomBackends();
 
     const onCancel = () => dispatch(closeModalAction());
 
@@ -124,8 +130,36 @@ export const UserContextModal = ({ payload }: ReduxModalProps<typeof MODAL_CONTE
             return <AddTokenModal {...payload} onCancel={onCancel} />;
         case 'safety-checks':
             return <SafetyChecksModal onCancel={onCancel} />;
-        case 'disable-tor':
-            return <DisableTorModal decision={payload.decision} onCancel={onCancel} />;
+        case 'disable-tor': {
+            const onionBackends = customBackends
+                .filter(({ urls }) => urls.every(isOnionUrl))
+                .map(({ symbol, urls }) => ({ symbol, urls }));
+
+            return (
+                <DisableTorModal
+                    onionBackends={onionBackends}
+                    onDisableTor={() => {
+                        customBackends
+                            .filter(({ urls }) => urls.every(isOnionUrl))
+                            .forEach(({ symbol, type, urls }) =>
+                                dispatch(
+                                    blockchainActions.setBackend({
+                                        symbol,
+                                        type,
+                                        urls: urls.filter(url => !isOnionUrl(url)),
+                                    }),
+                                ),
+                            );
+                        payload.decision.resolve(true);
+                        onCancel();
+                    }}
+                    onCancel={onCancel}
+                    renderCoinSettings={(symbol, onClose) => (
+                        <AdvancedCoinSettingsModal symbol={symbol} onCancel={onClose} />
+                    )}
+                />
+            );
+        }
         case 'request-enable-tor':
             return <RequestEnableTorModal decision={payload.decision} onCancel={onCancel} />;
         case 'disable-tor-stop-coinjoin':

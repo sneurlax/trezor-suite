@@ -1,10 +1,9 @@
 import { Translation } from '@suite/intl';
-import { type UserContextPayload } from '@suite-common/suite-types';
 import { Banner, Column, Modal, Paragraph } from '@trezor/components';
 import { spacings } from '@trezor/theme';
 
 type DisableTorStopCoinjoinModalProps = {
-    decision: Extract<UserContextPayload, { type: 'disable-tor-stop-coinjoin' }>['decision'];
+    decision: { resolve: (value: boolean) => void };
     onCancel: () => void;
 };
 
