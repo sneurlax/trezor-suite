@@ -11,6 +11,10 @@ import { type ConnectDynamicSettings } from '@trezor/connect-common/src/impl/dyn
 import { WindowServiceWorkerChannel } from '@trezor/connect-common/src/messageChannel/window-serviceworker';
 import type { UpdateConnectSettings } from '@trezor/connect-common/src/types';
 import { ConnectEmitter } from '@trezor/connect-common/src/types/emitter';
+import {
+    type CancelParams,
+    normalizeCancelParams,
+} from '@trezor/connect-common/src/utils/cancelParams';
 
 const eventEmitter = new ConnectEmitter();
 let _channel: any;
@@ -21,12 +25,13 @@ const dispose = () => {
     return Promise.resolve(undefined);
 };
 
-const cancel = (reason?: string) => {
+const cancel = (params?: CancelParams) => {
     if (_channel) {
+        const { reason, callId } = normalizeCancelParams(params);
         _channel.postMessage(
             {
                 type: CORE_CALL_CANCEL,
-                payload: reason ? { reason } : null,
+                payload: reason || callId ? { reason, callId } : null,
             },
             { usePromise: false },
         );
