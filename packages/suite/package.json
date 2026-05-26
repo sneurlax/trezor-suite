@@ -170,8 +170,7 @@
         "redux-thunk": "^3.1.0",
         "semver": "^7.7.1",
         "styled-components": "^6.3.9",
-        "viem": "^2.48.1",
-        "web3-utils": "^4.3.3"
+        "viem": "^2.48.1"
     },
     "devDependencies": {
         "@testing-library/react": "^16.3.2",
