@@ -5,7 +5,13 @@ import type { TranslationKey } from '@suite/intl';
 import { openDeferredModal } from '@suite/modal';
 import { selectRouterUrl } from '@suite/router';
 import { suiteSettingsActions } from '@suite/settings';
-import { type TorBootstrap, TorStatus, isOnionUrl, selectTorState, torActions } from '@suite/tor';
+import {
+    type TorBootstrap,
+    TorStatus,
+    isOnionUrl,
+    selectTorBootstrap,
+    torActions,
+} from '@suite/tor';
 import { type deviceActions } from '@suite-common/device';
 import { type ExtraDependencies } from '@suite-common/redux-utils';
 import { notificationsActions } from '@suite-common/toast-notifications';
@@ -87,12 +93,10 @@ export const updateOnlineStatus = (payload: boolean): SuiteAction => ({
     payload,
 });
 
-export const updateTorStatus = (payload: TorStatus) => torActions.setTorStatus(payload);
-
 export const toggleTor =
     (shouldEnable: boolean, modal: string | undefined) =>
     async (dispatch: Dispatch, getState: GetState, extra: ExtraDependencies) => {
-        const { torBootstrap } = selectTorState(getState());
+        const torBootstrap = selectTorBootstrap(getState());
 
         const backends = getCustomBackends(getState().wallet.blockchain);
         // Is there any network with only onion custom backends?
@@ -113,7 +117,7 @@ export const toggleTor =
         if (shouldEnable) {
             // Updating here TorStatus to Enabling so user gets faster feedback that something is happening
             // instead of wait for the event coming from request-manager in useTor.
-            dispatch(updateTorStatus(TorStatus.Enabling));
+            dispatch(torActions.setTorStatus(TorStatus.Enabling));
         }
 
         const ipcResponse = await desktopApi.toggleTor(shouldEnable);
@@ -143,7 +147,7 @@ export const toggleTor =
 
 export const setTorBootstrap =
     (torBootstrap: TorBootstrap) => (dispatch: Dispatch, getState: GetState) => {
-        const { torBootstrap: previousTorBootstrap } = selectTorState(getState());
+        const previousTorBootstrap = selectTorBootstrap(getState());
 
         const payload: TorBootstrap = {
             current: torBootstrap.current,
@@ -156,7 +160,7 @@ export const setTorBootstrap =
 
 export const setTorBootstrapSlow =
     (isSlow: boolean) => (dispatch: Dispatch, getState: GetState) => {
-        const { torBootstrap: previousTorBootstrap } = selectTorState(getState());
+        const previousTorBootstrap = selectTorBootstrap(getState());
 
         if (!previousTorBootstrap) {
             // Does not make sense to set bootstrap to slow when there is no bootstrap happening.

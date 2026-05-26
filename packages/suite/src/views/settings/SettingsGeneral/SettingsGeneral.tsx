@@ -20,7 +20,6 @@ import { SettingsLayout } from 'src/components/settings/SettingsLayout';
 import { ContextMessage } from 'src/components/wallet/WalletLayout/AccountBanners/ContextMessage';
 import { useSelector } from 'src/hooks/suite';
 import { useIsContentBelowBreakpoint } from 'src/support/suite/ContentFlex';
-import { TorStatus } from 'src/types/suite';
 
 import { AddressDisplay } from './AddressDisplay';
 import { Analytics } from './Analytics';
@@ -55,8 +54,7 @@ export const SettingsGeneral = () => {
         selectIsSettingsDesktopAppPromoBannerShown,
     );
 
-    const { isTorEnabled } = useSelector(selectTorState);
-    const torStatus = useSelector(state => state.tor.torStatus);
+    const { isTorEnabled, isTorEnabling } = useSelector(selectTorState);
     const enabledNetworks = useSelector(selectEnabledNetworks);
     const desktopUpdate = useSelector(state => state.desktopUpdate);
     const isLegacyLabelingVisible = useSelector(selectIsLegacyLabelingVisible);
@@ -103,9 +101,7 @@ export const SettingsGeneral = () => {
                     {(isDesktop() || (isWeb() && isTorEnabled)) && (
                         <>
                             {isDesktop() && <Tor />}
-                            {(isTorEnabled || torStatus === TorStatus.Enabling) && (
-                                <TorOnionLinks />
-                            )}
+                            {(isTorEnabled || isTorEnabling) && <TorOnionLinks />}
                             {torExternalExperimentalFeature && <TorExternal />}
                         </>
                     )}

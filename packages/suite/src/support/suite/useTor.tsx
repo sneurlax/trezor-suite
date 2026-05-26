@@ -1,17 +1,12 @@
 import { useEffect } from 'react';
 
-import { getIsTorDomain, selectTorState } from '@suite/tor';
+import { TorStatus, getIsTorDomain, selectTorState, torActions } from '@suite/tor';
 import { notificationsActions } from '@suite-common/toast-notifications';
 import { getLocationHostname, isDesktop, isWeb } from '@trezor/env-utils';
 import { type BootstrapTorEvent, type TorStatusEvent, desktopApi } from '@trezor/suite-desktop-api';
 
-import {
-    setTorBootstrap,
-    setTorBootstrapSlow,
-    updateTorStatus,
-} from 'src/actions/suite/suiteActions';
+import { setTorBootstrap, setTorBootstrapSlow } from 'src/actions/suite/suiteActions';
 import { useDispatch, useSelector } from 'src/hooks/suite';
-import { TorStatus } from 'src/types/suite';
 
 export const useTor = () => {
     const { torBootstrap, isTorEnabling } = useSelector(selectTorState);
@@ -22,13 +17,13 @@ export const useTor = () => {
             const isTorDomain = getIsTorDomain(getLocationHostname());
             const newTorStatus = isTorDomain ? TorStatus.Enabled : TorStatus.Disabled;
 
-            dispatch(updateTorStatus(newTorStatus));
+            dispatch(torActions.setTorStatus(newTorStatus));
         }
 
         if (isDesktop()) {
             desktopApi.on('tor/status', (newStatus: TorStatusEvent) => {
                 const { type } = newStatus;
-                dispatch(updateTorStatus(type));
+                dispatch(torActions.setTorStatus(type));
                 if (type === TorStatus.Slow) {
                     // When network is slow for some reason but still working we display toast message
                     // to let the user know that it is going to take some time but it's working.
@@ -63,9 +58,9 @@ export const useTor = () => {
                     );
 
                     if (bootstrapEvent.progress.current === bootstrapEvent.progress.total) {
-                        dispatch(updateTorStatus(TorStatus.Enabled));
+                        dispatch(torActions.setTorStatus(TorStatus.Enabled));
                     } else if (!isTorEnabling) {
-                        dispatch(updateTorStatus(TorStatus.Enabling));
+                        dispatch(torActions.setTorStatus(TorStatus.Enabling));
                     }
                 }
             });

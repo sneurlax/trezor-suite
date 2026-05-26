@@ -8,7 +8,7 @@ import {
     selectLanguage,
     selectTheme,
 } from '@suite/settings';
-import { getIsTorEnabled } from '@suite/tor';
+import { selectIsTorEnabled } from '@suite/tor';
 import {
     selectRememberedHiddenWalletsCount,
     selectRememberedStandardWalletsCount,
@@ -79,7 +79,7 @@ export const getSuiteReadyPayload = async (state: AppState): Promise<SuiteReadyP
         screenWidth: getScreenWidth(),
         screenHeight: getScreenHeight(),
         platformLanguages: getPlatformLanguages().join(','),
-        tor: getIsTorEnabled(state.tor.torStatus),
+        tor: selectIsTorEnabled(state),
         labeling: resolveLabelingType(state),
         rememberedStandardWallets: selectRememberedStandardWalletsCount(state),
         rememberedHiddenWallets: selectRememberedHiddenWalletsCount(state),
