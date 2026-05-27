@@ -25,6 +25,8 @@ export interface Fixture {
     description: string;
     params: VerifyAuthenticityProofParams;
     result: VerifyAuthenticityProofResult;
+    /** When true, this fixture is not usable in the matchRootPubKeyToCertificate test because the test setup cannot succeed (e.g. unparseable certificate, invalid device model). */
+    skipMatchTest?: boolean;
 }
 
 // In a hex-encoded data, search for a given plaintext searchValue (searched as hex) and replace it with a given plaintext replaceValue (converted to hex)
@@ -310,6 +312,119 @@ export const verifyAuthenticityProofFixtures: Fixture[] = [
             error: 'CA_PUBKEY_BLACKLISTED',
             caPubKey: CA_PUB_KEY_TROPIC,
             rootPubKey: T3W1_ROOT_PUB_KEY_TROPIC,
+        },
+    },
+
+    // Error detail scenarios — invalid inputs caught and wrapped in result objects.
+    {
+        description: 'fails with INVALID_DEVICE_MODEL for unknown device model',
+        params: {
+            ...defaultOptigaProps,
+            deviceModel: 'UNKNOWN',
+        },
+        result: { valid: false, error: 'INVALID_DEVICE_MODEL' },
+        skipMatchTest: true,
+    },
+    {
+        description: 'fails with INVALID_DEVICE_CERTIFICATE on malformed certificate hex',
+        params: {
+            ...defaultOptigaProps,
+            certificates: ['not-valid-hex'],
+        },
+        result: {
+            valid: false,
+            error: 'INVALID_DEVICE_CERTIFICATE',
+            errorDetails: "This can't be an X.509 certificate. Wrong data type.",
+        },
+        skipMatchTest: true,
+    },
+    {
+        description: 'fails with INVALID_DEVICE_CERTIFICATE on truncated certificate',
+        params: {
+            ...defaultOptigaProps,
+            certificates: [DEVICE_CERT_OPTIGA.slice(0, 20), CA_CERT_OPTIGA],
+        },
+        result: {
+            valid: false,
+            error: 'INVALID_DEVICE_CERTIFICATE',
+            errorDetails: 'Certificate contains more than the three specified children.',
+        },
+        skipMatchTest: true,
+    },
+    {
+        description: 'fails with RESPONSE_MALFORMED on empty certificates',
+        params: {
+            ...defaultOptigaProps,
+            certificates: [],
+        },
+        result: { valid: false, error: 'RESPONSE_MALFORMED' },
+        skipMatchTest: true,
+    },
+    {
+        description: 'fails with RESPONSE_MALFORMED when P-256 path receives wrong cert count',
+        params: {
+            ...defaultOptigaProps,
+            certificates: [DEVICE_CERT_OPTIGA],
+        },
+        result: { valid: false, error: 'RESPONSE_MALFORMED' },
+    },
+    {
+        description: 'fails with RESPONSE_MALFORMED when MLDSA44 path receives wrong cert count',
+        params: {
+            ...defaultMCUProps,
+            certificates: [DEVICE_CERT_MCU, DEVICE_CERT_MCU],
+        },
+        result: { valid: false, error: 'RESPONSE_MALFORMED' },
+        skipMatchTest: true,
+    },
+    {
+        description: 'fails with INVALID_DEVICE_CERTIFICATE on mismatched signature algorithms',
+        params: {
+            ...defaultOptigaProps,
+            certificates: [DEVICE_CERT_OPTIGA, CA_CERT_TROPIC],
+        },
+        result: {
+            valid: false,
+            error: 'INVALID_DEVICE_CERTIFICATE',
+            errorDetails: 'Mismatched signature algorithms in device and CA certificates',
+        },
+    },
+    {
+        description: 'fails with INVALID_DEVICE_CERTIFICATE when CA cert extensions are invalid',
+        params: {
+            ...defaultOptigaProps,
+            certificates: [CA_CERT_OPTIGA, DEVICE_CERT_OPTIGA],
+        },
+        result: {
+            valid: false,
+            error: 'INVALID_DEVICE_CERTIFICATE',
+            errorDetails: 'CA keyCertSign not set',
+        },
+    },
+    {
+        description:
+            'fails with INVALID_DEVICE_CERTIFICATE when Ed25519 CA cert extensions are invalid',
+        params: {
+            ...defaultTropicProps,
+            certificates: [CA_CERT_TROPIC, DEVICE_CERT_TROPIC],
+        },
+        result: {
+            valid: false,
+            error: 'INVALID_DEVICE_CERTIFICATE',
+            errorDetails: 'CA keyCertSign not set',
+        },
+    },
+    {
+        description: 'fails with INVALID_DEVICE_CERTIFICATE when device cert is not signed by CA',
+        params: {
+            ...defaultOptigaProps,
+            certificates: [`${DEVICE_CERT_OPTIGA.slice(0, -2)}ff`, CA_CERT_OPTIGA],
+        },
+        result: {
+            valid: false,
+            caPubKey: CA_PUB_KEY_OPTIGA,
+            rootPubKey: T2B1_ROOT_PUB_KEY_OPTIGA,
+            error: 'INVALID_DEVICE_CERTIFICATE',
         },
     },
 ];

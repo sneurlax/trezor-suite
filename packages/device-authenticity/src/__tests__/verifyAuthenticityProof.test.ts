@@ -50,6 +50,18 @@ describe(verifyAuthenticityProof.name, () => {
 
         expect(verify.valid).toBe(true);
     });
+
+    it('fails with INVALID_DEVICE_CERTIFICATE when CA cert validity is in the future', async () => {
+        jest.useFakeTimers({ now: new Date('2022-01-01') });
+        const result = await verifyAuthenticityProof(defaultOptigaProps);
+        jest.useRealTimers();
+
+        expect(result).toEqual({
+            valid: false,
+            error: 'INVALID_DEVICE_CERTIFICATE',
+            errorDetails: expect.stringContaining("can't be in the future"),
+        });
+    });
 });
 
 describe(matchRootPubKeyToCertificate.name, () => {
@@ -73,19 +85,23 @@ describe(matchRootPubKeyToCertificate.name, () => {
         ).resolves.toBe(undefined);
     });
 
-    verifyAuthenticityProofFixtures.forEach(({ description, params, result }) => {
-        it(description, async () => {
-            const { config, deviceModel, allowDebugKeys, certificates } = params;
-            const allRootPubKeys = getRootPubKeys({ config, deviceModel, allowDebugKeys });
+    verifyAuthenticityProofFixtures
+        .filter(f => !f.skipMatchTest)
+        .forEach(({ description, params, result }) => {
+            it(description, async () => {
+                const { config, deviceModel, allowDebugKeys, certificates } = params;
+                const allRootPubKeys = getRootPubKeys({ config, deviceModel, allowDebugKeys });
 
-            // The last certificate is the one signed by root pub key (caCer for Optiga & Tropic, deviceCert for MCU)
-            const signedCertificate = certificates.at(-1);
-            if (!signedCertificate) throw 'Missing expceted certificates in test fixture';
-            const cert = parseCertificate(new Uint8Array(Buffer.from(signedCertificate, 'hex')));
-            const match = await matchRootPubKeyToCertificate({ allRootPubKeys, cert });
-            expect(match).toBe(result.rootPubKey);
+                // The last certificate is the one signed by root pub key (caCer for Optiga & Tropic, deviceCert for MCU)
+                const signedCertificate = certificates.at(-1);
+                if (!signedCertificate) throw 'Missing expceted certificates in test fixture';
+                const cert = parseCertificate(
+                    new Uint8Array(Buffer.from(signedCertificate, 'hex')),
+                );
+                const match = await matchRootPubKeyToCertificate({ allRootPubKeys, cert });
+                expect(match).toBe(result.rootPubKey);
+            });
         });
-    });
 });
 
 describe(prepareDeviceAuthenticityData.name, () => {
