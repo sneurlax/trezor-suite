@@ -8,3 +8,13 @@ export const isAllowanceUnlimited = (amountUnits: string, decimals: number): boo
     new BigNumber(
         unitsToSubunits({ value: asAmountUnit(new BigNumber(amountUnits)), decimals }),
     ).gte(new BigNumber(UINT256_MAX).dividedBy(2).integerValue());
+
+export const tokenSupportsIncreasingAllowance = (contractAddress?: string): boolean => {
+    const ethereumUsdtContractAddress = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+
+    if (!contractAddress) {
+        return false;
+    }
+
+    return contractAddress.trim().toLowerCase() !== ethereumUsdtContractAddress.toLowerCase();
+};
