@@ -18,7 +18,7 @@ const toVin = (network: Network) => (address: string) => {
 };
 
 const toVout = (network: Network) => (address: string) => {
-    let length;
+    let length: number;
     try {
         length = BitcoinJsAddress.toOutputScript(address, network).length;
     } catch {

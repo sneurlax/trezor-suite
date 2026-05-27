@@ -29,7 +29,7 @@ export function decodeBlake256(address: string) {
     const bytes = base58.decode(address);
     const buffer = Buffer.from(bytes);
     if (buffer.length !== 26) throw new Error(`${address} invalid address length`);
-    let payload;
+    let payload: Buffer;
     try {
         payload = decodeBlake(buffer);
     } catch (e) {

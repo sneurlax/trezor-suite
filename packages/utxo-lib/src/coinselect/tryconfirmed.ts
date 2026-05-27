@@ -42,7 +42,7 @@ export function tryConfirmed(
 
         const trials: { other: number; own: number }[] = [];
 
-        let i;
+        let i: number;
         // first - let's keep others at options.other and let's try decrease own, but not to 0
         for (i = own; i > 0; i--) {
             trials.push({ other, own: i });
