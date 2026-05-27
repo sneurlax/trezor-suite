@@ -30,9 +30,11 @@ type YieldConsentsProviderCardProps = {
     providerName: string;
     tokenSymbol: string;
     onConfirm: () => void;
+    isConfirming?: boolean;
 };
 
 export const YieldConsentsProviderCard = ({
+    isConfirming,
     providerName,
     tokenSymbol,
     onConfirm,
@@ -65,7 +67,13 @@ export const YieldConsentsProviderCard = ({
                 </EarnConsentsItem>
             </VStack>
             <HStack style={applyStyle(buttonRowStyle)}>
-                <Button intent="info" onPress={onConfirm} style={applyStyle(buttonStyle)}>
+                <Button
+                    intent="info"
+                    isDisabled={isConfirming}
+                    isLoading={isConfirming}
+                    onPress={onConfirm}
+                    style={applyStyle(buttonStyle)}
+                >
                     <Translation id="generic.buttons.understand" />
                 </Button>
             </HStack>

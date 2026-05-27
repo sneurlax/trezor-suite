@@ -1,39 +1,39 @@
-import { type RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { type RouteProp, useRoute } from '@react-navigation/native';
 
 import { Text, VStack } from '@suite-native/atoms';
 import { Translation } from '@suite-native/intl';
 import {
     Screen,
     ScreenHeader,
-    type StackNavigationProps,
     type YieldStackParamList,
-    YieldStackRoutes,
+    type YieldStackRoutes,
 } from '@suite-native/navigation';
 import { prepareNativeStyle, useNativeStyles } from '@trezor/styles-native';
 
 import { YieldConsentsProviderCard } from '../components/YieldConsentsProviderCard';
 import { useResolvedYieldFlowData } from '../hooks/useResolvedYieldFlowData';
+import { useYieldDepositInitialRouting } from '../hooks/useYieldDepositInitialRouting';
 
 const titleStyle = prepareNativeStyle(utils => ({
     marginBottom: utils.spacings.sp32,
 }));
 
 type RouteProps = RouteProp<YieldStackParamList, YieldStackRoutes.YieldConsents>;
-type NavigationProps = StackNavigationProps<YieldStackParamList, YieldStackRoutes.YieldConsents>;
 
 export const YieldConsentsScreen = () => {
     const { applyStyle } = useNativeStyles();
-    const navigation = useNavigation<NavigationProps>();
     const route = useRoute<RouteProps>();
-    const { providerName, tokenSymbol, resolutionStatus } = useResolvedYieldFlowData(route.params);
+    const resolvedFlowData = useResolvedYieldFlowData(route.params);
+    const { handleConfirmConsent, isInitializingAllowance } = useYieldDepositInitialRouting({
+        resolvedFlowData,
+        routeParams: route.params,
+    });
 
-    const handleNavigateToYieldDepositApproval = () => {
-        navigation.navigate(YieldStackRoutes.YieldDepositApproval, route.params);
-    };
-
-    if (resolutionStatus !== 'resolved') {
+    if (resolvedFlowData.resolutionStatus !== 'resolved') {
         return;
     }
+
+    const { providerName, tokenSymbol } = resolvedFlowData;
 
     return (
         <Screen header={<ScreenHeader closeActionType="back" />}>
@@ -44,7 +44,8 @@ export const YieldConsentsScreen = () => {
                 <YieldConsentsProviderCard
                     providerName={providerName}
                     tokenSymbol={tokenSymbol}
-                    onConfirm={handleNavigateToYieldDepositApproval}
+                    isConfirming={isInitializingAllowance}
+                    onConfirm={handleConfirmConsent}
                 />
             </VStack>
         </Screen>
