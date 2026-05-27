@@ -8,7 +8,10 @@ import {
     T3W1_ROOT_PUB_KEY_TROPIC,
     defaultOptigaProps,
 } from '../../mocks/mockDeviceAuthenticityData';
-import { verifyAuthenticityProofFixtures } from '../__fixtures__/verifyAuthenticityProof';
+import {
+    matchRootPubKeyToCertificateFixtures,
+    verifyAuthenticityProofFixtures,
+} from '../__fixtures__/verifyAuthenticityProof';
 import { getRootPubKeys } from '../utils';
 import {
     matchRootPubKeyToCertificate,
@@ -85,23 +88,19 @@ describe(matchRootPubKeyToCertificate.name, () => {
         ).resolves.toBe(undefined);
     });
 
-    verifyAuthenticityProofFixtures
-        .filter(f => !f.skipMatchTest)
-        .forEach(({ description, params, result }) => {
-            it(description, async () => {
-                const { config, deviceModel, allowDebugKeys, certificates } = params;
-                const allRootPubKeys = getRootPubKeys({ config, deviceModel, allowDebugKeys });
+    matchRootPubKeyToCertificateFixtures.forEach(({ description, params, result }) => {
+        it(description, async () => {
+            const { config, deviceModel, allowDebugKeys, certificates } = params;
+            const allRootPubKeys = getRootPubKeys({ config, deviceModel, allowDebugKeys });
 
-                // The last certificate is the one signed by root pub key (caCer for Optiga & Tropic, deviceCert for MCU)
-                const signedCertificate = certificates.at(-1);
-                if (!signedCertificate) throw 'Missing expceted certificates in test fixture';
-                const cert = parseCertificate(
-                    new Uint8Array(Buffer.from(signedCertificate, 'hex')),
-                );
-                const match = await matchRootPubKeyToCertificate({ allRootPubKeys, cert });
-                expect(match).toBe(result.rootPubKey);
-            });
+            // The last certificate is the one signed by root pub key (caCer for Optiga & Tropic, deviceCert for MCU)
+            const signedCertificate = certificates.at(-1);
+            if (!signedCertificate) throw 'Missing expceted certificates in test fixture';
+            const cert = parseCertificate(new Uint8Array(Buffer.from(signedCertificate, 'hex')));
+            const match = await matchRootPubKeyToCertificate({ allRootPubKeys, cert });
+            expect(match).toBe(result.rootPubKey);
         });
+    });
 });
 
 describe(prepareDeviceAuthenticityData.name, () => {

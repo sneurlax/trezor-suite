@@ -25,8 +25,6 @@ export interface Fixture {
     description: string;
     params: VerifyAuthenticityProofParams;
     result: VerifyAuthenticityProofResult;
-    /** When true, this fixture is not usable in the matchRootPubKeyToCertificate test because the test setup cannot succeed (e.g. unparseable certificate, invalid device model). */
-    skipMatchTest?: boolean;
 }
 
 // In a hex-encoded data, search for a given plaintext searchValue (searched as hex) and replace it with a given plaintext replaceValue (converted to hex)
@@ -36,8 +34,11 @@ const replaceInHex = (hexData: string, searchValue: string, replaceValue: string
         Buffer.from(replaceValue).toString('hex'),
     );
 
-// Note: most test cases are applied three times similarly for Optiga, Tropic and MCU.
-export const verifyAuthenticityProofFixtures: Fixture[] = [
+/*
+ Fixtures common for matchRootPubKeyToCertificate and verifyAuthenticityProof.
+ Most test cases are applied three times similarly for Optiga, Tropic and MCU.
+*/
+export const matchRootPubKeyToCertificateFixtures: Fixture[] = [
     // The most common happy path that mimicks a production device & an ordinary user.
     {
         description: 'succeeds for optiga (with prod keys)',
@@ -314,69 +315,6 @@ export const verifyAuthenticityProofFixtures: Fixture[] = [
             rootPubKey: T3W1_ROOT_PUB_KEY_TROPIC,
         },
     },
-
-    // Error detail scenarios — invalid inputs caught and wrapped in result objects.
-    {
-        description: 'fails with INVALID_DEVICE_MODEL for unknown device model',
-        params: {
-            ...defaultOptigaProps,
-            deviceModel: 'UNKNOWN',
-        },
-        result: { valid: false, error: 'INVALID_DEVICE_MODEL' },
-        skipMatchTest: true,
-    },
-    {
-        description: 'fails with INVALID_DEVICE_CERTIFICATE on malformed certificate hex',
-        params: {
-            ...defaultOptigaProps,
-            certificates: ['not-valid-hex'],
-        },
-        result: {
-            valid: false,
-            error: 'INVALID_DEVICE_CERTIFICATE',
-            errorDetails: "This can't be an X.509 certificate. Wrong data type.",
-        },
-        skipMatchTest: true,
-    },
-    {
-        description: 'fails with INVALID_DEVICE_CERTIFICATE on truncated certificate',
-        params: {
-            ...defaultOptigaProps,
-            certificates: [DEVICE_CERT_OPTIGA.slice(0, 20), CA_CERT_OPTIGA],
-        },
-        result: {
-            valid: false,
-            error: 'INVALID_DEVICE_CERTIFICATE',
-            errorDetails: 'Certificate contains more than the three specified children.',
-        },
-        skipMatchTest: true,
-    },
-    {
-        description: 'fails with RESPONSE_MALFORMED on empty certificates',
-        params: {
-            ...defaultOptigaProps,
-            certificates: [],
-        },
-        result: { valid: false, error: 'RESPONSE_MALFORMED' },
-        skipMatchTest: true,
-    },
-    {
-        description: 'fails with RESPONSE_MALFORMED when P-256 path receives wrong cert count',
-        params: {
-            ...defaultOptigaProps,
-            certificates: [DEVICE_CERT_OPTIGA],
-        },
-        result: { valid: false, error: 'RESPONSE_MALFORMED' },
-    },
-    {
-        description: 'fails with RESPONSE_MALFORMED when MLDSA44 path receives wrong cert count',
-        params: {
-            ...defaultMCUProps,
-            certificates: [DEVICE_CERT_MCU, DEVICE_CERT_MCU],
-        },
-        result: { valid: false, error: 'RESPONSE_MALFORMED' },
-        skipMatchTest: true,
-    },
     {
         description: 'fails with INVALID_DEVICE_CERTIFICATE on mismatched signature algorithms',
         params: {
@@ -426,5 +364,67 @@ export const verifyAuthenticityProofFixtures: Fixture[] = [
             rootPubKey: T2B1_ROOT_PUB_KEY_OPTIGA,
             error: 'INVALID_DEVICE_CERTIFICATE',
         },
+    },
+];
+
+// Fixtures that are not applicable for matchRootPubKeyToCertificate
+export const verifyAuthenticityProofFixtures: Fixture[] = [
+    ...matchRootPubKeyToCertificateFixtures,
+    // Error detail scenarios — invalid inputs caught and wrapped in result objects.
+    {
+        description: 'fails with INVALID_DEVICE_MODEL for unknown device model',
+        params: {
+            ...defaultOptigaProps,
+            deviceModel: 'UNKNOWN',
+        },
+        result: { valid: false, error: 'INVALID_DEVICE_MODEL' },
+    },
+    {
+        description: 'fails with INVALID_DEVICE_CERTIFICATE on malformed certificate hex',
+        params: {
+            ...defaultOptigaProps,
+            certificates: ['not-valid-hex'],
+        },
+        result: {
+            valid: false,
+            error: 'INVALID_DEVICE_CERTIFICATE',
+            errorDetails: "This can't be an X.509 certificate. Wrong data type.",
+        },
+    },
+    {
+        description: 'fails with INVALID_DEVICE_CERTIFICATE on truncated certificate',
+        params: {
+            ...defaultOptigaProps,
+            certificates: [DEVICE_CERT_OPTIGA.slice(0, 20), CA_CERT_OPTIGA],
+        },
+        result: {
+            valid: false,
+            error: 'INVALID_DEVICE_CERTIFICATE',
+            errorDetails: 'Certificate contains more than the three specified children.',
+        },
+    },
+    {
+        description: 'fails with RESPONSE_MALFORMED on empty certificates',
+        params: {
+            ...defaultOptigaProps,
+            certificates: [],
+        },
+        result: { valid: false, error: 'RESPONSE_MALFORMED' },
+    },
+    {
+        description: 'fails with RESPONSE_MALFORMED when P-256 path receives wrong cert count',
+        params: {
+            ...defaultOptigaProps,
+            certificates: [DEVICE_CERT_OPTIGA],
+        },
+        result: { valid: false, error: 'RESPONSE_MALFORMED' },
+    },
+    {
+        description: 'fails with RESPONSE_MALFORMED when MLDSA44 path receives wrong cert count',
+        params: {
+            ...defaultMCUProps,
+            certificates: [DEVICE_CERT_MCU, DEVICE_CERT_MCU],
+        },
+        result: { valid: false, error: 'RESPONSE_MALFORMED' },
     },
 ];
