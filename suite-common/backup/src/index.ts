@@ -1,5 +1,4 @@
-export * from './backupUtils';
+export * from './backup';
 export * from './createAdditionalBackup';
-export * from './shamirConstants';
-export * from './shamirUtils';
-export type * from './types';
+export * from './shamir';
+export * from './verifyOwnershipThunk';

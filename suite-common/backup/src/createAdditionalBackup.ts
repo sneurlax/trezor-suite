@@ -1,47 +1,22 @@
-import TrezorConnect, { type DeviceUniquePath, PROTO } from '@trezor/connect';
+import { createThunk } from '@suite-common/redux-utils';
+import TrezorConnect, { type DeviceUniquePath, type PROTO } from '@trezor/connect';
 
-import { type AdditionalBackupResult } from './types';
+const actionPrefix = '@common/backup';
 
-type CreateAdditionalBackupParams = {
-    devicePath: DeviceUniquePath;
-    backupMethod: PROTO.BackupMethod;
-    skipVerification?: boolean;
-    onVerificationComplete?: () => void;
-};
-
-/**
- * Core additional backup flow: verify ownership via recovery, then create backup.
- * Platform-specific thunks should wrap this with their own device access patterns.
- */
-export const createAdditionalBackup = async ({
-    devicePath,
-    backupMethod,
-    skipVerification,
-    onVerificationComplete,
-}: CreateAdditionalBackupParams): Promise<AdditionalBackupResult> => {
-    if (!skipVerification) {
-        const verifyResponse = await TrezorConnect.recoveryDevice({
-            type: 'UnlockRepeatedBackup',
-            input_method: PROTO.RecoveryDeviceInputMethod.Matrix,
-            enforce_wordlist: true,
+export const createAdditionalBackupThunk = createThunk(
+    `${actionPrefix}/createAdditionalBackup`,
+    async ({
+        devicePath,
+        backupMethod,
+    }: {
+        devicePath: DeviceUniquePath;
+        backupMethod: PROTO.BackupMethod;
+    }) => {
+        const response = await TrezorConnect.backupDevice({
+            backup_method: backupMethod,
             device: { path: devicePath },
         });
 
-        if (!verifyResponse.success) {
-            return { success: false, phase: 'verify-ownership' };
-        }
-
-        onVerificationComplete?.();
-    }
-
-    const backupResponse = await TrezorConnect.backupDevice({
-        backup_method: backupMethod,
-        device: { path: devicePath },
-    });
-
-    if (!backupResponse.success) {
-        return { success: false, phase: 'backup' };
-    }
-
-    return { success: true };
-};
+        return response.success;
+    },
+);
