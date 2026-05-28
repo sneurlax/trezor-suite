@@ -12,7 +12,7 @@ export type BridgeProtocolMessage = {
 export function validateProtocolMessage(body: unknown, withData = true): BridgeProtocolMessage {
     const isHex = (s: string) => /^[0-9A-Fa-f]+$/g.test(s); // TODO: trezor/utils accepts 0x prefix (eth)
     const isValidProtocol = (s: any): s is BridgeProtocolMessage['protocol'] =>
-        s === 'v1' || s === 'v2' || s === 'bridge';
+        s === 'v1' || s === 'v2';
 
     let json: Record<string, any> | undefined | null;
     if (typeof body === 'object') {
