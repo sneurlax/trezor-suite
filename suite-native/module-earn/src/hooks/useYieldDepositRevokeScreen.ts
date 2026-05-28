@@ -6,18 +6,13 @@ import { isFulfilled } from '@reduxjs/toolkit';
 
 import { useFormatters } from '@suite-common/formatters';
 import { getNetwork } from '@suite-common/wallet-config';
-import {
-    splitYieldPendingTransaction,
-    stablecoinYieldActions,
-    submitYieldRevokeThunk,
-} from '@suite-common/wallet-core';
+import { stablecoinYieldActions, submitYieldRevokeThunk } from '@suite-common/wallet-core';
 import { useBottomSheetModal } from '@suite-native/atoms';
 import {
     type StackNavigationProps,
     type YieldStackParamList,
     YieldStackRoutes,
 } from '@suite-native/navigation';
-import { useTransactionDetails } from '@suite-native/transaction-management';
 import { BigNumber } from '@trezor/utils';
 
 import { useRefreshYieldDepositAllowanceOnIdle } from './useRefreshYieldDepositAllowanceOnIdle';
@@ -25,6 +20,7 @@ import { useResolvedYieldFlowData } from './useResolvedYieldFlowData';
 import { useShowYieldAlert } from './useShowYieldAlert';
 import { useShowYieldTransactionFailureAlert } from './useShowYieldTransactionFailureAlert';
 import { type YieldAllowanceFeeTransaction, useYieldAllowanceFees } from './useYieldAllowanceFees';
+import { useYieldPendingTransaction } from './useYieldPendingTransaction';
 import { useYieldPendingTransactionTracking } from './useYieldPendingTransactionTracking';
 import { useYieldSession } from './useYieldSession';
 import { prepareYieldAllowanceReviewTransactionThunk } from '../yieldApprovalThunks';
@@ -37,8 +33,6 @@ type NavigationProps = StackNavigationProps<
 >;
 
 const REVOKE_ALLOWANCE_AMOUNT = '0';
-
-const isRevokeTransactionType = (txType: string) => txType === 'revoke' || txType === 'revoke-only';
 
 const hasPositiveAmount = (amount: string) => amount !== '' && new BigNumber(amount).gt(0);
 
@@ -53,11 +47,6 @@ export const useYieldDepositRevokeScreen = () => {
         bottomSheetRef: infoBottomSheetRef,
         closeModal: closeInfoBottomSheet,
         openModal: openInfoBottomSheet,
-    } = useBottomSheetModal();
-    const {
-        bottomSheetRef: pendingBottomSheetRef,
-        closeModal: closePendingBottomSheet,
-        openModal: openPendingBottomSheet,
     } = useBottomSheetModal();
     const resolvedFlowData = useResolvedYieldFlowData(route.params);
     const {
@@ -78,15 +67,17 @@ export const useYieldDepositRevokeScreen = () => {
     const allowanceAmount = session?.approval.allowanceAmount;
     const allowanceStatus = session?.approval.allowanceStatus;
     const approvalModalState = session?.approval.modalState;
-    const pendingTransaction = session?.action.pendingTransaction ?? null;
-    const { approvalPendingTransaction } = splitYieldPendingTransaction(
-        pendingTransaction,
-        'deposit',
-    );
-    const revokePendingTransaction =
-        approvalPendingTransaction && isRevokeTransactionType(approvalPendingTransaction.type)
-            ? approvalPendingTransaction
-            : undefined;
+    const {
+        pendingBottomSheetRef,
+        pendingModalProps,
+        pendingTransaction: revokePendingTransaction,
+        reopenPendingBottomSheet,
+    } = useYieldPendingTransaction({
+        accountKey: account?.key,
+        isFocused,
+        pendingTransaction: session?.action.pendingTransaction,
+        transactionType: 'revoke',
+    });
     const isApprovedAmountUnlimited = isYieldApprovalAllowanceUnlimited({ session, token });
     const revokeRequestAmount = route.params.amount ?? allowanceAmount ?? '';
     const approvedAllowanceAmount = allowanceAmount ?? '';
@@ -98,7 +89,7 @@ export const useYieldDepositRevokeScreen = () => {
     const hasRevokeRequestAmount = hasPositiveAmount(revokeRequestAmount);
     const hasApprovedAllowanceAmount = hasPositiveAmount(approvedAllowanceAmount);
     const revokeFeeTransaction = useMemo<YieldAllowanceFeeTransaction | null>(() => {
-        if (!approvalModalState || !isRevokeTransactionType(approvalModalState.txType)) {
+        if (!approvalModalState || approvalModalState.txType === 'approve') {
             return null;
         }
 
@@ -136,11 +127,6 @@ export const useYieldDepositRevokeScreen = () => {
         hasApprovedAllowanceAmount && isRevokeFeeReadyForReview && !isRevokeScreenBusy;
     const isSubmitDisabled = !canReviewRevoke;
     const isSubmitLoading = isPreparingReview || isPreparingRevoke || isComposingAllowanceFee;
-    const { explorerUrl, openInBlockchain } = useTransactionDetails({
-        accountKey: account?.key ?? null,
-        txid: revokePendingTransaction?.txid ?? null,
-    });
-
     useShowYieldTransactionFailureAlert({
         error: session?.error,
         flowKey,
@@ -267,16 +253,6 @@ export const useYieldDepositRevokeScreen = () => {
         shouldPrepareRevokeTransaction,
     ]);
 
-    useEffect(() => {
-        if (!isFocused || revokePendingTransaction === undefined) {
-            closePendingBottomSheet();
-
-            return;
-        }
-
-        openPendingBottomSheet();
-    }, [closePendingBottomSheet, isFocused, openPendingBottomSheet, revokePendingTransaction]);
-
     const formattedApprovedAmount = useMemo(() => {
         if (!hasApprovedAllowanceAmount || !tokenSymbol || isApprovedAmountUnlimited) {
             return null;
@@ -299,11 +275,8 @@ export const useYieldDepositRevokeScreen = () => {
 
     const handleCloseInfoBottomSheet = useCallback(() => {
         closeInfoBottomSheet();
-
-        if (revokePendingTransaction !== undefined) {
-            requestAnimationFrame(openPendingBottomSheet);
-        }
-    }, [closeInfoBottomSheet, openPendingBottomSheet, revokePendingTransaction]);
+        reopenPendingBottomSheet();
+    }, [closeInfoBottomSheet, reopenPendingBottomSheet]);
 
     const handleReviewAndSign = useCallback(async () => {
         if (!canReviewRevoke || resolutionStatus !== 'resolved') {
@@ -371,13 +344,14 @@ export const useYieldDepositRevokeScreen = () => {
               }
             : null;
     const pendingModal =
-        revokePendingTransaction !== undefined
+        revokePendingTransaction && pendingModalProps
             ? {
                   amount: allowanceAmount ?? revokePendingTransaction.amount,
                   amountTokenSymbol: isApprovedAmountUnlimited ? undefined : tokenSymbol,
-                  isExploreDisabled: !explorerUrl,
-                  onExplorePress: openInBlockchain,
-                  transaction: revokePendingTransaction,
+                  fee: pendingModalProps.fee,
+                  isExploreDisabled: pendingModalProps.isExploreDisabled,
+                  onExplorePress: pendingModalProps.onExplorePress,
+                  submittedAt: pendingModalProps.submittedAt,
               }
             : null;
 

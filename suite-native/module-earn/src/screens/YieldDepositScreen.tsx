@@ -5,11 +5,7 @@ import { type RouteProp, useIsFocused, useNavigation, useRoute } from '@react-na
 
 import { useFormatters } from '@suite-common/formatters';
 import { getNetwork, getNetworkType } from '@suite-common/wallet-config';
-import {
-    getYieldApprovalAction,
-    splitYieldPendingTransaction,
-    stablecoinYieldActions,
-} from '@suite-common/wallet-core';
+import { getYieldApprovalAction, stablecoinYieldActions } from '@suite-common/wallet-core';
 import { Box, VStack, useBottomSheetModal } from '@suite-native/atoms';
 import { Form } from '@suite-native/forms';
 import { Translation } from '@suite-native/intl';
@@ -19,7 +15,7 @@ import {
     type YieldStackParamList,
     YieldStackRoutes,
 } from '@suite-native/navigation';
-import { FeeSummaryCard, useTransactionDetails } from '@suite-native/transaction-management';
+import { FeeSummaryCard } from '@suite-native/transaction-management';
 
 import { YieldDepositAmountInputCard } from '../components/YieldDepositAmountInputCard';
 import { YieldDepositApprovedAmountCard } from '../components/YieldDepositApprovedAmountCard';
@@ -35,6 +31,7 @@ import { useShowYieldTransactionFailureAlert } from '../hooks/useShowYieldTransa
 import { type PreparedYieldDepositAction, useYieldDepositFees } from '../hooks/useYieldDepositFees';
 import { useYieldDepositForm } from '../hooks/useYieldDepositForm';
 import { useYieldDepositSubmit } from '../hooks/useYieldDepositSubmit';
+import { useYieldPendingTransaction } from '../hooks/useYieldPendingTransaction';
 import { useYieldPendingTransactionTracking } from '../hooks/useYieldPendingTransactionTracking';
 import { useYieldSession } from '../hooks/useYieldSession';
 import { isYieldApprovalAllowanceUnlimited } from '../yieldApprovalUtils';
@@ -61,12 +58,6 @@ export const YieldDepositScreen = () => {
         openModal: openSimulationBottomSheet,
     } = useBottomSheetModal();
 
-    const {
-        bottomSheetRef: pendingBottomSheetRef,
-        closeModal: closePendingBottomSheet,
-        openModal: openPendingBottomSheet,
-    } = useBottomSheetModal();
-
     const [simulationPreparedAction, setSimulationPreparedAction] =
         useState<PreparedYieldDepositAction | null>(null);
 
@@ -90,11 +81,17 @@ export const YieldDepositScreen = () => {
     const depositAmount = session?.action.amount;
     const allowanceAmount = session?.approval.allowanceAmount;
     const allowanceStatus = session?.approval.allowanceStatus;
-    const pendingTransaction = session?.action.pendingTransaction ?? null;
-    const { actionPendingTransaction } = splitYieldPendingTransaction(
-        pendingTransaction,
-        'deposit',
-    );
+    const {
+        pendingBottomSheetRef,
+        pendingModalProps,
+        pendingTransaction: actionPendingTransaction,
+        reopenPendingBottomSheet,
+    } = useYieldPendingTransaction({
+        accountKey: account?.key,
+        isFocused,
+        pendingTransaction: session?.action.pendingTransaction,
+        transactionType: 'deposit',
+    });
     const isDepositPending = !!actionPendingTransaction;
     const isActionSubmitting = session?.action.isSubmitting ?? false;
     const isApprovedAmountUnlimited = isYieldApprovalAllowanceUnlimited({ session, token });
@@ -137,11 +134,6 @@ export const YieldDepositScreen = () => {
         flowKey,
         isEnabled: canPrepareDepositFee,
     });
-    const { explorerUrl, openInBlockchain } = useTransactionDetails({
-        accountKey: account?.key ?? null,
-        txid: actionPendingTransaction?.txid ?? null,
-    });
-
     useShowYieldTransactionFailureAlert({
         error: session?.error,
         flowKey,
@@ -296,21 +288,8 @@ export const YieldDepositScreen = () => {
 
     const handleCloseInfoBottomSheet = useCallback(() => {
         closeInfoBottomSheet();
-
-        if (isDepositPending) {
-            requestAnimationFrame(openPendingBottomSheet);
-        }
-    }, [closeInfoBottomSheet, isDepositPending, openPendingBottomSheet]);
-
-    useEffect(() => {
-        if (!isFocused || !isDepositPending) {
-            closePendingBottomSheet();
-
-            return;
-        }
-
-        openPendingBottomSheet();
-    }, [closePendingBottomSheet, isFocused, isDepositPending, openPendingBottomSheet]);
+        reopenPendingBottomSheet();
+    }, [closeInfoBottomSheet, reopenPendingBottomSheet]);
 
     if (resolutionStatus !== 'resolved' || !isDepositSessionReady) {
         return null;
@@ -382,7 +361,7 @@ export const YieldDepositScreen = () => {
                 </VStack>
             </Box>
 
-            {actionPendingTransaction && (
+            {actionPendingTransaction && pendingModalProps && (
                 <YieldPendingTransactionModal
                     ref={pendingBottomSheetRef}
                     accountLabel={accountLabel}
@@ -391,10 +370,10 @@ export const YieldDepositScreen = () => {
                     amountLabel={<Translation id="earn.yieldDepositFlowScreen.amountToDeposit" />}
                     amountTokenContract={route.params.tokenContract}
                     amountTokenSymbol={tokenSymbol}
-                    fee={actionPendingTransaction.fee}
-                    isExploreDisabled={!explorerUrl}
-                    onExplorePress={openInBlockchain}
-                    submittedAt={new Date(actionPendingTransaction.submittedAt ?? 0)}
+                    fee={pendingModalProps.fee}
+                    isExploreDisabled={pendingModalProps.isExploreDisabled}
+                    onExplorePress={pendingModalProps.onExplorePress}
+                    submittedAt={pendingModalProps.submittedAt}
                     title={<Translation id="earn.yieldDepositFlowScreen.depositPendingTitle" />}
                     vaultName={vault.metadata.name}
                     vaultTokenContract={route.params.tokenContract}

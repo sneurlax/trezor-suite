@@ -1,10 +1,10 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { type RouteProp, useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 
 import { getNetwork } from '@suite-common/wallet-config';
-import { splitYieldPendingTransaction, stablecoinYieldActions } from '@suite-common/wallet-core';
+import { stablecoinYieldActions } from '@suite-common/wallet-core';
 import { Box, useBottomSheetModal } from '@suite-native/atoms';
 import { Form } from '@suite-native/forms';
 import { Translation } from '@suite-native/intl';
@@ -15,7 +15,7 @@ import {
     YieldStackRoutes,
     useNavigateToInitialScreen,
 } from '@suite-native/navigation';
-import { FeeSelector, useTransactionDetails } from '@suite-native/transaction-management';
+import { FeeSelector } from '@suite-native/transaction-management';
 
 import { ApproveDepositForm } from '../components/ApproveDepositForm';
 import { YieldDepositApprovalLimitBottomSheet } from '../components/YieldDepositApprovalLimitBottomSheet';
@@ -30,6 +30,7 @@ import { useYieldApprovalFees } from '../hooks/useYieldApprovalFees';
 import { useYieldApprovalLimit } from '../hooks/useYieldApprovalLimit';
 import { useYieldDepositApprovalSubmit } from '../hooks/useYieldDepositApprovalSubmit';
 import { useYieldDepositForm } from '../hooks/useYieldDepositForm';
+import { useYieldPendingTransaction } from '../hooks/useYieldPendingTransaction';
 import { useYieldPendingTransactionTracking } from '../hooks/useYieldPendingTransactionTracking';
 import { useYieldSession } from '../hooks/useYieldSession';
 import { isYieldApprovalAllowanceUnlimited } from '../yieldApprovalUtils';
@@ -56,11 +57,6 @@ export const YieldDepositApprovalScreen = () => {
         closeModal: closeApprovalLimitBottomSheet,
         openModal: openApprovalLimitBottomSheet,
     } = useBottomSheetModal();
-    const {
-        bottomSheetRef: pendingBottomSheetRef,
-        closeModal: closePendingBottomSheet,
-        openModal: openPendingBottomSheet,
-    } = useBottomSheetModal();
     const resolvedFlowData = useResolvedYieldFlowData(route.params);
     const {
         account,
@@ -84,12 +80,17 @@ export const YieldDepositApprovalScreen = () => {
         useYieldApprovalLimit(defaultApprovalLimitType);
     const sessionStep = session?.step;
     const allowanceStatus = session?.approval.allowanceStatus;
-    const pendingTransaction = session?.action.pendingTransaction ?? null;
-    const { approvalPendingTransaction } = splitYieldPendingTransaction(
-        pendingTransaction,
-        'deposit',
-    );
-
+    const {
+        pendingBottomSheetRef,
+        pendingModalProps,
+        pendingTransaction: approvalPendingTransaction,
+        reopenPendingBottomSheet,
+    } = useYieldPendingTransaction({
+        accountKey: account?.key,
+        isFocused,
+        pendingTransaction: session?.action.pendingTransaction,
+        transactionType: 'approve',
+    });
     const isApprovalPending = !!approvalPendingTransaction;
 
     const depositForm = useYieldDepositForm({
@@ -129,12 +130,6 @@ export const YieldDepositApprovalScreen = () => {
         !isApprovalPending &&
         !isCheckingApproval;
     const isSubmitDisabled = !canSubmitApproval;
-    const pendingModalData = isApprovalPending ? approvalPendingTransaction : null;
-    const isPendingModalVisible = !!pendingModalData;
-    const { explorerUrl, openInBlockchain } = useTransactionDetails({
-        accountKey: account?.key ?? null,
-        txid: approvalPendingTransaction?.txid ?? null,
-    });
 
     useShowYieldTransactionFailureAlert({
         error: session?.error,
@@ -174,21 +169,8 @@ export const YieldDepositApprovalScreen = () => {
 
     const handleCloseInfoBottomSheet = useCallback(() => {
         closeInfoBottomSheet();
-
-        if (isPendingModalVisible) {
-            requestAnimationFrame(openPendingBottomSheet);
-        }
-    }, [closeInfoBottomSheet, isPendingModalVisible, openPendingBottomSheet]);
-
-    useEffect(() => {
-        if (!isFocused || !isPendingModalVisible) {
-            closePendingBottomSheet();
-
-            return;
-        }
-
-        openPendingBottomSheet();
-    }, [closePendingBottomSheet, isFocused, isPendingModalVisible, openPendingBottomSheet]);
+        reopenPendingBottomSheet();
+    }, [closeInfoBottomSheet, reopenPendingBottomSheet]);
 
     const handleSubmit = form.handleSubmit(async ({ amount }) => {
         if (!canSubmitApproval) {
@@ -203,12 +185,12 @@ export const YieldDepositApprovalScreen = () => {
     }
 
     const accountLabel = account.accountLabel ?? getNetwork(account.symbol).name;
-    const pendingModalAmount = pendingModalData?.isAmountUnlimited ? (
+    const pendingModalAmount = approvalPendingTransaction?.isAmountUnlimited ? (
         <Translation id="earn.yieldDepositFlowScreen.approvalLimitSheet.unlimited.title" />
     ) : (
-        pendingModalData?.amount
+        approvalPendingTransaction?.amount
     );
-    const pendingModalAmountTokenSymbol = pendingModalData?.isAmountUnlimited
+    const pendingModalAmountTokenSymbol = approvalPendingTransaction?.isAmountUnlimited
         ? undefined
         : tokenSymbol;
 
@@ -260,7 +242,7 @@ export const YieldDepositApprovalScreen = () => {
                     />
                 </Form>
             </Box>
-            {pendingModalData && (
+            {approvalPendingTransaction && pendingModalProps && (
                 <YieldPendingTransactionModal
                     ref={pendingBottomSheetRef}
                     accountLabel={accountLabel}
@@ -269,10 +251,10 @@ export const YieldDepositApprovalScreen = () => {
                     amountLabel={<Translation id="earn.yieldDepositFlowScreen.approvalLimit" />}
                     amountTokenContract={route.params.tokenContract}
                     amountTokenSymbol={pendingModalAmountTokenSymbol}
-                    fee={pendingModalData.fee}
-                    isExploreDisabled={!explorerUrl}
-                    onExplorePress={openInBlockchain}
-                    submittedAt={new Date(pendingModalData.submittedAt ?? 0)}
+                    fee={pendingModalProps.fee}
+                    isExploreDisabled={pendingModalProps.isExploreDisabled}
+                    onExplorePress={pendingModalProps.onExplorePress}
+                    submittedAt={pendingModalProps.submittedAt}
                     title={
                         <Translation id="moduleTrading.tradingConfirmationScreen.approveTitle" />
                     }
