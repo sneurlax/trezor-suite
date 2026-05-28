@@ -144,7 +144,10 @@ export const ApproveModal = (props: ApproveModalProps) => {
                                 />
                             </Row>
                         </CardList.Item>
-                        <CardList.Item isDisabled>
+                        <CardList.Item
+                            isDisabled
+                            paddingType={logoSourceType === 'url' ? 'medium' : 'normal'}
+                        >
                             <Text typographyStyle="body-sm">
                                 <Translation id={provider.label ?? 'TR_TRADING_PROVIDER'} />
                             </Text>
