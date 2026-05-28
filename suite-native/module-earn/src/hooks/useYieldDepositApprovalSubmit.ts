@@ -21,7 +21,7 @@ import {
 import { type ResolvedYieldFlowData } from './useResolvedYieldFlowData';
 import { useShowYieldAlert } from './useShowYieldAlert';
 import { type YieldApprovalLimitType } from '../types';
-import { prepareYieldApprovalReviewTransactionThunk } from '../yieldApprovalThunks';
+import { prepareYieldAllowanceReviewTransactionThunk } from '../yieldApprovalThunks';
 import { isYieldApprovalAllowanceEnough } from '../yieldApprovalUtils';
 
 type NavigationProps = StackNavigationProps<
@@ -161,11 +161,12 @@ export const useYieldDepositApprovalSubmit = ({
                 }
 
                 const reviewTransactionResponse = await dispatch(
-                    prepareYieldApprovalReviewTransactionThunk({
+                    prepareYieldAllowanceReviewTransactionThunk({
                         amount,
                         approvalLimitType,
                         flowData,
                         flowKey,
+                        transactionType: 'approve',
                         tokenContract: routeParams.tokenContract,
                     }),
                 );

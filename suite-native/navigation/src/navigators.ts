@@ -96,12 +96,23 @@ export type YieldDepositApprovalReviewParams = YieldFlowParams & {
     approvalLimitType: 'per-deposit' | 'unlimited';
 };
 
+export type YieldDepositRevokeParams = YieldFlowParams & {
+    amount?: string;
+};
+
+export type YieldDepositRevokeReviewParams = YieldFlowParams & {
+    amount: string;
+    isAmountUnlimited: boolean;
+};
+
 export type YieldStackParamList = {
     [YieldStackRoutes.HowYieldWorks]: YieldFlowParams;
     [YieldStackRoutes.YieldConsents]: YieldFlowParams;
     [YieldStackRoutes.YieldDepositApproval]: YieldFlowParams;
     [YieldStackRoutes.YieldDeposit]: YieldFlowParams;
+    [YieldStackRoutes.YieldDepositRevoke]: YieldDepositRevokeParams;
     [YieldStackRoutes.YieldDepositApprovalReview]: YieldDepositApprovalReviewParams;
+    [YieldStackRoutes.YieldDepositRevokeReview]: YieldDepositRevokeReviewParams;
     [YieldStackRoutes.YieldDepositReview]: YieldFlowParams;
     [YieldStackRoutes.YieldDepositComplete]: YieldFlowParams;
 };

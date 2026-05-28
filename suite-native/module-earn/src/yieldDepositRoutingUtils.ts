@@ -16,9 +16,15 @@ export const getYieldDepositInitialRoute = ({
     pendingTransaction,
 }: GetYieldDepositInitialRouteParams) => {
     if (pendingTransaction) {
-        return pendingTransaction.type === 'deposit'
-            ? YieldStackRoutes.YieldDeposit
-            : YieldStackRoutes.YieldDepositApproval;
+        if (pendingTransaction.type === 'deposit') {
+            return YieldStackRoutes.YieldDeposit;
+        }
+
+        if (pendingTransaction.type === 'revoke' || pendingTransaction.type === 'revoke-only') {
+            return YieldStackRoutes.YieldDepositRevoke;
+        }
+
+        return YieldStackRoutes.YieldDepositApproval;
     }
 
     if (allowanceStatus === 'loaded' && allowanceAmount !== null && allowanceAmount !== '0') {

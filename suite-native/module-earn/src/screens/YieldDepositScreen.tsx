@@ -7,7 +7,6 @@ import { useFormatters } from '@suite-common/formatters';
 import { getNetwork, getNetworkType } from '@suite-common/wallet-config';
 import {
     getYieldApprovalAction,
-    initYieldAllowanceThunk,
     splitYieldPendingTransaction,
     stablecoinYieldActions,
 } from '@suite-common/wallet-core';
@@ -30,6 +29,7 @@ import { YieldDepositInfoBottomSheet } from '../components/YieldDepositInfoBotto
 import { YieldDepositStepCard } from '../components/YieldDepositStepCard';
 import { YieldDepositTxSimulationBottomSheet } from '../components/YieldDepositTxSimulationBottomSheet';
 import { YieldPendingTransactionModal } from '../components/YieldPendingTransactionModal';
+import { useRefreshYieldDepositAllowanceOnIdle } from '../hooks/useRefreshYieldDepositAllowanceOnIdle';
 import { useResolvedYieldFlowData } from '../hooks/useResolvedYieldFlowData';
 import { useShowYieldTransactionFailureAlert } from '../hooks/useShowYieldTransactionFailureAlert';
 import { type PreparedYieldDepositAction, useYieldDepositFees } from '../hooks/useYieldDepositFees';
@@ -70,6 +70,7 @@ export const YieldDepositScreen = () => {
     const [simulationPreparedAction, setSimulationPreparedAction] =
         useState<PreparedYieldDepositAction | null>(null);
 
+    const resolvedFlowData = useResolvedYieldFlowData(route.params);
     const {
         account,
         apy,
@@ -80,7 +81,7 @@ export const YieldDepositScreen = () => {
         vault,
         vaultTokenName,
         resolutionStatus,
-    } = useResolvedYieldFlowData(route.params);
+    } = resolvedFlowData;
 
     const session = useYieldSession({
         flowKey,
@@ -97,9 +98,9 @@ export const YieldDepositScreen = () => {
     const isDepositPending = !!actionPendingTransaction;
     const isActionSubmitting = session?.action.isSubmitting ?? false;
     const isApprovedAmountUnlimited = isYieldApprovalAllowanceUnlimited({ session, token });
+    const canEditApproval = !!allowanceAmount && allowanceAmount !== '0';
     const isAllowanceLoaded = allowanceStatus === 'loaded';
     const isDepositSessionReady = session?.step === 'action';
-    const shouldRefreshAllowance = resolutionStatus === 'resolved' && allowanceStatus === 'idle';
     const depositForm = useYieldDepositForm({
         defaultAmount: depositAmount,
         token,
@@ -117,27 +118,24 @@ export const YieldDepositScreen = () => {
         isRevokeRequired: session?.approval.isRevokeRequired ?? false,
         tokenContractAddress: token?.contractAddress,
     });
+    const isDepositAmountReady = isValid && !!amountValue;
     const isApprovalActionRequired =
         !!amountValue && isAllowanceLoaded && approvalAction !== 'continue';
 
-    const isSubmitDisabled =
-        isDepositPending ||
-        !isDepositSessionReady ||
-        !isAllowanceLoaded ||
-        !isValid ||
-        !amountValue ||
-        isActionSubmitting;
+    const canContinueDepositFlow =
+        isDepositSessionReady &&
+        isAllowanceLoaded &&
+        isDepositAmountReady &&
+        !isDepositPending &&
+        !isActionSubmitting;
+    const canPrepareDepositFee = canContinueDepositFlow && !isApprovalActionRequired;
+    const isSubmitDisabled = !canContinueDepositFlow;
 
     const depositFee = useYieldDepositFees({
         amount: amountValue,
         flowData,
         flowKey,
-        isEnabled:
-            isDepositSessionReady &&
-            isAllowanceLoaded &&
-            isValid &&
-            !isApprovalActionRequired &&
-            !isDepositPending,
+        isEnabled: canPrepareDepositFee,
     });
     const { explorerUrl, openInBlockchain } = useTransactionDetails({
         accountKey: account?.key ?? null,
@@ -158,19 +156,10 @@ export const YieldDepositScreen = () => {
         pendingTransaction: actionPendingTransaction,
     });
 
-    useEffect(() => {
-        if (shouldRefreshAllowance) {
-            void dispatch(
-                initYieldAllowanceThunk({
-                    flowData,
-                    flowKey,
-                    flowType: 'deposit',
-                    // Mobile deposit screen only refreshes display/guards here.
-                    shouldSkipApprovalStep: false,
-                }),
-            );
-        }
-    }, [dispatch, flowData, flowKey, shouldRefreshAllowance]);
+    useRefreshYieldDepositAllowanceOnIdle({
+        allowanceStatus,
+        resolvedFlowData,
+    });
 
     useEffect(() => {
         if (session?.step === 'complete') {
@@ -192,7 +181,7 @@ export const YieldDepositScreen = () => {
         });
     }, [CryptoAmountFormatter, isApprovedAmountUnlimited, allowanceAmount, tokenSymbol]);
 
-    const handleEditApproval = useCallback(() => {
+    const handleNavigateToApproval = useCallback(() => {
         if (!flowKey || isDepositPending) {
             return;
         }
@@ -206,6 +195,34 @@ export const YieldDepositScreen = () => {
         );
         navigation.navigate(YieldStackRoutes.YieldDepositApproval, route.params);
     }, [amountValue, dispatch, flowKey, isDepositPending, navigation, route.params]);
+
+    const handleNavigateToRevoke = useCallback(
+        (amount?: string) => {
+            if (!flowKey || isDepositPending) {
+                return;
+            }
+
+            navigation.navigate(YieldStackRoutes.YieldDepositRevoke, {
+                ...route.params,
+                amount,
+            });
+        },
+        [flowKey, isDepositPending, navigation, route.params],
+    );
+
+    const handleEditApproval = useCallback(() => {
+        handleNavigateToRevoke(amountValue || undefined);
+    }, [amountValue, handleNavigateToRevoke]);
+
+    const handleApprovalAction = useCallback(() => {
+        if (approvalAction === 'revoke') {
+            handleNavigateToRevoke(amountValue);
+
+            return;
+        }
+
+        handleNavigateToApproval();
+    }, [amountValue, approvalAction, handleNavigateToApproval, handleNavigateToRevoke]);
     const handleActionReady = useCallback(
         (preparedAction: PreparedYieldDepositAction) => {
             setSimulationPreparedAction(preparedAction);
@@ -242,26 +259,40 @@ export const YieldDepositScreen = () => {
         flowData,
         flowKey,
         onActionReady: handleActionReady,
-        onApprovalRequired: handleEditApproval,
+        onApprovalRequired: handleNavigateToApproval,
+        onRevokeRequired: () => handleNavigateToRevoke(amountValue),
         preparedAction: depositFee.preparedAction,
     });
 
     const handleContinue = useCallback(() => {
-        if (isDepositPending) {
+        if (!canContinueDepositFlow) {
             return;
         }
 
         if (isApprovalActionRequired) {
-            handleEditApproval();
+            handleApprovalAction();
 
             return;
         }
 
         void handleSubmitDeposit();
-    }, [handleEditApproval, handleSubmitDeposit, isApprovalActionRequired, isDepositPending]);
-    const footerTranslationId = isApprovalActionRequired
-        ? 'earn.yieldDepositFlowScreen.increaseApprovalLimit'
-        : undefined;
+    }, [
+        canContinueDepositFlow,
+        handleApprovalAction,
+        handleSubmitDeposit,
+        isApprovalActionRequired,
+    ]);
+    const footerTranslationId = (() => {
+        if (!isApprovalActionRequired) {
+            return undefined;
+        }
+
+        if (approvalAction === 'revoke') {
+            return 'earn.yieldDepositFlowScreen.revokeApproval';
+        }
+
+        return 'earn.yieldDepositFlowScreen.increaseApprovalLimit';
+    })();
 
     const handleCloseInfoBottomSheet = useCallback(() => {
         closeInfoBottomSheet();
@@ -320,7 +351,7 @@ export const YieldDepositScreen = () => {
                             approvedAmount={formattedApprovedAmount}
                             isApprovedAmountUnlimited={isApprovedAmountUnlimited}
                             networkSymbol={account.symbol}
-                            onEditApprovalPress={handleEditApproval}
+                            onEditApprovalPress={canEditApproval ? handleEditApproval : undefined}
                             tokenContract={route.params.tokenContract}
                         />
                     </Box>

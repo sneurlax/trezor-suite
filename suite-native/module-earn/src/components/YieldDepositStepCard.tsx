@@ -1,3 +1,5 @@
+import { type ReactNode } from 'react';
+
 import {
     BottomSheetModal,
     Box,
@@ -48,6 +50,16 @@ type YieldDepositStepIndex = 0 | 1 | 2;
 
 type YieldDepositStepCardProps = {
     currentStepIndex: YieldDepositStepIndex;
+};
+
+export const YieldDepositStaticStepCard = ({ title }: { title: ReactNode }) => {
+    const { applyStyle } = useNativeStyles();
+
+    return (
+        <Box style={applyStyle(stepCardStyle)}>
+            <Text variant="body-md-strong">{title}</Text>
+        </Box>
+    );
 };
 
 export const YieldDepositStepCard = ({ currentStepIndex }: YieldDepositStepCardProps) => {

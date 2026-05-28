@@ -7,7 +7,7 @@ type YieldDepositApprovedAmountCardProps = {
     approvedAmount: string | null;
     isApprovedAmountUnlimited: boolean;
     networkSymbol: NetworkSymbol;
-    onEditApprovalPress: () => void;
+    onEditApprovalPress?: () => void;
     tokenContract: string;
 };
 
@@ -32,7 +32,7 @@ export const YieldDepositApprovedAmountCard = ({
                         approvedAmount
                     )}
                 </Text>
-                {!isApprovedAmountUnlimited && (
+                {onEditApprovalPress && (
                     <PressableOpacity
                         accessibilityRole="button"
                         accessibilityLabel="Edit approval amount"
