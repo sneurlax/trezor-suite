@@ -56,7 +56,7 @@ export const connectInitThunk = createThunk<void, ConnectInitHooks | void, void>
         const {
             selectors: { selectDebugSettings, selectThpSettings },
             actions: { lockDevice },
-            services: { connectInitSettings, analytics },
+            services: { connectInitSettings, analytics, mapDebugTransports },
         } = extra;
 
         const getEnabledNetworks = () => selectEnabledNetworks(getState());
@@ -195,7 +195,7 @@ export const connectInitThunk = createThunk<void, ConnectInitHooks | void, void>
             ...firmwareHashCheckTimeoutsOverride,
         };
 
-        const { transports, showConnectLogs } = selectDebugSettings(getState());
+        const { transports: debugTransports, showConnectLogs } = selectDebugSettings(getState());
         const thp = selectThpSettings(getState());
         // desktop thp appName/hostName enhanced in ./packages/suite-desktop-core/src/modules/trezor-connect.ts
         if (isWeb()) {
@@ -209,6 +209,12 @@ export const connectInitThunk = createThunk<void, ConnectInitHooks | void, void>
         const createLogger = isDesktop()
             ? undefined
             : (prefix: string) => initLog(prefix, showConnectLogs);
+
+        // The selectDebugSettings selector is typed as `any` (see SuiteCompatibleSelector<any>
+        // in extraDependenciesType.ts), so we have to narrow `debugTransports`.
+        // The mapper is host-provided via extra.services so this shared thunk never
+        // statically imports env-specific transport packages (e.g. @trezor/transport-web).
+        const transports = mapDebugTransports(debugTransports as unknown[] | undefined);
 
         try {
             await TrezorConnect.init({

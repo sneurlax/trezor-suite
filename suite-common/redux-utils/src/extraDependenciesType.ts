@@ -39,6 +39,14 @@ export type CommonServices = SuiteSyncDep &
         analytics: Analytics<AnalyticsSharedEvents>;
         saveAs: (data: Blob, fileName: string) => void;
         connectInitSettings: ConnectInitSettings;
+        // Translates host-level debug transport identifiers (legacy strings on
+        // web/desktop suite; real DI references on native) to the pure-DI
+        // surface expected by @trezor/connect's `init`. The mapper lives at
+        // each host boundary so shared modules never statically import
+        // env-specific transport packages (e.g. @trezor/transport-web).
+        mapDebugTransports: (
+            debugTransports: readonly unknown[] | undefined,
+        ) => ConnectSettings['transports'];
     } & ReportSecurityCheckDep &
     MigrateSuiteSyncLabelsForRbfTransactionDep;
 

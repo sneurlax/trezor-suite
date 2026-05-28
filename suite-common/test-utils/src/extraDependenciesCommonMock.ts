@@ -92,6 +92,8 @@ export const extraDependenciesCommonMock: ExtraDependencies = {
                 `Save data: ${data} into file: ${fileName}. Implementation on phone not ready.`,
             ),
         connectInitSettings,
+        mapDebugTransports: (debugTransports: readonly unknown[] | undefined) =>
+            debugTransports as ReturnType<ExtraDependencies['services']['mapDebugTransports']>,
         migrateSuiteSyncLabelsForRbfTransaction: () => Promise.resolve([[], []]),
     },
     selectors: {
