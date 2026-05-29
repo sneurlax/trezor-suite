@@ -39,11 +39,11 @@ export const tradeExchangeEvent: EventDef<Attributes, EventType.TradeExchange> =
     attributes: {
         action: {
             changelog: [{ version: '25.5.2', notes: 'added' }],
-            description: 'The user action in the exchange flow: "continue" to proceed, "cancel" to exit',
+            description: 'The user action in the exchange flow: `continue` to proceed, `cancel` to exit',
         },
         step: {
             changelog: [{ version: '25.5.2', notes: 'added' }],
-            description: 'The current step in the exchange flow: "exchange-form" for initial form, "offers-form" for offers, "receive-address" for address selection, "create-approval" for token approval, "already-approved" when approval exists, "confirm-and-send" for final confirmation',
+            description: 'The current step in the exchange flow: `exchange-form` for initial form, `offers-form` for offers, `receive-address` for address selection, `create-approval` for token approval, `already-approved` when approval exists, `confirm-and-send` for final confirmation',
         },
         sendCryptoLabel: {
             changelog: [{ version: '25.5.2', notes: 'added' }],

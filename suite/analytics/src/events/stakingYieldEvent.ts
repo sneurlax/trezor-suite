@@ -33,19 +33,19 @@ export const stakingYieldEvent: EventDef<Attributes, EventType.StakingYield> = {
                     notes: 'action values changed to `continue` | `cancel` | `close`',
                 },
             ],
-            description: 'User action: "continue" to proceed, "cancel" to abort, "close" to exit the dialog',
+            description: 'User action: `continue` to proceed, `cancel` to abort, `close` to exit the dialog',
         },
         step: {
             changelog: [{ version: '26.2.0', notes: 'added' }],
-            description: 'Current step in the yield flow: "earn-dashboard", "yield-supply", "yield-withdraw", "stake-in-a-nutshell-modal", or "funds-maintained-modal"',
+            description: 'Current step in the yield flow: `earn-dashboard`, `yield-supply`, `yield-withdraw`, `stake-in-a-nutshell-modal`, or `funds-maintained-modal`',
         },
         networkSymbol: {
             changelog: [{ version: '26.2.0', notes: 'added' }],
-            description: 'The blockchain network symbol for yield/staking (e.g., "eth", "sol", "ada")',
+            description: 'The blockchain network symbol for yield/staking (e.g., `eth`, `sol`, `ada`)',
         },
         currency: {
             changelog: [{ version: '26.2.0', notes: 'added' }],
-            description: 'Currency type: "crypto" for cryptocurrency amount, "fiat" for fiat currency conversion',
+            description: 'Currency type: `crypto` for cryptocurrency amount, `fiat` for fiat currency conversion',
         },
     },
 };

@@ -15,7 +15,7 @@ export const sendAddressFilledEvent: EventDef<Attributes, EventType.SendAddressF
     changelog: [{ version: '24.10.1', notes: 'added' }],
     attributes: {
         method: {
-            description: 'How the address was provided: "manual" for keyboard entry, "qr" for QR code scan',
+            description: 'How the address was provided: `manual` for keyboard entry, `qr` for QR code scan',
             changelog: [{ version: '24.10.1', notes: 'added' }],
         },
     },
