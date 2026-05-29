@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { type CryptoId, type DexApprovalType } from 'invity-api';
 
 import { Translation } from '@suite/intl';
+import { parseCryptoId } from '@suite-common/trading';
 import { getDisplaySymbol } from '@suite-common/wallet-config';
 import { type AmountSubunit, subunitsToUnits } from '@suite-common/wallet-utils';
 import { type TokenInfo } from '@trezor/blockchain-link-types';
@@ -17,11 +18,10 @@ import {
     Row,
     Text,
 } from '@trezor/components';
+import { AssetLogoWithId } from '@trezor/product-components';
 import { zIndices } from '@trezor/theme';
 
-import { TradingCoinLogo } from 'src/views/wallet/trading/common/TradingCoinLogo';
-
-import type { AllowanceModalProvider } from './AllowanceModalProviderInfo';
+import type { AllowanceModalProvider } from './AllowanceModalProviderLabel';
 
 interface ApproveModalTypeSelectorProps {
     approvalType: DexApprovalType;
@@ -38,13 +38,13 @@ interface ApproveModalTypeSelectorProps {
 type SelectableType = Extract<DexApprovalType, 'INFINITE' | 'MINIMAL'>;
 
 const TYPE_LABEL_ID = {
-    INFINITE: 'TR_EXCHANGE_APPROVAL_VALUE_INFINITE',
-    MINIMAL: 'TR_EXCHANGE_APPROVAL_VALUE_MINIMAL',
+    INFINITE: 'TR_TOKEN_APPROVAL_VALUE_INFINITE',
+    MINIMAL: 'TR_TOKEN_APPROVAL_VALUE_MINIMAL',
 } as const satisfies Record<SelectableType, string>;
 
 const TYPE_INFO_ID = {
-    INFINITE: 'TR_EXCHANGE_APPROVAL_VALUE_INFINITE_INFO',
-    MINIMAL: 'TR_EXCHANGE_APPROVAL_VALUE_MINIMAL_INFO',
+    INFINITE: 'TR_TOKEN_APPROVAL_VALUE_INFINITE_INFO',
+    MINIMAL: 'TR_TOKEN_APPROVAL_VALUE_MINIMAL_INFO',
 } as const satisfies Record<SelectableType, string>;
 
 const toSelectable = (type: DexApprovalType): SelectableType =>
@@ -62,6 +62,7 @@ export const ApproveModalTypeSelector = ({
 }: ApproveModalTypeSelectorProps) => {
     const popoverRef = useRef<PopoverRef>(null);
     const displaySymbol = token.symbol ? getDisplaySymbol(token.symbol) : token.name;
+    const { networkId, contractAddress } = parseCryptoId(cryptoId);
 
     const translationValues = {
         value: subunitsToUnits({ value: displayAmount, decimals: token.decimals }).toString(),
@@ -84,7 +85,7 @@ export const ApproveModalTypeSelector = ({
                     <Row gap={8}>
                         <Icon name="warning" size={16} />
                         <Translation
-                            id="TR_EXCHANGE_APPROVAL_REVOKE_UNLIMITED_SPENDING_WARNING"
+                            id="TR_TOKEN_APPROVAL_REVOKE_UNLIMITED_SPENDING_WARNING"
                             values={{ displaySymbol }}
                         />
                     </Row>
@@ -97,7 +98,12 @@ export const ApproveModalTypeSelector = ({
         <CardList.Item key={type} onClick={() => handleSelect(type)} width="100%">
             <Column gap={4} flex="1" alignItems="flex-start">
                 <Row gap={8}>
-                    <TradingCoinLogo cryptoId={cryptoId} size={20} />
+                    <AssetLogoWithId
+                        coingeckoId={networkId}
+                        contractAddress={contractAddress}
+                        size={20}
+                        placeholder={networkId.toUpperCase()}
+                    />
                     <Text typographyStyle="body-sm-strong">
                         <Translation id={TYPE_LABEL_ID[type]} values={translationValues} />
                     </Text>
@@ -116,13 +122,18 @@ export const ApproveModalTypeSelector = ({
                         <Translation
                             id={
                                 hasPreapprovedAmount
-                                    ? 'TR_EXCHANGE_APPROVAL_NEW_LIMIT'
-                                    : 'TR_EXCHANGE_APPROVAL_LIMIT'
+                                    ? 'TR_TOKEN_APPROVAL_NEW_LIMIT'
+                                    : 'TR_TOKEN_APPROVAL_LIMIT'
                             }
                         />
                     </Text>
                     <Row gap={8}>
-                        <TradingCoinLogo cryptoId={cryptoId} size={20} />
+                        <AssetLogoWithId
+                            coingeckoId={networkId}
+                            contractAddress={contractAddress}
+                            size={20}
+                            placeholder={networkId.toUpperCase()}
+                        />
                         <Text typographyStyle="body-sm-strong">
                             <Translation
                                 id={TYPE_LABEL_ID[selectedType]}

@@ -147,7 +147,7 @@ export const RevokeModal = ({ setIsWaitingForDevice, onCancel }: RevokeModalProp
             width={600}
             heading={
                 <Translation
-                    id="TR_EXCHANGE_APPROVAL_REVOKE_TOKEN_SPENDING"
+                    id="TR_TOKEN_APPROVAL_REVOKE_TOKEN_SPENDING"
                     values={{ displaySymbol }}
                 />
             }
@@ -204,7 +204,7 @@ export const RevokeModal = ({ setIsWaitingForDevice, onCancel }: RevokeModalProp
                     <Banner
                         intent="info"
                         icon="info"
-                        description={<Translation id="TR_EXCHANGE_APPROVAL_MODAL_REVOKE_BANNER" />}
+                        description={<Translation id="TR_TOKEN_APPROVAL_MODAL_REVOKE_BANNER" />}
                     />
                 )}
 
@@ -243,7 +243,7 @@ export const RevokeModal = ({ setIsWaitingForDevice, onCancel }: RevokeModalProp
                         <Row alignItems="flex-start" gap={spacings.xxxxl}>
                             <Column gap={spacings.sm} flex="1" overflow="hidden">
                                 <Text>
-                                    <Translation id="TR_EXCHANGE_APPROVAL_CURRENT_LIMIT" />
+                                    <Translation id="TR_TOKEN_APPROVAL_CURRENT_LIMIT" />
                                 </Text>
                                 <Row gap={spacings.sm}>
                                     <TradingCoinLogo cryptoId={selectedQuote.send} size={24} />
@@ -257,7 +257,7 @@ export const RevokeModal = ({ setIsWaitingForDevice, onCancel }: RevokeModalProp
 
                             <Column gap={spacings.sm} flex="1">
                                 <Text>
-                                    <Translation id="TR_EXCHANGE_APPROVAL_NEW_LIMIT" />
+                                    <Translation id="TR_TOKEN_APPROVAL_NEW_LIMIT" />
                                 </Text>
                                 <Row gap={spacings.sm}>
                                     <TradingCoinLogo cryptoId={selectedQuote.send} size={24} />0{' '}
@@ -270,7 +270,7 @@ export const RevokeModal = ({ setIsWaitingForDevice, onCancel }: RevokeModalProp
                             <CollapsibleBox
                                 heading={
                                     <DebugOnlyBadge>
-                                        <Translation id="TR_EXCHANGE_APPROVAL_DATA" />
+                                        <Translation id="TR_TOKEN_APPROVAL_DATA" />
                                     </DebugOnlyBadge>
                                 }
                             >

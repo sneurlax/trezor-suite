@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 import { type DexApprovalType } from 'invity-api';
 
 import { events, selectDesktopAnalyticsDep } from '@suite/analytics';
-import { Translation } from '@suite/intl';
 import { useServices } from '@suite-common/dependency-injection';
 import { KNOWN_VAULTS } from '@suite-common/suite-constants';
 import { parseCryptoId, toTokenCryptoId } from '@suite-common/trading';
@@ -154,12 +153,8 @@ export const YieldApproveModal = ({
                 spender={spender}
                 logoSourceType="url"
                 preapprovedAmount={preapprovedAmount}
-                renderDescription={({ displaySymbol }) => (
-                    <Translation
-                        id="TR_EARN_YIELD_APPROVE_TOKEN_SPENDING_DESCRIPTION"
-                        values={{ displaySymbol, provider: provider.companyName }}
-                    />
-                )}
+                heading="TR_TOKEN_APPROVAL_APPROVE_TOKEN_SPENDING"
+                description="TR_EARN_YIELD_APPROVE_TOKEN_SPENDING_DESCRIPTION"
                 onCancel={handleOnApproveCancel}
                 onConfirm={handleOnApproveConfirm}
             />
@@ -176,6 +171,8 @@ export const YieldApproveModal = ({
                 logoSourceType="url"
                 preapprovedAmount={preapprovedAmount}
                 precedesApproval={txType === 'revoke'}
+                heading="TR_TOKEN_APPROVAL_REVOKE_TOKEN_SPENDING"
+                description="TR_TOKEN_APPROVAL_REVOKE_TOKEN_SPENDING_DESCRIPTION"
                 onCancel={handleOnRevokeCancel}
                 onConfirm={handleOnRevokeConfirm}
             />

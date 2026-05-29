@@ -1,12 +1,12 @@
-import { type ReactNode } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 
 import { type CryptoId, type DexApprovalType } from 'invity-api';
 
 import { useDevice } from '@suite/device';
-import { Translation } from '@suite/intl';
+import { Translation, type TranslationKey } from '@suite/intl';
 import { selectIsDebugModeActive } from '@suite/settings';
+import { parseCryptoId } from '@suite-common/trading';
 import { getDisplaySymbol } from '@suite-common/wallet-config';
 import { type Account } from '@suite-common/wallet-types';
 import { isAllowanceUnlimited } from '@suite-common/wallet-utils';
@@ -20,7 +20,7 @@ import {
     Row,
     Text,
 } from '@trezor/components';
-import { NetworkIcon } from '@trezor/product-components';
+import { AssetLogoWithId, NetworkIcon } from '@trezor/product-components';
 import { useAsyncClickHandler } from '@trezor/react-utils';
 import { borders } from '@trezor/theme';
 
@@ -28,11 +28,12 @@ import { DebugOnlyBadge } from 'src/components/suite/DebugOnlyBadge';
 import { AccountLabeling } from 'src/components/suite/labeling';
 import { Fees } from 'src/components/wallet/Fees/Fees';
 import { useAllowanceModal } from 'src/hooks/wallet/allowance';
-import { TradingCoinLogo } from 'src/views/wallet/trading/common/TradingCoinLogo';
-import { TradingUtilsProvider } from 'src/views/wallet/trading/common/TradingUtils/TradingUtilsProvider';
-import { toTradingUtilsProviders } from 'src/views/wallet/trading/common/TradingUtils/toTradingUtilsProviders';
 
-import type { AllowanceModalProvider, ProviderLogoSourceType } from './AllowanceModalProviderInfo';
+import {
+    type AllowanceModalProvider,
+    AllowanceModalProviderLabel,
+    type ProviderLogoSourceType,
+} from './AllowanceModalProviderLabel';
 import { ApproveModalTypeSelector } from './ApproveModalTypeSelector';
 
 interface ApproveModalProps {
@@ -43,7 +44,8 @@ interface ApproveModalProps {
     spender: string;
     logoSourceType?: ProviderLogoSourceType;
     preapprovedAmount?: string;
-    renderDescription: (ctx: { displaySymbol: string }) => ReactNode;
+    heading: TranslationKey;
+    description: TranslationKey;
     onSelectApprovalType?: (type: DexApprovalType) => void;
     onConfirm?: (approvalType: DexApprovalType) => void;
     onCancel?: () => void;
@@ -57,7 +59,8 @@ export const ApproveModal = (props: ApproveModalProps) => {
         cryptoId,
         preapprovedAmount,
         logoSourceType,
-        renderDescription,
+        heading,
+        description,
     } = props;
     const { device } = useDevice();
     const { handleClick, disabled: isConfirmInProgress } = useAsyncClickHandler();
@@ -87,6 +90,7 @@ export const ApproveModal = (props: ApproveModalProps) => {
     const hasPreapprovedAmount = !!preapprovedAmount && preapprovedAmount !== '0';
     const isPreapprovedAmountUnlimited =
         hasPreapprovedAmount && isAllowanceUnlimited(preapprovedAmount, token.decimals);
+    const { networkId, contractAddress } = parseCryptoId(cryptoId);
 
     return (
         <FormProvider {...methods}>
@@ -94,13 +98,13 @@ export const ApproveModal = (props: ApproveModalProps) => {
                 onCancel={handleClose}
                 intent="brand"
                 width={480}
-                heading={
+                heading={<Translation id={heading} values={{ displaySymbol }} />}
+                description={
                     <Translation
-                        id="TR_EXCHANGE_APPROVAL_APPROVE_TOKEN_SPENDING"
-                        values={{ displaySymbol: getDisplaySymbol(token.symbol, token.contract) }}
+                        id={description}
+                        values={{ displaySymbol, provider: provider.companyName }}
                     />
                 }
-                description={renderDescription({ displaySymbol })}
                 bottomContent={
                     <>
                         <Modal.Button
@@ -125,7 +129,7 @@ export const ApproveModal = (props: ApproveModalProps) => {
                             intent="info"
                             icon="info"
                             description={
-                                <Translation id="TR_EXCHANGE_APPROVAL_MODAL_APPROVE_BANNER" />
+                                <Translation id="TR_TOKEN_APPROVAL_MODAL_APPROVE_BANNER" />
                             }
                         />
                     )}
@@ -146,12 +150,11 @@ export const ApproveModal = (props: ApproveModalProps) => {
                         </CardList.Item>
                         <CardList.Item paddingType={logoSourceType === 'url' ? 'medium' : 'normal'}>
                             <Text typographyStyle="body-sm">
-                                <Translation id={provider.label ?? 'TR_TRADING_PROVIDER'} />
+                                <Translation id={provider.label} />
                             </Text>
                             <Column alignItems="flex-end" gap={2}>
-                                <TradingUtilsProvider
-                                    exchange={provider.name}
-                                    providers={toTradingUtilsProviders(provider)}
+                                <AllowanceModalProviderLabel
+                                    provider={provider}
                                     typographyStyle="body-sm"
                                     logoSourceType={logoSourceType}
                                 />
@@ -170,10 +173,15 @@ export const ApproveModal = (props: ApproveModalProps) => {
                         {hasPreapprovedAmount && (
                             <CardList.Item>
                                 <Text typographyStyle="body-sm">
-                                    <Translation id="TR_EXCHANGE_APPROVAL_CURRENT_LIMIT" />
+                                    <Translation id="TR_TOKEN_APPROVAL_CURRENT_LIMIT" />
                                 </Text>
                                 <Row gap={8}>
-                                    <TradingCoinLogo cryptoId={cryptoId} size={20} />
+                                    <AssetLogoWithId
+                                        coingeckoId={networkId}
+                                        contractAddress={contractAddress}
+                                        size={20}
+                                        placeholder={networkId.toUpperCase()}
+                                    />
                                     <Text typographyStyle="body-sm-strong">
                                         {isPreapprovedAmountUnlimited ? (
                                             <Translation id="TR_APPROVE_AMOUNT_UNLIMITED" />
@@ -202,7 +210,7 @@ export const ApproveModal = (props: ApproveModalProps) => {
                             heading={
                                 <Text typographyStyle="body-sm">
                                     <DebugOnlyBadge>
-                                        <Translation id="TR_EXCHANGE_APPROVAL_DATA" />
+                                        <Translation id="TR_TOKEN_APPROVAL_DATA" />
                                     </DebugOnlyBadge>
                                 </Text>
                             }

@@ -218,7 +218,7 @@ export const ApproveModal = ({
             width={600}
             heading={
                 <Translation
-                    id="TR_EXCHANGE_APPROVAL_APPROVE_TOKEN_SPENDING"
+                    id="TR_TOKEN_APPROVAL_APPROVE_TOKEN_SPENDING"
                     values={{ displaySymbol }}
                 />
             }
@@ -311,7 +311,7 @@ export const ApproveModal = ({
                                     margin={{ right: spacings.xxs }}
                                 />
                                 <Text>
-                                    <Translation id="TR_EXCHANGE_APPROVAL_VALUE_INFINITE" />
+                                    <Translation id="TR_TOKEN_APPROVAL_VALUE_INFINITE" />
                                 </Text>
                             </Row>
                             <Paragraph
@@ -321,7 +321,7 @@ export const ApproveModal = ({
                                 priority="secondary"
                             >
                                 <Translation
-                                    id="TR_EXCHANGE_APPROVAL_VALUE_INFINITE_INFO"
+                                    id="TR_TOKEN_APPROVAL_VALUE_INFINITE_INFO"
                                     values={translationValues}
                                 />
                             </Paragraph>
@@ -339,7 +339,7 @@ export const ApproveModal = ({
                                 />
                                 <Text>
                                     <Translation
-                                        id="TR_EXCHANGE_APPROVAL_VALUE_MINIMAL"
+                                        id="TR_TOKEN_APPROVAL_VALUE_MINIMAL"
                                         values={translationValues}
                                     />
                                 </Text>
@@ -351,7 +351,7 @@ export const ApproveModal = ({
                                 priority="secondary"
                             >
                                 <Translation
-                                    id="TR_EXCHANGE_APPROVAL_VALUE_MINIMAL_INFO"
+                                    id="TR_TOKEN_APPROVAL_VALUE_MINIMAL_INFO"
                                     values={translationValues}
                                 />
                             </Paragraph>
@@ -360,7 +360,7 @@ export const ApproveModal = ({
                             <CollapsibleBox
                                 heading={
                                     <DebugOnlyBadge>
-                                        <Translation id="TR_EXCHANGE_APPROVAL_DATA" />
+                                        <Translation id="TR_TOKEN_APPROVAL_DATA" />
                                     </DebugOnlyBadge>
                                 }
                             >

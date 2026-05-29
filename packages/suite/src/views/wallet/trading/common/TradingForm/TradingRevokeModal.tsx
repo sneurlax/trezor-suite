@@ -84,10 +84,12 @@ export const TradingRevokeModal = ({ cryptoId }: TradingRevokeModalProps) => {
         <RevokeModal
             cryptoId={cryptoId}
             account={context.account}
-            provider={provider}
+            provider={{ ...provider, label: 'TR_TRADING_PROVIDER' }}
             spender={spender}
             preapprovedAmount={preapprovedAmount}
             precedesApproval
+            heading="TR_TOKEN_APPROVAL_REVOKE_TOKEN_SPENDING"
+            description="TR_TOKEN_APPROVAL_REVOKE_TOKEN_SPENDING_DESCRIPTION"
             onConfirm={onConfirm}
             onCancel={handleCancel}
         />
