@@ -142,7 +142,7 @@ export const RevokeModal = (props: RevokeModalProps) => {
                         />
                     )}
                     <CardList borderRadius={borders.radii.sm}>
-                        <CardList.Item isDisabled>
+                        <CardList.Item>
                             <Text typographyStyle="body-sm">
                                 <Translation id="TR_ACCOUNT" />
                             </Text>
@@ -156,7 +156,7 @@ export const RevokeModal = (props: RevokeModalProps) => {
                                 />
                             </Row>
                         </CardList.Item>
-                        <CardList.Item isDisabled>
+                        <CardList.Item>
                             <Text typographyStyle="body-sm">
                                 <Translation id={provider.label ?? 'TR_TRADING_PROVIDER'} />
                             </Text>

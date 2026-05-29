@@ -130,7 +130,7 @@ export const ApproveModal = (props: ApproveModalProps) => {
                         />
                     )}
                     <CardList borderRadius={borders.radii.sm}>
-                        <CardList.Item isDisabled>
+                        <CardList.Item>
                             <Text typographyStyle="body-sm">
                                 <Translation id="TR_ACCOUNT" />
                             </Text>
@@ -144,10 +144,7 @@ export const ApproveModal = (props: ApproveModalProps) => {
                                 />
                             </Row>
                         </CardList.Item>
-                        <CardList.Item
-                            isDisabled
-                            paddingType={logoSourceType === 'url' ? 'medium' : 'normal'}
-                        >
+                        <CardList.Item paddingType={logoSourceType === 'url' ? 'medium' : 'normal'}>
                             <Text typographyStyle="body-sm">
                                 <Translation id={provider.label ?? 'TR_TRADING_PROVIDER'} />
                             </Text>
@@ -171,7 +168,7 @@ export const ApproveModal = (props: ApproveModalProps) => {
                             </Column>
                         </CardList.Item>
                         {hasPreapprovedAmount && (
-                            <CardList.Item isDisabled>
+                            <CardList.Item>
                                 <Text typographyStyle="body-sm">
                                     <Translation id="TR_EXCHANGE_APPROVAL_CURRENT_LIMIT" />
                                 </Text>

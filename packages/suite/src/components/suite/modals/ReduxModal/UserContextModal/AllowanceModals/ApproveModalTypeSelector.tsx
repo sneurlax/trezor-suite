@@ -1,7 +1,6 @@
 import { useRef } from 'react';
 
 import { type CryptoId, type DexApprovalType } from 'invity-api';
-import styled from 'styled-components';
 
 import { Translation } from '@suite/intl';
 import { getDisplaySymbol } from '@suite-common/wallet-config';
@@ -11,6 +10,7 @@ import {
     CardList,
     Column,
     Icon,
+    Menu,
     Paragraph,
     Popover,
     type PopoverRef,
@@ -22,12 +22,6 @@ import { zIndices } from '@trezor/theme';
 import { TradingCoinLogo } from 'src/views/wallet/trading/common/TradingCoinLogo';
 
 import type { AllowanceModalProvider } from './AllowanceModalProviderInfo';
-
-// Popover does not have a box-shadow by default, but the design requires it, so we create a styled version of it here
-// eslint-disable-next-line local-rules/no-override-ds-component
-const StyledPopover = styled(Popover)`
-    box-shadow: ${({ theme }) => theme.boxShadowBase};
-`;
 
 interface ApproveModalTypeSelectorProps {
     approvalType: DexApprovalType;
@@ -148,19 +142,23 @@ export const ApproveModalTypeSelector = ({
     }
 
     return (
-        <StyledPopover
+        <Popover
             ref={popoverRef}
             placement={{ position: 'bottom', alignment: 'end' }}
             zIndex={zIndices.modal + 1}
             popoverOffset={-60}
             content={
-                <CardList width={420}>
-                    {renderOption('MINIMAL')}
-                    {renderOption('INFINITE')}
-                </CardList>
+                <Menu
+                    content={
+                        <CardList width={420}>
+                            {renderOption('MINIMAL')}
+                            {renderOption('INFINITE')}
+                        </CardList>
+                    }
+                />
             }
         >
             {trigger}
-        </StyledPopover>
+        </Popover>
     );
 };
