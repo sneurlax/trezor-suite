@@ -2,24 +2,14 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": { "outDir": "libDev" },
     "references": [
-        {
-            "path": "../../suite-common/formatters"
-        },
         { "path": "../../suite-common/trading" },
-        {
-            "path": "../../suite-common/wallet-config"
-        },
-        {
-            "path": "../../suite-common/wallet-core"
-        },
-        {
-            "path": "../../suite-common/wallet-types"
-        },
         { "path": "../atoms" },
+        { "path": "../icons" },
         { "path": "../intl" },
-        { "path": "../trading-types" },
+        { "path": "../link" },
+        { "path": "../trading-state" },
         { "path": "../../packages/type-utils" },
-        { "path": "../../packages/utils" },
+        { "path": "../../packages/urls" },
         { "path": "../test-utils" },
         { "path": "../test-utils-store" },
         { "path": "../trading-fixtures" }

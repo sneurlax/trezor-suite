@@ -8,15 +8,15 @@ import {
     getSellTrade,
 } from '@suite-native/trading-fixtures';
 import {
-    TradeDetailTransactionInfo,
-    type TradeDetailTransactionInfoProps,
-} from '@suite-native/trading-history';
-import {
     type PreloadedStatePartial,
     type TradingTestPreloadedState,
     renderWithTradingProvider,
 } from '@suite-native/trading-state/testUtils';
-import {} from '../../../../__tests__/tradingTestUtils';
+
+import {
+    TradeDetailTransactionInfo,
+    type TradeDetailTransactionInfoProps,
+} from '../TradeDetailTransactionInfo';
 
 jest.mock('@suite-native/trading-state', () => {
     const actual = jest.requireActual('@suite-native/trading-state');
