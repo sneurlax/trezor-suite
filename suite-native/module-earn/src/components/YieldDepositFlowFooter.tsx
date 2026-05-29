@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { useFormatters } from '@suite-common/formatters';
+import { type YieldApprovalAction } from '@suite-common/wallet-core';
 import { type TokenSymbol } from '@suite-common/wallet-types';
 import { calculateRewards } from '@suite-common/wallet-utils';
 import { Box, Button, ScreenFooterGradient, Text, VStack } from '@suite-native/atoms';
@@ -25,17 +26,31 @@ const rewardsBoxStyle = prepareNativeStyle(utils => ({
 type YieldDepositFlowFooterProps = {
     amountValue: string | undefined;
     apy: number | null;
-    buttonTranslationId?: TxKeyPath;
+    approvalAction?: YieldApprovalAction;
     isDisabled: boolean;
     isLoading?: boolean;
     onPress: () => void;
     tokenSymbol: TokenSymbol;
 };
 
+const getTranslationId = (
+    approvalAction?: YieldDepositFlowFooterProps['approvalAction'],
+): TxKeyPath => {
+    if (approvalAction === 'revoke') {
+        return 'earn.yieldDepositFlowScreen.revokeApproval';
+    }
+
+    if (approvalAction && approvalAction != 'continue') {
+        return 'earn.yieldDepositFlowScreen.increaseApprovalLimit';
+    }
+
+    return 'generic.buttons.continue';
+};
+
 export const YieldDepositFlowFooter = ({
     amountValue,
     apy,
-    buttonTranslationId = 'generic.buttons.continue',
+    approvalAction,
     isDisabled,
     isLoading = false,
     onPress,
@@ -60,6 +75,10 @@ export const YieldDepositFlowFooter = ({
     }, [amountValue, apy, CryptoAmountFormatter, tokenSymbol]);
 
     const isEstimatedRewardsVisible = !isDisabled && estimatedRewards !== null;
+    const buttonTranslationId = getTranslationId(approvalAction);
+    const buttonColorProps = approvalAction
+        ? { intent: 'neutral' as const, priority: 'secondary' as const }
+        : undefined;
 
     return (
         <Animated.View entering={SlideInDown} exiting={SlideOutDown}>
@@ -80,6 +99,7 @@ export const YieldDepositFlowFooter = ({
                         accessibilityRole="button"
                         accessibilityLabel={translate(buttonTranslationId)}
                         onPress={onPress}
+                        {...buttonColorProps}
                         isDisabled={isDisabled}
                         isLoading={isLoading}
                     >

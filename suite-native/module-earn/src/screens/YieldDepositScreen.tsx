@@ -276,18 +276,6 @@ export const YieldDepositScreen = () => {
         handleSubmitDeposit,
         isApprovalActionRequired,
     ]);
-    const footerTranslationId = (() => {
-        if (!isApprovalActionRequired) {
-            return undefined;
-        }
-
-        if (approvalAction === 'revoke') {
-            return 'earn.yieldDepositFlowScreen.revokeApproval';
-        }
-
-        return 'earn.yieldDepositFlowScreen.increaseApprovalLimit';
-    })();
-
     const handleCloseInfoBottomSheet = useCallback(() => {
         closeInfoBottomSheet();
         reopenPendingBottomSheet();
@@ -325,7 +313,7 @@ export const YieldDepositScreen = () => {
                 <YieldDepositFlowFooter
                     amountValue={amountValue}
                     apy={apy}
-                    buttonTranslationId={footerTranslationId}
+                    approvalAction={approvalAction}
                     isDisabled={isSubmitDisabled}
                     isLoading={isActionSubmitting}
                     onPress={handleContinue}
