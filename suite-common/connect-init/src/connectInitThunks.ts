@@ -82,6 +82,18 @@ export const connectInitThunk = createThunk<void, void, void>(
         });
 
         TrezorConnect.on(UI_EVENT, ({ event: _, ...action }) => {
+            // callId-bearing UI events belong to a scoped caller (e.g.
+            // runPassphraseWalletAddingDiscoveryThunk's hidden-wallet discovery)
+            // and are handled there by membership in the scoped callIds set.
+            // The global listener intentionally drops them so the scoped path
+            // is the single place that decides what to do with them.
+            if ('callId' in action && action.callId) {
+                console.warn(
+                    `[connect-init] UI_EVENT ${action.type} (callId=${action.callId}) swallowed in global scope — handled by a scoped flow.`,
+                );
+
+                return;
+            }
             dispatch(defaultTrezorUIEventHandlerThunk(action));
         });
 

@@ -44,6 +44,7 @@ export class DashboardPage {
     readonly passphraseMismatchDesc: Locator;
     readonly passphraseInput: Locator;
     readonly passphraseSubmitButton: Locator;
+    readonly passphraseSubmitButtonSpinner: Locator;
     readonly passphraseShowButton: Locator;
     readonly passphraseMismatchStartOverButton: Locator;
     readonly openUnusedWalletButton1: Locator;
@@ -101,6 +102,9 @@ export class DashboardPage {
         this.solveIssuesButton = this.page.getByTestId('@switch-device/solve-issue-button');
         this.passphraseInput = this.page.getByTestId('@passphrase/input');
         this.passphraseSubmitButton = this.page.getByTestId('@passphrase/hidden/submit-button');
+        this.passphraseSubmitButtonSpinner = this.page.getByTestId(
+            '@passphrase/hidden/submit-button/spinner',
+        );
         this.passphraseShowButton = this.page.getByTestId('@passphrase/show-toggle');
         this.passphraseMismatchStartOverButton = this.page.getByTestId(
             '@passphrase-mismatch/start-over',
@@ -159,7 +163,10 @@ export class DashboardPage {
 
         await this.passphraseInput.fill(passphrase);
         await this.passphraseSubmitButton.click();
-        await expect(this.passphraseInput).toBeHidden();
+        // After submit, the passphrase input stays mounted (the discovery owns the
+        // PassphraseModal and only swaps content when status changes). The button
+        // entering its loading state is the reliable signal that submission landed.
+        await expect(this.passphraseSubmitButtonSpinner).toBeVisible();
 
         await this.devicePrompt.confirmOnDevicePromptIsShown();
         await this.device.pressYes();
@@ -188,7 +195,10 @@ export class DashboardPage {
         await this.openUnusedWalletButton2.click();
         await this.passphraseInput.fill(passphrase);
         await this.passphraseSubmitButton.click();
-        await expect(this.passphraseInput).toBeHidden();
+        // After submit, the passphrase input stays mounted (the discovery owns the
+        // PassphraseModal and only swaps content when status changes). The button
+        // entering its loading state is the reliable signal that submission landed.
+        await expect(this.passphraseSubmitButtonSpinner).toBeVisible();
 
         await this.devicePrompt.confirmOnDevicePromptIsShown();
         await this.device.pressYes();

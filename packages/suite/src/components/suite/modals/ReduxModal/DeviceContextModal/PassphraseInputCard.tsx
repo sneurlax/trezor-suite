@@ -4,7 +4,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { Translation, useTranslation } from '@suite/intl';
 import { MODAL_CONTEXT_DEVICE } from '@suite/modal';
+import { selectSelectedDevice } from '@suite-common/device';
 import { formInputsMaxLength } from '@suite-common/validators';
+import { selectDiscoveryByDevicePath } from '@suite-common/wallet-core';
 import {
     Box,
     Button,
@@ -63,6 +65,10 @@ export const PassphraseInputCard = ({
     setValue: setExternalValue,
 }: PassphraseInputCardProps) => {
     const modal = useSelector(state => state.modal);
+    const selectedDevice = useSelector(selectSelectedDevice);
+    const discovery = useSelector(state =>
+        selectedDevice?.path ? selectDiscoveryByDevicePath(state, selectedDevice.path) : undefined,
+    );
     const [internalValue, setInternalValue] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
@@ -72,7 +78,10 @@ export const PassphraseInputCard = ({
     const setValue = setExternalValue ?? setInternalValue;
 
     const isDeviceLoading = !(
-        modal.context === MODAL_CONTEXT_DEVICE && modal.windowType === UI_REQUEST.REQUEST_PASSPHRASE
+        (modal.context === MODAL_CONTEXT_DEVICE &&
+            modal.windowType === UI_REQUEST.REQUEST_PASSPHRASE) ||
+        discovery?.status === 'enter-passphrase' ||
+        discovery?.status === 'confirm-empty-passphrase'
     );
 
     const isPassphraseTooLong = countBytesInString(value) > formInputsMaxLength.passphrase;

@@ -30,6 +30,7 @@ import {
 } from '@suite-common/wallet-config';
 import {
     type Account,
+    type DiscoveryCallIds,
     type DiscoveryStatus,
     type TokenSymbol,
     toTokenAddress,
@@ -347,9 +348,20 @@ export const cancelDiscoveryThunk = createThunk(
     },
 );
 
+type RunDiscoveryParams = {
+    device: TrezorDevice;
+    // Optional callIds set: when provided (by runPassphraseWalletAddingDiscoveryThunk),
+    // each Connect call is stamped with its named slot so the scoped UI-event
+    // listener can filter by membership. Omitted for non-scoped runs.
+    callIds?: DiscoveryCallIds;
+};
+
 export const runDiscoveryThunk = createThunk(
     `${DISCOVERY_MODULE_PREFIX}/run`,
-    async (passedDevice: TrezorDevice, { dispatch, getState, extra }): Promise<void> => {
+    async (
+        { device: passedDevice, callIds }: RunDiscoveryParams,
+        { dispatch, getState, extra },
+    ): Promise<void> => {
         try {
             let device: TrezorDevice = passedDevice;
 
@@ -395,6 +407,7 @@ export const runDiscoveryThunk = createThunk(
                     state: undefined,
                     useEmptyPassphrase: !isAddingHiddenWallet,
                 },
+                callId: callIds?.initialDeviceState,
             });
 
             if (!isDiscoveryInProgress(selectDiscoveryByDevicePath(getState(), device.path))) {
@@ -443,6 +456,7 @@ export const runDiscoveryThunk = createThunk(
                     // no passphrase duplicity and no standard wallet -> check that this is not in fact empty passphrase
                     const res = await TrezorConnect.getDeviceState({
                         device: { path: passedDevice.path, useEmptyPassphrase: true },
+                        callId: callIds?.emptyPassphraseCheck,
                     });
 
                     if (res.success && deviceStateEqualTo(deviceState)(res.payload.state)) {
@@ -531,6 +545,7 @@ export const runDiscoveryThunk = createThunk(
                 },
                 coins: accountsParam,
                 entropyCheckResult,
+                callId: callIds?.discoverAccounts,
             });
 
             TrezorConnect.off(UI_REQUEST.BUNDLE_PROGRESS, onBundleProgress);
@@ -597,6 +612,7 @@ export const runDiscoveryThunk = createThunk(
 
             const getDeviceState2Res = await TrezorConnect.getDeviceState({
                 device: { path: device.path, instance, state: undefined },
+                callId: callIds?.confirmDeviceState,
             });
 
             if (!isDiscoveryInProgress(selectDiscoveryByDevicePath(getState(), device.path))) {
@@ -651,12 +667,24 @@ type StartDiscoveryThunkParams = {
     device: TrezorDevice | undefined;
     isAddingHiddenWallet?: boolean;
     isAddingExistingWallet?: boolean;
+    useScopedCallIds?: boolean;
 };
 
+// "Prepare" entry point: dispatches the startDiscovery state action and
+// auto-runs the discovery for everything except the new-hidden-wallet path —
+// that one defers to PassphraseModal, which dispatches runPassphraseWalletAddingDiscoveryThunk
+// once the user confirms best practices. The scoped wrapper owns its own
+// callIds set; nothing about scoping lives on the redux discovery state
+// other than the `useScopedCallIds` boolean flag.
 export const startDiscoveryThunk = createThunk(
     `${DISCOVERY_MODULE_PREFIX}/start`,
     (
-        { device, isAddingHiddenWallet, isAddingExistingWallet }: StartDiscoveryThunkParams,
+        {
+            device,
+            isAddingHiddenWallet,
+            isAddingExistingWallet,
+            useScopedCallIds,
+        }: StartDiscoveryThunkParams,
         { dispatch, getState },
     ): void => {
         if (!device) {
@@ -679,6 +707,7 @@ export const startDiscoveryThunk = createThunk(
             discoveryActions.startDiscovery(device.path, {
                 isAddingHiddenWallet,
                 isAddingExistingWallet,
+                useScopedCallIds,
             }),
         );
 
@@ -687,7 +716,7 @@ export const startDiscoveryThunk = createThunk(
         // - or adding an existing hidden wallet,
         // - or adding initially a hidden wallet set by settings
         if (!isAddingHiddenWallet || isAddingExistingWallet) {
-            dispatch(runDiscoveryThunk(device));
+            dispatch(runDiscoveryThunk({ device }));
         }
     },
 );
