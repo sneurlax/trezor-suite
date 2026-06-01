@@ -6,8 +6,8 @@ import { createTradingLightStore } from '@suite-native/trading-state/testUtils';
 
 import { useExchangeData } from '../useExchangeData';
 
-jest.mock('@suite-native/trading-common', () => ({
-    ...jest.requireActual('@suite-native/trading-common'),
+jest.mock('@suite-native/trading-quote-utils', () => ({
+    ...jest.requireActual('@suite-native/trading-quote-utils'),
     getRandomAccountDescriptor: () => 'random_string',
 }));
 
