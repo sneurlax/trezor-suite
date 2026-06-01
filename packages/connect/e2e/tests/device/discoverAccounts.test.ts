@@ -75,8 +75,8 @@ describe(`TrezorConnect.discoverAccounts`, () => {
         );
         */
 
-        // Cardano accounts in the bundle need a Cardano-aware session — `discoverAccounts`
-        // is not a `cardano*` method so it doesn't auto-enable derive_cardano.
+        // The bundle includes a Cardano coin, so 'ada' must be enabled — otherwise Connect
+        // rejects the call with Method_CardanoNetworkNotEnabled.
         await TrezorConnect.setEnabledNetworks(['ada']);
 
         const result = await TrezorConnect.discoverAccounts({

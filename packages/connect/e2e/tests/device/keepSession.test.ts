@@ -25,9 +25,8 @@ describe('keepSession common param', () => {
             TrezorConnect.uiResponse({ type: 'ui-receive_passphrase', payload: { value: 'a' } });
         });
 
-        // Disable cardano-derivation by removing 'ada' from the runtime set.
-        // getAccountInfo on a Cardano path now goes through a non-cardano session and
-        // is expected to fail at the device level.
+        // With 'ada' removed from the runtime set, a Cardano-bound call (coin: 'ada') is
+        // rejected up-front by Connect's guard rather than reaching the device.
         await TrezorConnect.setEnabledNetworks([]);
         const noDerivation = await TrezorConnect.getAccountInfo({
             coin: 'ada',
@@ -35,9 +34,7 @@ describe('keepSession common param', () => {
             keepSession: true,
         });
         if (noDerivation.success) throw new Error('noDerivation should not succeed');
-        expect(noDerivation.error.message).toBe(
-            'Cardano derivation is not enabled for this session',
-        );
+        expect(noDerivation.error.message).toContain("requires 'ada' in enabled networks");
 
         // Re-enable. The next call forces a session re-create with derive_cardano.
         await TrezorConnect.setEnabledNetworks(['ada']);

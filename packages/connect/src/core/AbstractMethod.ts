@@ -42,6 +42,26 @@ export type MethodMessage<Name extends CallMethodPayload['method']> = {
     payload: Payload<Name>;
 };
 
+// Cardano coin symbols used to detect a Cardano-bound call. Hardcoded today (Cardano is the
+// only coin needing session-level `derive_cardano`); if more coins gain such quirks, this
+// should move to a coinInfo-driven registry alongside `getCoinInfo()`.
+const CARDANO_COIN_SYMBOLS = new Set(['ada', 'tada']);
+
+const referencesCardano = (value: unknown): boolean =>
+    typeof value === 'string' && CARDANO_COIN_SYMBOLS.has(value.toLowerCase());
+
+// Detects whether a call is Cardano-bound by its payload coin reference (method name is
+// checked separately). Covers `getAccountInfo({ coin: 'ada' })` and
+// `discoverAccounts({ coins: [{ symbol: 'ada' }] })`.
+const payloadReferencesCardanoCoin = (payload: any): boolean => {
+    if (referencesCardano(payload?.coin)) return true;
+    if (Array.isArray(payload?.coins)) {
+        return payload.coins.some((c: any) => referencesCardano(c?.symbol));
+    }
+
+    return false;
+};
+
 function validateStaticSessionId(input: unknown): StaticSessionId {
     if (!isStaticSessionId(input)) {
         throw ERRORS.TypedError(
@@ -170,11 +190,26 @@ export abstract class AbstractMethod<Name extends CallMethodPayload['method'], P
         this.useDevice = true;
         this.useDeviceState = true;
         this.useUi = true;
-        // should derive cardano seed? on for any cardano* method, or when the application has
-        // declared 'ada' in its enabled networks set via TrezorConnect.setEnabledNetworks.
-        // No per-call escape hatch; useCardanoDerivation is no longer part of CommonParams.
-        this.useCardanoDerivation =
-            payload.method.startsWith('cardano') || enabledNetworksStore.has('ada');
+        // Cardano derivation is driven solely by the application-declared enabled-networks set
+        // (`TrezorConnect.setEnabledNetworks(...)` / `init({ enabledNetworks })`). There is no
+        // per-call escape hatch — `useCardanoDerivation` is no longer part of `CommonParams`.
+        const adaEnabled = enabledNetworksStore.has('ada');
+
+        // DX guard: when a call is clearly Cardano-bound — by `cardano*` method name or by an
+        // ada/tada coin in the payload — but 'ada' is not enabled, the session would be created
+        // without `derive_cardano` and the call would fail deep in the device flow. Fail loudly
+        // here instead, pointing at the required setup.
+        const isCardanoBound =
+            payload.method.startsWith('cardano') || payloadReferencesCardanoCoin(payload);
+        if (isCardanoBound && !adaEnabled) {
+            throw ERRORS.TypedError(
+                'Method_CardanoNetworkNotEnabled',
+                `Cardano operation '${payload.method}' requires 'ada' in enabled networks. ` +
+                    "Call TrezorConnect.setEnabledNetworks(['ada']) before invoking Cardano methods.",
+            );
+        }
+
+        this.useCardanoDerivation = adaEnabled;
         this.confirmMissingBackup = false;
     }
 

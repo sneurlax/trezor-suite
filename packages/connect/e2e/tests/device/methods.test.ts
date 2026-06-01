@@ -122,10 +122,15 @@ describe(`TrezorConnect methods`, () => {
                             lastSetupConfig = setupConfig;
                         }
 
-                        // Per-test enabled networks. Only fixtures that actually need a
-                        // Cardano-aware session (non-cardano* methods on Cardano paths) set
-                        // this — keeps unrelated tests off the slower Initialize path.
-                        await TrezorConnect.setEnabledNetworks(t.enabledNetworks ?? []);
+                        // Enabled networks for this call's session. `cardano*` methods are
+                        // always Cardano-bound, so 'ada' must be enabled or Connect's guard
+                        // rejects them; other fixtures opt in per-test via `enabledNetworks`
+                        // (e.g. non-cardano* methods on Cardano paths). Keeps unrelated tests
+                        // off the slower Initialize path.
+                        const enabledNetworks = testCase.method.startsWith('cardano')
+                            ? [...new Set(['ada', ...(t.enabledNetworks ?? [])])]
+                            : (t.enabledNetworks ?? []);
+                        await TrezorConnect.setEnabledNetworks(enabledNetworks);
 
                         // @ts-expect-error, string + params union
                         const result = await TrezorConnect[testCase.method](t.params);
