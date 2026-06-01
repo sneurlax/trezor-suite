@@ -28,7 +28,7 @@ export const tradingExchangeEvent: EventDef<Attributes, EventType.TradingExchang
     attributes: {
         action: {
             changelog: [{ version: '25.10.1', notes: 'added' }],
-            description: 'Action type: `continue` | `cancel` | `retry` | `visit`',
+            description: 'Action type: `continue` | `cancel` | `retry` | `visit` | `revoke`',
         },
         step: {
             changelog: [{ version: '25.10.1', notes: 'added' }],
@@ -68,11 +68,11 @@ export const tradingExchangeEvent: EventDef<Attributes, EventType.TradingExchang
         },
         accountType: {
             changelog: [{ version: '25.10.1', notes: 'added' }],
-            description: 'Type of account used for the exchange (e.g., `standard`, `hidden`, `watch-only`)',
+            description: 'Type of account used for the exchange',
         },
         approvalType: {
             changelog: [{ version: '25.10.1', notes: 'added' }],
-            description: 'Type of approval required for the exchange (e.g., `none`, `token-approval`, `permit`)',
+            description: 'Type of approval required for the exchange (e.g., `MINIMAL`)',
         },
         slippage: {
             changelog: [{ version: '25.10.1', notes: 'added' }],

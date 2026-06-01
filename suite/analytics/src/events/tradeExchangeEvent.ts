@@ -43,7 +43,13 @@ export const tradeExchangeEvent: EventDef<Attributes, EventType.TradeExchange> =
         },
         step: {
             changelog: [{ version: '25.5.2', notes: 'added' }],
-            description: 'The current step in the exchange flow: `exchange-form` for initial form, `offers-form` for offers, `receive-address` for address selection, `create-approval` for token approval, `already-approved` when approval exists, `confirm-and-send` for final confirmation',
+            description: `The current step in the exchange flow:
+- \`exchange-form\`: initial exchange form
+- \`offers-form\`: reviewing available offers
+- \`receive-address\`: selecting receive address
+- \`create-approval\`: token approval required
+- \`already-approved\`: token approval already exists
+- \`confirm-and-send\`: final confirmation`,
         },
         sendCryptoLabel: {
             changelog: [{ version: '25.5.2', notes: 'added' }],
