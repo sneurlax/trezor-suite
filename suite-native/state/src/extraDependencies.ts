@@ -99,6 +99,7 @@ export const createNativeCompositionRoot = (deps: NativeAppDeps): NativeServices
                 appUrl: '@trezor/suite',
             },
         },
+        connectInitHooks: { deviceEvent: {}, uiEvent: {} },
         migrateSuiteSyncLabelsForRbfTransaction:
             createMigrateSuiteSyncLabelsForRbfTransactionCompositionRoot({
                 dispatch: deps.dispatch,
