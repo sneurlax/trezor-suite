@@ -15,6 +15,7 @@ import {
     getDisplaySymbol,
     getMainnets,
     getNetwork,
+    getNetworkDisplaySymbolName,
     isNetworkSymbol,
 } from '@suite-common/wallet-config';
 import { getCurrencies } from '@trezor/address-validator';
@@ -102,6 +103,7 @@ export function createAssetOption({
             contractAddress: contractAddress as TradingAssetOptionNativeToken['contractAddress'],
             networkName: networkConfig.name,
             networkSymbol: networkConfig.symbol,
+            displaySymbolName: getNetworkDisplaySymbolName(networkConfig.symbol),
         } satisfies TradingAssetOptionNativeToken;
     }
 
@@ -126,6 +128,7 @@ export function createAssetOption({
         contractAddress: contractAddress!,
         networkName: networkConfig.name,
         networkSymbol: networkConfig.symbol,
+        displaySymbolName: coinInfo.name,
     } satisfies TradingAssetOptionWithContractAddress;
 }
 
@@ -141,6 +144,7 @@ export function createAssetOption({
         "networkSymbol": "btc",
         "symbol": "btc",
         "displaySymbol": "BTC",
+        "displaySymbolName": "Bitcoin",
         "contractAddress": null
     }
  * ```
@@ -156,6 +160,7 @@ export function createAssetOption({
         "networkSymbol": "eth",
         "symbol": "op",
         "displaySymbol": "ETH",
+        "displaySymbolName": "Ethereum",
         "contractAddress": "0x0000000000000000000000000000000000000000"
     }
  * ```
@@ -171,6 +176,7 @@ export function createAssetOption({
         "networkSymbol": "sol",
         "symbol": "usdc",
         "displaySymbol": "USDC",
+        "displaySymbolName": "USDC",
         "contractAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
     }
  * ```
@@ -191,6 +197,7 @@ export function createAssetNativeTokenOption(
         contractAddress: null,
         networkName: network.name,
         networkSymbol: network.symbol,
+        displaySymbolName: getNetworkDisplaySymbolName(network.symbol),
     };
 }
 
@@ -212,6 +219,7 @@ export function createAssetTokenOption<
 
         networkSymbol,
         networkName: network.name,
+        displaySymbolName: token.name!,
     };
 }
 

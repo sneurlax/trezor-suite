@@ -39,7 +39,7 @@ export function AssetRowAsset({ asset, dataTestId, onClick }: AssetRowAssetProps
                     />
                 )}
                 <AssetDetails
-                    name={asset.name}
+                    name={asset.displaySymbolName ?? asset.name}
                     displaySymbol={asset.displaySymbol}
                     networkName={asset.networkName}
                 />
