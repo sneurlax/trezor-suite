@@ -83,6 +83,7 @@ describe('handleBuyRequestThunk', () => {
                 symbol: 'btc',
                 coingeckoId: 'bitcoin',
                 displaySymbol: 'BTC',
+                displaySymbolName: 'Bitcoin',
                 contractAddress: null,
                 networkName: 'Bitcoin',
                 networkSymbol: 'btc',
