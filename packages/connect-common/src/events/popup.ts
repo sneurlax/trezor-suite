@@ -31,6 +31,9 @@ export interface PopupHandshake {
         settings: {
             manifest?: Manifest;
             version: string;
+            // Application-declared enabled networks. Applied additively by the Core host
+            // (Suite / native) — widens the host's set, never replaces it.
+            enabledNetworks?: string[];
         }; // those are settings from the iframe, they could be different from window.opener settings
         transports?: TransportInfo[];
     };

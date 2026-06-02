@@ -81,4 +81,41 @@ describe('enabledNetworksStore', () => {
 
         expect(enabledNetworksStore.get()).toEqual(['btc']);
     });
+
+    describe('add (additive union)', () => {
+        it('widens the set without removing existing symbols', () => {
+            enabledNetworksStore.set(['btc', 'eth']);
+
+            const result = enabledNetworksStore.add(['ada']);
+
+            expect(result.changed).toBe(true);
+            expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'eth', 'ada']));
+            expect(result.canonical).toHaveLength(3);
+        });
+
+        it('reports changed=false when all symbols are already present', () => {
+            enabledNetworksStore.set(['btc', 'ada']);
+
+            const result = enabledNetworksStore.add(['ada']);
+
+            expect(result.changed).toBe(false);
+            expect(result.canonical).toHaveLength(2);
+        });
+
+        it('add([]) is a no-op', () => {
+            enabledNetworksStore.set(['btc']);
+
+            const result = enabledNetworksStore.add([]);
+
+            expect(result.changed).toBe(false);
+            expect(result.canonical).toEqual(['btc']);
+        });
+
+        it('add on an empty store behaves like set', () => {
+            const result = enabledNetworksStore.add(['ada']);
+
+            expect(result.changed).toBe(true);
+            expect(enabledNetworksStore.has('ada')).toBe(true);
+        });
+    });
 });

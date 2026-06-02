@@ -15,6 +15,9 @@ export type ConnectImplSettings = {
     version: NonNullable<ConnectSettings['version']>;
     env?: ConnectSettings['env'];
     debug?: ConnectSettings['debug'];
+    // Application-declared enabled networks; forwarded into the (possibly remote) Core's init
+    // so the enabled-networks store is populated before the first device session is created.
+    enabledNetworks?: ConnectSettings['enabledNetworks'];
 };
 
 type CoreMode = 'auto' | 'suite-desktop' | 'suite-web';
@@ -100,6 +103,7 @@ export class TrezorConnectDynamic implements ConnectFactoryDependencies<Record<n
             env: settings.env,
             debug: settings.debug,
             version: parseVersion(settings.version),
+            enabledNetworks: settings.enabledNetworks,
         };
 
         this.currentTarget = this.getInitTarget();

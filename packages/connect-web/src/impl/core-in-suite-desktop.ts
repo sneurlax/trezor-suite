@@ -22,6 +22,7 @@ import { WebsocketClient, WebsocketError } from '@trezor/websocket-client';
 export class CoreInSuiteDesktop implements ConnectImpl {
     private manifest?: Manifest;
     private version?: string;
+    private enabledNetworks?: string[];
     private ws: WebsocketClient<Record<never, never>>;
     private localNetworkPermissionState: PermissionState | 'unknown' = 'unknown';
 
@@ -32,6 +33,7 @@ export class CoreInSuiteDesktop implements ConnectImpl {
     public dispose() {
         this.manifest = undefined;
         this.version = undefined;
+        this.enabledNetworks = undefined;
         this.ws.dispose();
 
         return Promise.resolve(undefined);
@@ -68,7 +70,13 @@ export class CoreInSuiteDesktop implements ConnectImpl {
             const response = await this.ws.sendMessage(
                 {
                     type: POPUP.HANDSHAKE,
-                    payload: { settings: { manifest: this.manifest, version: this.version } },
+                    payload: {
+                        settings: {
+                            manifest: this.manifest,
+                            version: this.version,
+                            enabledNetworks: this.enabledNetworks,
+                        },
+                    },
                 },
                 {
                     // can take a while on slower machines due to loading process info
@@ -86,7 +94,7 @@ export class CoreInSuiteDesktop implements ConnectImpl {
         }
     }
 
-    public async init({ manifest, version }: ConnectImplSettings): Promise<void> {
+    public async init({ manifest, version, enabledNetworks }: ConnectImplSettings): Promise<void> {
         // navigator should be always present in the runtime
         // but since in tests we run this code in node.js for convenience, we can make this check optional
         if (typeof navigator !== 'undefined' && navigator?.permissions?.query) {
@@ -114,6 +122,7 @@ export class CoreInSuiteDesktop implements ConnectImpl {
 
         this.manifest = manifest;
         this.version = version;
+        this.enabledNetworks = enabledNetworks;
 
         return await this.connect();
     }

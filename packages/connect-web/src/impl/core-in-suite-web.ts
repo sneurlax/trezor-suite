@@ -69,7 +69,13 @@ export class CoreInSuiteWeb implements ConnectImpl {
         );
     }
 
-    public init({ env, manifest, version, debug }: ConnectImplSettings): Promise<void> {
+    public init({
+        env,
+        manifest,
+        version,
+        debug,
+        enabledNetworks,
+    }: ConnectImplSettings): Promise<void> {
         this.logger.enabled = !!debug;
 
         if (!this._popupManager) {
@@ -79,6 +85,7 @@ export class CoreInSuiteWeb implements ConnectImpl {
                 version,
                 popupSrc: this.getSuiteUrl(),
                 logger: this.logger,
+                enabledNetworks,
             };
 
             switch (resolvedEnv) {

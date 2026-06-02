@@ -26,9 +26,18 @@ type BuildUrlParams = {
     connectSrc: string | undefined;
     callbackUrl: string;
     manifest?: Manifest;
+    enabledNetworks?: string[];
 };
 
-const buildUrl = ({ method, id, params, connectSrc, callbackUrl, manifest }: BuildUrlParams) => {
+const buildUrl = ({
+    method,
+    id,
+    params,
+    connectSrc,
+    callbackUrl,
+    manifest,
+    enabledNetworks,
+}: BuildUrlParams) => {
     const urlWithParams = new URL(callbackUrl);
     urlWithParams.searchParams.set('id', id);
 
@@ -39,7 +48,12 @@ const buildUrl = ({ method, id, params, connectSrc, callbackUrl, manifest }: Bui
         `&params=${encodeURIComponent(JSON.stringify(params))}` +
         `&callback=${encodeURIComponent(urlWithParams.toString())}` +
         (manifest?.appName ? `&appName=${encodeURIComponent(manifest.appName)}` : '') +
-        (manifest?.appIcon ? `&appIcon=${encodeURIComponent(manifest.appIcon)}` : '')
+        (manifest?.appIcon ? `&appIcon=${encodeURIComponent(manifest.appIcon)}` : '') +
+        // Application-declared enabled networks. The deeplink is stateless, so this init-time
+        // setting rides along on every call for the native Core to apply to its session.
+        (enabledNetworks?.length
+            ? `&enabledNetworks=${encodeURIComponent(JSON.stringify(enabledNetworks))}`
+            : '')
     );
 };
 
@@ -49,6 +63,7 @@ interface ConnectSettingsMobile {
     connectSrc?: string;
     deeplinkOpen: (url: string) => void;
     deeplinkCallbackUrl: string;
+    enabledNetworks?: string[];
 }
 
 export class TrezorConnectDeeplink implements ConnectFactoryDependencies<ConnectSettingsMobile> {
@@ -56,6 +71,8 @@ export class TrezorConnectDeeplink implements ConnectFactoryDependencies<Connect
     private messages = createDeferredManager({ generateId: (): string => crypto.randomUUID() });
 
     private manifest?: Manifest;
+
+    private enabledNetworks?: string[];
 
     public updateConnectSettings(_params: UpdateConnectSettings) {
         return Promise.resolve(createErrorMessage(ERRORS.TypedError('Method_InvalidPackage')));
@@ -66,7 +83,8 @@ export class TrezorConnectDeeplink implements ConnectFactoryDependencies<Connect
     }
 
     public getEnabledNetworks() {
-        return Promise.resolve([] as string[]);
+        // Runtime mutation over deeplink isn't supported; reflect the init-declared set instead.
+        return Promise.resolve(this.enabledNetworks ?? []);
     }
 
     private openDeeplink: (method: string, id: string, params: any) => void = () => {
@@ -78,8 +96,10 @@ export class TrezorConnectDeeplink implements ConnectFactoryDependencies<Connect
         connectSrc,
         deeplinkOpen,
         deeplinkCallbackUrl,
+        enabledNetworks,
     }: ConnectSettingsMobile) {
         this.manifest = parseManifest(manifest);
+        this.enabledNetworks = enabledNetworks;
 
         if (!this.manifest) {
             throw ERRORS.TypedError('Init_ManifestMissing');
@@ -107,6 +127,7 @@ export class TrezorConnectDeeplink implements ConnectFactoryDependencies<Connect
                 connectSrc: validConnectSrc,
                 callbackUrl: deeplinkCallbackUrl,
                 manifest: this.manifest,
+                enabledNetworks: this.enabledNetworks,
             });
             deeplinkOpen(url);
         };

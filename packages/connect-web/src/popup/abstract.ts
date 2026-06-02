@@ -14,6 +14,7 @@ import { type Deferred, createDeferred } from '@trezor/utils';
 
 export type Params = Pick<ConnectSettings, 'manifest' | 'popupSrc' | 'version'> & {
     logger: Log;
+    enabledNetworks?: string[];
 };
 
 // How often to check if popup window is still open (ms).
@@ -31,17 +32,19 @@ export abstract class Popup extends EventEmitter {
 
     private readonly manifest: Params['manifest'];
     private readonly version: Params['version'];
+    private readonly enabledNetworks: Params['enabledNetworks'];
     private closeInterval: IntervalId | undefined;
     private locked = false;
     private closedEmitted = false;
     private pendingFocusOrCreate: Promise<void> = Promise.resolve();
 
-    constructor({ popupSrc, manifest, version, logger }: Params) {
+    constructor({ popupSrc, manifest, version, logger, enabledNetworks }: Params) {
         super();
         this.logger = logger;
         this.popupSrc = popupSrc;
         this.manifest = manifest;
         this.version = version;
+        this.enabledNetworks = enabledNetworks;
         this.channel = this.createChannel(getOrigin(popupSrc));
         this.handshakePromise = createDeferred();
         // Prevent unhandled rejection when the promise is rejected before
@@ -114,7 +117,11 @@ export abstract class Popup extends EventEmitter {
             this.channel.postMessage({
                 type: POPUP.HANDSHAKE,
                 // in this case, settings will be validated in popup
-                payload: { manifest: this.manifest, version: this.version },
+                payload: {
+                    manifest: this.manifest,
+                    version: this.version,
+                    enabledNetworks: this.enabledNetworks,
+                },
             });
             this.handshakePromise?.resolve();
         } else if (message.type === POPUP.CLOSED) {
