@@ -4,8 +4,8 @@ import { useDispatch } from 'react-redux';
 import { type RouteProp, useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 
 import { getNetwork, getNetworkType } from '@suite-common/wallet-config';
-import { getYieldApprovalAction, stablecoinYieldActions } from '@suite-common/wallet-core';
-import { Box, VStack, useBottomSheetModal } from '@suite-native/atoms';
+import { stablecoinYieldActions } from '@suite-common/wallet-core';
+import { Box, FullAlertBox, VStack, useBottomSheetModal } from '@suite-native/atoms';
 import { Form } from '@suite-native/forms';
 import { Translation } from '@suite-native/intl';
 import {
@@ -16,6 +16,7 @@ import {
     useNavigateToInitialScreen,
 } from '@suite-native/navigation';
 import { FeeSummaryCard } from '@suite-native/transaction-management';
+import { BigNumber } from '@trezor/utils';
 
 import { YieldDepositAmountInputCard } from '../components/YieldDepositAmountInputCard';
 import { YieldDepositApprovedAmountCard } from '../components/YieldDepositApprovedAmountCard';
@@ -113,16 +114,12 @@ export const YieldDepositScreen = () => {
         formState: { isValid },
     } = form;
 
-    const approvalAction = getYieldApprovalAction({
-        liveAmount: amountValue ?? '',
-        allowanceAmount,
-        isModifyMode: true,
-        isRevokeRequired: session?.approval.isRevokeRequired ?? false,
-        tokenContractAddress: token?.contractAddress,
-    });
+    const isApprovalInsufficient =
+        isAllowanceLoaded &&
+        !!amountValue &&
+        !isApprovedAmountUnlimited &&
+        new BigNumber(amountValue).gt(allowanceAmount ?? '0');
     const isDepositAmountReady = isValid && !!amountValue;
-    const isApprovalActionRequired =
-        !!amountValue && isAllowanceLoaded && approvalAction !== 'continue';
 
     const canContinueDepositFlow =
         isDepositSessionReady &&
@@ -130,8 +127,8 @@ export const YieldDepositScreen = () => {
         isDepositAmountReady &&
         !isDepositPending &&
         !isActionSubmitting;
-    const canPrepareDepositFee = canContinueDepositFlow && !isApprovalActionRequired;
-    const isSubmitDisabled = !canContinueDepositFlow;
+    const canPrepareDepositFee = canContinueDepositFlow && !isApprovalInsufficient;
+    const isSubmitDisabled = !canContinueDepositFlow || isApprovalInsufficient;
 
     const depositFee = useYieldDepositFees({
         amount: amountValue,
@@ -176,6 +173,7 @@ export const YieldDepositScreen = () => {
                 amount: amountValue || undefined,
             }),
         );
+
         navigation.goBack();
     }, [amountValue, dispatch, flowKey, isDepositPending, navigation]);
 
@@ -193,15 +191,6 @@ export const YieldDepositScreen = () => {
         [flowKey, isDepositPending, navigation, route.params],
     );
 
-    const handleApprovalAction = useCallback(() => {
-        if (approvalAction === 'revoke') {
-            handleNavigateToRevoke(amountValue);
-
-            return;
-        }
-
-        handleGoBackToApproval();
-    }, [amountValue, approvalAction, handleGoBackToApproval, handleNavigateToRevoke]);
     const handleActionReady = useCallback(
         (preparedAction: PreparedYieldDepositAction) => {
             setSimulationPreparedAction(preparedAction);
@@ -243,23 +232,12 @@ export const YieldDepositScreen = () => {
     });
 
     const handleContinue = useCallback(() => {
-        if (!canContinueDepositFlow) {
-            return;
-        }
-
-        if (isApprovalActionRequired) {
-            handleApprovalAction();
-
+        if (isSubmitDisabled) {
             return;
         }
 
         void handleSubmitDeposit();
-    }, [
-        canContinueDepositFlow,
-        handleApprovalAction,
-        handleSubmitDeposit,
-        isApprovalActionRequired,
-    ]);
+    }, [handleSubmitDeposit, isSubmitDisabled]);
     const handleCloseInfoBottomSheet = useCallback(() => {
         closeInfoBottomSheet();
         reopenPendingBottomSheet();
@@ -297,10 +275,10 @@ export const YieldDepositScreen = () => {
                 <YieldDepositFlowFooter
                     amountValue={amountValue}
                     apy={apy}
-                    approvalAction={approvalAction}
                     isDisabled={isSubmitDisabled}
                     isLoading={isActionSubmitting}
                     onPress={handleContinue}
+                    shouldKeepEstimatedRewardsVisible={isApprovalInsufficient}
                     tokenSymbol={tokenSymbol}
                 />
             }
@@ -332,7 +310,22 @@ export const YieldDepositScreen = () => {
                         </Form>
                     </Box>
 
-                    {isValid && !!amountValue && !isApprovalActionRequired && (
+                    {isApprovalInsufficient && (
+                        <Box paddingHorizontal="sp16">
+                            <FullAlertBox
+                                variant="warning"
+                                title={
+                                    <Translation id="earn.yieldDepositFlowScreen.alerts.approvalTooLow.title" />
+                                }
+                                primaryButtonLabel={
+                                    <Translation id="earn.yieldDepositFlowScreen.alerts.approvalTooLow.primaryButton" />
+                                }
+                                onPressPrimaryButton={handleGoBackToApproval}
+                            />
+                        </Box>
+                    )}
+
+                    {isValid && !!amountValue && !isApprovalInsufficient && (
                         <Box paddingHorizontal="sp16">
                             <FeeSummaryCard
                                 fee={depositFee.feePreview?.fee ?? null}
