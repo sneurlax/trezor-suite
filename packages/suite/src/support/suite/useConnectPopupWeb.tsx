@@ -142,7 +142,10 @@ export const useConnectPopupWeb = () => {
                         ? {
                               type: data.type,
                               id: data.id,
-                              payload: { manifest: data.payload?.manifest },
+                              payload: {
+                                  manifest: data.payload?.manifest,
+                                  enabledNetworks: data.payload?.enabledNetworks,
+                              },
                               version: data.payload?.version,
                           }
                         : data;

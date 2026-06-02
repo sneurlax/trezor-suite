@@ -155,6 +155,9 @@ export type ConnectPopupCall = {
         email: string;
         npmVersion?: string;
     };
+    // Caller-declared enabled networks (from its `init({ enabledNetworks })`), applied
+    // additively to Suite's enabled set so Connect's Cardano guard accepts the caller's coins.
+    enabledNetworks?: string[];
 };
 
 export type ConnectPopupCancel = {

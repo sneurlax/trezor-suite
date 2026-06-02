@@ -9,6 +9,8 @@ import {
     queuePopupCall,
     selectConnectPopupCall,
 } from '@suite-common/connect-popup';
+import { type NetworkSymbol } from '@suite-common/wallet-config';
+import { addEnabledNetworks } from '@suite-common/wallet-core';
 import {
     CORE_CALL,
     CORE_CALL_CANCEL,
@@ -28,7 +30,7 @@ export type ConnectPopupMessage =
     | {
           type: typeof POPUP.HANDSHAKE;
           id: string;
-          payload: { manifest: ManifestPartial };
+          payload: { manifest: ManifestPartial; enabledNetworks?: string[] };
           version: string;
       }
     | { type: typeof CORE_CALL; id: string; payload: { method: string; [key: string]: unknown } }
@@ -91,6 +93,11 @@ export const useConnectPopup = (
                     ...event.payload.manifest,
                     npmVersion: event.version,
                 };
+                // The caller's declared networks additively widen Suite's enabled set so
+                // its Cardano (and future per-coin) calls are accepted by Connect's guard.
+                if (event.payload.enabledNetworks?.length) {
+                    dispatch(addEnabledNetworks(event.payload.enabledNetworks as NetworkSymbol[]));
+                }
                 setPendingHandshake(event.id);
             } else if (event.type === CORE_CALL) {
                 if (!manifest.current) {

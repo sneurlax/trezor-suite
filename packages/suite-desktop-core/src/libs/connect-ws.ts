@@ -105,6 +105,7 @@ export const exposeConnectWs = ({
 
         let manifest: Manifest | undefined;
         let version: string | undefined;
+        let enabledNetworks: string[] | undefined;
 
         logger.info(LOG_PREFIX, `origin: ${origin}`);
 
@@ -144,6 +145,7 @@ export const exposeConnectWs = ({
                 });
                 manifest = parseManifest(message.payload.settings.manifest);
                 version = parseVersion(message.payload.settings.version);
+                enabledNetworks = message.payload.settings.enabledNetworks;
                 ws.send(JSON.stringify({ id: message.id, type: POPUP.HANDSHAKE, payload: 'ok' }));
             } else if (message.type === POPUP.CLOSED) {
                 mainWindowProxy.getInstance()?.webContents.send('connect-popup/cancel', {
@@ -242,6 +244,7 @@ export const exposeConnectWs = ({
                             email: manifest.email,
                             npmVersion: version,
                         },
+                        enabledNetworks,
                     });
 
                     // wait for response

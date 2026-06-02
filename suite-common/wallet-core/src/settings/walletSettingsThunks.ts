@@ -46,6 +46,24 @@ export const changeCoinVisibility = createThunk<
     },
 );
 
+/**
+ * Additively widen Suite's enabled networks with a set declared by a 3rd-party caller
+ * (connect popup / desktop / deeplink). The caller's `init({ enabledNetworks })` extends the
+ * host's set — it never removes what the user already enabled. No-op when nothing is new.
+ */
+export const addEnabledNetworks = createThunk<void, NetworkSymbol[], void>(
+    '@common/wallet-settings/addEnabledNetworks',
+    async (networks, { getState }) => {
+        const current = selectEnabledNetworks(getState());
+        const union = [...new Set([...current, ...networks])];
+        if (union.length === current.length) return;
+
+        // Connect is the runtime source of truth; the setter emits 'enabled-networks-changed'
+        // which the connect-init listener mirrors back into Redux.
+        await TrezorConnect.setEnabledNetworks(union);
+    },
+);
+
 export const toggleBitcoinAmountUnits = () => (dispatch: Dispatch, getState: () => any) => {
     const currentUnits = selectBitcoinAmountUnit(getState());
 
