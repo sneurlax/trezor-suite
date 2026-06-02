@@ -2,6 +2,8 @@ import { type CryptoId } from 'invity-api';
 
 import {
     getApprovalStatus,
+    getDisplayNetworkFee,
+    hasEip712SignDataType,
     requiresTokenApproval,
     tokenSupportsIncreasingAllowance,
 } from '../exchangeUtils';
@@ -255,5 +257,67 @@ describe('tokenSupportsIncreasingAllowance', () => {
     it('should return false for empty string', () => {
         const result = tokenSupportsIncreasingAllowance('');
         expect(result).toBe(false);
+    });
+});
+
+describe('hasEip712SignDataType', () => {
+    it('should return false when no quote is provided', () => {
+        expect(hasEip712SignDataType(undefined)).toBe(false);
+    });
+
+    it('should return false for a CEX quote without signData', () => {
+        const quote = { orderId: 'test-order', isDex: false };
+        expect(hasEip712SignDataType(quote)).toBe(false);
+    });
+
+    it('should return false for a non-fusion DEX quote without signData', () => {
+        const quote = {
+            orderId: 'test-order',
+            isDex: true,
+            send: 'ethereum--0xdac17f958d2ee523a2206206994597c13d831ec7' as CryptoId,
+        };
+        expect(hasEip712SignDataType(quote)).toBe(false);
+    });
+
+    it('should return true for a quote with EIP-712 signData regardless of status', () => {
+        const quote = {
+            orderId: 'test-order',
+            exchange: '1inchfusion',
+            isDex: true,
+            signData: {
+                type: 'eip712-typed-data' as const,
+                data: { primaryType: 'Order' },
+            },
+        };
+        expect(hasEip712SignDataType(quote)).toBe(true);
+    });
+});
+
+describe('getDisplayNetworkFee', () => {
+    it('should return the original fee when quote is undefined', () => {
+        expect(getDisplayNetworkFee(undefined, '12345')).toBe('12345');
+    });
+
+    it('should return the original fee for a non-gasless quote', () => {
+        const quote = { orderId: 'test-order', isDex: false };
+        expect(getDisplayNetworkFee(quote, '12345')).toBe('12345');
+    });
+
+    it('should return "0" for an EIP-712-signed (gasless) quote', () => {
+        const quote = {
+            orderId: 'test-order',
+            exchange: '1inchfusion',
+            isDex: true,
+            signData: {
+                type: 'eip712-typed-data' as const,
+                data: { primaryType: 'Order' },
+            },
+        };
+        expect(getDisplayNetworkFee(quote, '12345')).toBe('0');
+    });
+
+    it('should pass through undefined fee for a non-gasless quote', () => {
+        const quote = { orderId: 'test-order', isDex: false };
+        expect(getDisplayNetworkFee(quote, undefined)).toBe(undefined);
     });
 });

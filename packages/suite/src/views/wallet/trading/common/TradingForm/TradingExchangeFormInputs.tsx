@@ -9,6 +9,7 @@ import {
     TRADING_FORM_SEND_CRYPTO_CURRENCY_SELECT,
     type TradingExchangeFormProps,
     type TradingExchangeType,
+    hasEip712SignDataType,
     selectTradingExchangeBuyCryptoIds,
     selectTradingExchangeSellCryptoIds,
     selectTradingLoadingAndTimestamp,
@@ -56,8 +57,23 @@ export const TradingExchangeFormInputs = () => {
         shouldSendInSats,
         showReserveBanner,
         resetSelectedOffer,
+        selectedQuote,
         setAmountLimits,
     } = context;
+
+    // Set fee to 0 for all eip712 quotes
+    const displayComposedLevels = useMemo(
+        () =>
+            hasEip712SignDataType(selectedQuote) && composedLevels
+                ? Object.fromEntries(
+                      Object.entries(composedLevels).map(([label, level]) => [
+                          label,
+                          level.type === 'error' ? level : { ...level, fee: '0' },
+                      ]),
+                  )
+                : composedLevels,
+        [selectedQuote, composedLevels],
+    );
     const { getValues, setValue } = useFormContext<TradingExchangeFormProps>();
     const {
         [TRADING_FORM_SEND_CRYPTO_CURRENCY_SELECT]: sendCryptoSelect,
@@ -180,7 +196,7 @@ export const TradingExchangeFormInputs = () => {
                 <TradingFormFees
                     feeInfo={feeInfo}
                     account={account}
-                    composedLevels={composedLevels}
+                    composedLevels={displayComposedLevels}
                     changeFeeLevel={changeFeeLevel}
                 />
                 <TradingSelectedOfferProvider />

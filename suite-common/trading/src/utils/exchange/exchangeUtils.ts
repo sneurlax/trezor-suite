@@ -119,8 +119,11 @@ export type ApprovalStatus =
     | 'not_needed'
     | null;
 
+export const hasEip712SignDataType = (quote?: ExchangeTrade): boolean =>
+    quote?.signData?.type === 'eip712-typed-data';
+
 export const hasEip712SignData = (quote?: ExchangeTrade) =>
-    quote?.status === 'SIGN_DATA' && quote?.signData?.type === 'eip712-typed-data';
+    quote?.status === 'SIGN_DATA' && hasEip712SignDataType(quote);
 
 export const requiresTokenApproval = (quote?: ExchangeTrade): boolean =>
     !!quote &&
@@ -128,6 +131,11 @@ export const requiresTokenApproval = (quote?: ExchangeTrade): boolean =>
     !!quote.send &&
     !isSendingEvmNativeToken(quote.send) &&
     !hasEip712SignData(quote);
+
+export const getDisplayNetworkFee = (
+    quote: ExchangeTrade | undefined,
+    fee: string | undefined,
+): string | undefined => (hasEip712SignDataType(quote) ? '0' : fee);
 
 export const getApprovalStatus = (candidateQuote?: ExchangeTrade): ApprovalStatus => {
     if (!candidateQuote) {
@@ -165,7 +173,9 @@ export const exchangeUtils = {
     getSuccessQuotesOrdered,
     getStatusMessage,
     tokenSupportsIncreasingAllowance,
+    hasEip712SignDataType,
     hasEip712SignData,
     requiresTokenApproval,
     getApprovalStatus,
+    getDisplayNetworkFee,
 };
