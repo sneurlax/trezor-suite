@@ -76,7 +76,8 @@ export const useYieldDepositRevokeScreen = () => {
         transactionType: 'revoke',
     });
     const isApprovedAmountUnlimited = isYieldApprovalAllowanceUnlimited({ session, token });
-    const revokeRequestAmount = route.params.amount ?? allowanceAmount ?? '';
+    const intendedDepositAmount = route.params.amount ?? session?.action.amount ?? undefined;
+    const revokeRequestAmount = intendedDepositAmount ?? allowanceAmount ?? '';
     const approvedAllowanceAmount = allowanceAmount ?? '';
     const [hasRequestedRevokePreparation, setHasRequestedRevokePreparation] = useState(false);
     const [hasShownMissingAmountError, setHasShownMissingAmountError] = useState(false);
@@ -152,17 +153,28 @@ export const useYieldDepositRevokeScreen = () => {
             return;
         }
 
-        const { amount: _amount, ...approvalRouteParams } = route.params;
-
         dispatch(
             stablecoinYieldActions.enterModifyMode({
                 flowType: 'deposit',
                 flowKey,
-                amount: route.params.amount,
+                amount: intendedDepositAmount,
             }),
         );
-        navigation.replace(YieldStackRoutes.YieldDepositApproval, approvalRouteParams);
-    }, [dispatch, flowKey, navigation, resolutionStatus, route.params]);
+        navigation.replace(YieldStackRoutes.YieldDepositApproval, {
+            accountKey: route.params.accountKey,
+            tokenContract: route.params.tokenContract,
+            yieldId: route.params.yieldId,
+        });
+    }, [
+        dispatch,
+        flowKey,
+        intendedDepositAmount,
+        navigation,
+        resolutionStatus,
+        route.params.accountKey,
+        route.params.tokenContract,
+        route.params.yieldId,
+    ]);
     const handleMissingAmountAlertPress = useCallback(() => {
         navigation.goBack();
     }, [navigation]);

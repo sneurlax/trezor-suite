@@ -178,19 +178,30 @@ export const YieldDepositApprovalScreen = () => {
 
         dispatch(stablecoinYieldActions.disposeSession({ flowType: 'deposit', flowKey }));
     }, [dispatch, flowKey, isApprovalPending, navigateToInitialScreen, navigation]);
+
     const handleNavigateToRevoke = useCallback(() => {
         if (!flowKey || isApprovalPending) {
             return;
         }
 
+        const amount =
+            amountValue !== undefined && isPositiveBalance(amountValue) ? amountValue : undefined;
+
+        if (amount) {
+            dispatch(
+                stablecoinYieldActions.enterModifyMode({
+                    flowType: 'deposit',
+                    flowKey,
+                    amount,
+                }),
+            );
+        }
+
         navigation.navigate(YieldStackRoutes.YieldDepositRevoke, {
             ...route.params,
-            amount:
-                amountValue !== undefined && isPositiveBalance(amountValue)
-                    ? amountValue
-                    : undefined,
+            amount,
         });
-    }, [amountValue, flowKey, isApprovalPending, navigation, route.params]);
+    }, [amountValue, dispatch, flowKey, isApprovalPending, navigation, route.params]);
 
     useYieldPendingTransactionTracking({
         account,

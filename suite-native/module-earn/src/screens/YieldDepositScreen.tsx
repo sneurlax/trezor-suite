@@ -183,12 +183,22 @@ export const YieldDepositScreen = () => {
                 return;
             }
 
+            if (amount) {
+                dispatch(
+                    stablecoinYieldActions.enterModifyMode({
+                        flowType: 'deposit',
+                        flowKey,
+                        amount,
+                    }),
+                );
+            }
+
             navigation.navigate(YieldStackRoutes.YieldDepositRevoke, {
                 ...route.params,
                 amount,
             });
         },
-        [flowKey, isDepositPending, navigation, route.params],
+        [dispatch, flowKey, isDepositPending, navigation, route.params],
     );
 
     const handleActionReady = useCallback(
