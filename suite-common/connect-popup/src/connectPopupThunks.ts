@@ -288,6 +288,26 @@ export const connectPopupDeeplinkThunk = createThunk<void, { url: string }>(
             return;
         }
 
+        // The caller's declared networks (from its `init({ enabledNetworks })`) additively
+        // widen this app's enabled set before the call runs, so Connect's Cardano guard
+        // accepts the caller's coins. Done via TrezorConnect directly (this package has no
+        // wallet-core dependency); the 'enabled-networks-changed' event mirrors it into Redux.
+        // Malformed values are ignored.
+        if (queryParams.enabledNetworks) {
+            try {
+                const networks = JSON.parse(queryParams.enabledNetworks);
+                if (Array.isArray(networks) && networks.length) {
+                    const current = await TrezorConnect.getEnabledNetworks();
+                    const union = [...new Set([...current, ...networks])];
+                    if (union.length > current.length) {
+                        await TrezorConnect.setEnabledNetworks(union);
+                    }
+                }
+            } catch {
+                // ignore malformed enabledNetworks
+            }
+        }
+
         dispatch(
             connectPopupCallThunk({
                 source: {
