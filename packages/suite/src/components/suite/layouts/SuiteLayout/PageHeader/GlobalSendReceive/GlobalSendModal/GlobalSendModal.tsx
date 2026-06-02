@@ -20,6 +20,7 @@ import {
 } from 'src/components/suite/asset-picker/components';
 import {
     type AssetPickerListItem,
+    useAccountsWithTokenDisplayNames,
     useExpandableAccountGroups,
     useFilterAccountsWithTokens,
     useInsertGroupLabelsAndSpaces,
@@ -52,8 +53,9 @@ export function GlobalSendModal({ onCancel, onSubmit }: GlobalSendModalProps) {
         staticSessionId: device?.state?.staticSessionId ?? null,
     });
 
+    const accountsWithTokensDisplayNames = useAccountsWithTokenDisplayNames(accountsWithTokens);
     const filteredAccountsWithTokens = useFilterAccountsWithTokens(
-        accountsWithTokens,
+        accountsWithTokensDisplayNames,
         searchFilter,
     );
     const globalSendListItems = useInsertGroupLabelsAndSpaces(filteredAccountsWithTokens);
