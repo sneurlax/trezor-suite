@@ -4,22 +4,22 @@ import { useDispatch } from 'react-redux';
 import { type RouteProp, useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { isFulfilled } from '@reduxjs/toolkit';
 
-import { useFormatters } from '@suite-common/formatters';
 import { getNetwork } from '@suite-common/wallet-config';
 import { stablecoinYieldActions, submitYieldRevokeThunk } from '@suite-common/wallet-core';
+import { isPositiveBalance } from '@suite-common/wallet-utils';
 import { useBottomSheetModal } from '@suite-native/atoms';
 import {
     type StackNavigationProps,
     type YieldStackParamList,
     YieldStackRoutes,
 } from '@suite-native/navigation';
-import { BigNumber } from '@trezor/utils';
 
 import { useRefreshYieldDepositAllowanceOnIdle } from './useRefreshYieldDepositAllowanceOnIdle';
 import { useResolvedYieldFlowData } from './useResolvedYieldFlowData';
 import { useShowYieldAlert } from './useShowYieldAlert';
 import { useShowYieldTransactionFailureAlert } from './useShowYieldTransactionFailureAlert';
 import { type YieldAllowanceFeeTransaction, useYieldAllowanceFees } from './useYieldAllowanceFees';
+import { useYieldApprovedAmountDisplay } from './useYieldApprovedAmountDisplay';
 import { useYieldPendingTransaction } from './useYieldPendingTransaction';
 import { useYieldPendingTransactionTracking } from './useYieldPendingTransactionTracking';
 import { useYieldSession } from './useYieldSession';
@@ -34,14 +34,11 @@ type NavigationProps = StackNavigationProps<
 
 const REVOKE_ALLOWANCE_AMOUNT = '0';
 
-const hasPositiveAmount = (amount: string) => amount !== '' && new BigNumber(amount).gt(0);
-
 export const useYieldDepositRevokeScreen = () => {
     const route = useRoute<RouteProps>();
     const navigation = useNavigation<NavigationProps>();
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
-    const { CryptoAmountFormatter } = useFormatters();
     const showYieldAlert = useShowYieldAlert();
     const {
         bottomSheetRef: infoBottomSheetRef,
@@ -86,8 +83,13 @@ export const useYieldDepositRevokeScreen = () => {
     const [hasShownRevokePreparationError, setHasShownRevokePreparationError] = useState(false);
     const [isPreparingReview, setIsPreparingReview] = useState(false);
     const isPreparingRevoke = session?.approval.isSubmitting ?? false;
-    const hasRevokeRequestAmount = hasPositiveAmount(revokeRequestAmount);
-    const hasApprovedAllowanceAmount = hasPositiveAmount(approvedAllowanceAmount);
+    const hasRevokeRequestAmount = isPositiveBalance(revokeRequestAmount);
+    const { formattedApprovedAmount, hasApprovedAmount: hasApprovedAllowanceAmount } =
+        useYieldApprovedAmountDisplay({
+            allowanceAmount: approvedAllowanceAmount,
+            isApprovedAmountUnlimited,
+            tokenSymbol,
+        });
     const revokeFeeTransaction = useMemo<YieldAllowanceFeeTransaction | null>(() => {
         if (!approvalModalState || approvalModalState.txType === 'approve') {
             return null;
@@ -251,26 +253,6 @@ export const useYieldDepositRevokeScreen = () => {
         resolutionStatus,
         revokeRequestAmount,
         shouldPrepareRevokeTransaction,
-    ]);
-
-    const formattedApprovedAmount = useMemo(() => {
-        if (!hasApprovedAllowanceAmount || !tokenSymbol || isApprovedAmountUnlimited) {
-            return null;
-        }
-
-        return CryptoAmountFormatter.format(approvedAllowanceAmount, {
-            symbol: tokenSymbol,
-            isBalance: true,
-            withSymbol: true,
-            isEllipsisAppended: false,
-            maxDisplayedDecimals: 8,
-        });
-    }, [
-        CryptoAmountFormatter,
-        approvedAllowanceAmount,
-        hasApprovedAllowanceAmount,
-        isApprovedAmountUnlimited,
-        tokenSymbol,
     ]);
 
     const handleCloseInfoBottomSheet = useCallback(() => {
