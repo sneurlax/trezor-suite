@@ -24,6 +24,8 @@ import { spacings } from '@trezor/theme';
 
 import { setSendFormPrefill } from 'src/actions/suite/suiteActions';
 import { BaseCurrencyValue, FormattedCryptoAmount, HiddenPlaceholder } from 'src/components/suite';
+import { useTokenDisplaySymbolNames } from 'src/components/suite/asset-picker/hooks';
+import { getTokenDisplaySymbolName } from 'src/components/suite/asset-picker/utils/tokenDisplayNames';
 import { useDispatch, useSelector } from 'src/hooks/suite';
 import { useSendFormContext } from 'src/hooks/wallet';
 import { getTokenAddressTranslationId } from 'src/utils/wallet/tokenUtils';
@@ -90,6 +92,26 @@ export const TokenSelect = ({ outputId }: TokenSelectProps) => {
         () => account.tokens?.find(token => token.contract === tokenContractAddress),
         [account.tokens, tokenContractAddress],
     );
+    const selectedTokenDisplayNameSources = useMemo(
+        () =>
+            selectedToken
+                ? [
+                      {
+                          account,
+                          token: selectedToken,
+                      },
+                  ]
+                : [],
+        [account, selectedToken],
+    );
+    const tokenDisplaySymbolNames = useTokenDisplaySymbolNames(selectedTokenDisplayNameSources);
+    const selectedTokenName = selectedToken
+        ? getTokenDisplaySymbolName({
+              tokenDisplaySymbolNames,
+              account,
+              token: selectedToken,
+          })
+        : undefined;
 
     const hasNoStandardTokens = !account.tokens?.filter(token => !isNftToken(token))?.length;
     const onOpenSelectAssetModal = !hasNoStandardTokens
@@ -129,7 +151,7 @@ export const TokenSelect = ({ outputId }: TokenSelectProps) => {
                         <Column alignItems="flex-start">
                             <Row justifyContent="flex-start">
                                 <Text intent="neutral" typographyStyle="body-md">
-                                    {selectedToken?.name ||
+                                    {selectedTokenName ||
                                         getNetworkDisplaySymbolName(account.symbol)}
                                 </Text>
                             </Row>

@@ -11,6 +11,8 @@ import { selectBaseCurrency, selectCurrentFiatRates } from '@suite-common/wallet
 import { toFiatCurrency } from '@suite-common/wallet-utils';
 import { type AssetProps, ITEM_HEIGHT, type TokenTab } from '@trezor/product-components';
 
+import { useTokenDisplaySymbolNames } from 'src/components/suite/asset-picker/hooks';
+import { getTokenDisplaySymbolName } from 'src/components/suite/asset-picker/utils/tokenDisplayNames';
 import { useSelector } from 'src/hooks/suite';
 import { type Account } from 'src/types/wallet';
 import {
@@ -91,7 +93,7 @@ export function useBuildOptionsForTabs(account: Account): TokensOptionsForAllTab
     const fiatRates = useSelector(selectCurrentFiatRates);
     const coinDefinitions = useSelector(state => selectCoinDefinitions(state, account.symbol));
 
-    const tabsOptions = useMemo(() => {
+    const sortedTokensWithRates = useMemo(() => {
         const tokensWithRates = enhanceTokensWithRates(
             account.tokens,
             baseCurrencyCode,
@@ -99,10 +101,36 @@ export function useBuildOptionsForTabs(account: Account): TokensOptionsForAllTab
             fiatRates,
         );
 
-        const sortedTokensWithRates = tokensWithRates.sort(sortTokensWithRates);
+        return tokensWithRates.sort(sortTokensWithRates);
+    }, [account.tokens, account.symbol, baseCurrencyCode, fiatRates]);
 
-        return buildTokenOptions(sortedTokensWithRates, account.symbol, coinDefinitions);
-    }, [account.tokens, account.symbol, baseCurrencyCode, fiatRates, coinDefinitions]);
+    const tokenDisplayNameSources = useMemo(
+        () =>
+            sortedTokensWithRates.map(token => ({
+                account,
+                token,
+            })),
+        [account, sortedTokensWithRates],
+    );
+    const tokenDisplaySymbolNames = useTokenDisplaySymbolNames(tokenDisplayNameSources);
+
+    const sortedTokensWithDisplayNames = useMemo(
+        () =>
+            sortedTokensWithRates.map(token => ({
+                ...token,
+                name: getTokenDisplaySymbolName({
+                    tokenDisplaySymbolNames,
+                    account,
+                    token,
+                }),
+            })),
+        [account, sortedTokensWithRates, tokenDisplaySymbolNames],
+    );
+
+    const tabsOptions = useMemo(
+        () => buildTokenOptions(sortedTokensWithDisplayNames, account.symbol, coinDefinitions),
+        [account.symbol, coinDefinitions, sortedTokensWithDisplayNames],
+    );
 
     return tabsOptions;
 }
