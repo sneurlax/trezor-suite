@@ -1,12 +1,9 @@
 import { Box, Button, InlineAlertBox, ScreenFooterGradient, VStack } from '@suite-native/atoms';
 import { Translation } from '@suite-native/intl';
-import { Screen } from '@suite-native/navigation';
+import { DynamicScreenHeader, Screen } from '@suite-native/navigation';
 import { FeeSelector } from '@suite-native/transaction-management';
 
-import { YieldDepositApprovedAmountCard } from '../components/YieldDepositApprovedAmountCard';
-import { YieldDepositFlowScreenHeader } from '../components/YieldDepositFlowScreenHeader';
-import { YieldDepositInfoBottomSheet } from '../components/YieldDepositInfoBottomSheet';
-import { YieldDepositStaticStepCard } from '../components/YieldDepositStepCard';
+import { YieldDepositRevokeDetailsCard } from '../components/YieldDepositRevokeDetailsCard';
 import { YieldPendingTransactionModal } from '../components/YieldPendingTransactionModal';
 import { useYieldDepositRevokeScreen } from '../hooks/useYieldDepositRevokeScreen';
 
@@ -20,22 +17,19 @@ export const YieldDepositRevokeScreen = () => {
     const {
         account,
         accountLabel,
-        apy,
         feeSelectorProps,
         formattedApprovedAmount,
-        handleCloseInfoBottomSheet,
         handleReviewAndSign,
-        infoBottomSheetRef,
         isApprovedAmountUnlimited,
         isSubmitDisabled,
         isSubmitLoading,
-        openInfoBottomSheet,
         pendingBottomSheetRef,
         pendingModal,
+        providerName,
+        shouldShowLowLimitWarning,
         tokenContract,
         tokenSymbol,
         vault,
-        vaultTokenName,
     } = revokeScreen;
 
     const pendingModalAmount = isApprovedAmountUnlimited ? (
@@ -46,13 +40,23 @@ export const YieldDepositRevokeScreen = () => {
 
     return (
         <Screen
-            noHorizontalPadding
             header={
-                <YieldDepositFlowScreenHeader
-                    account={account}
-                    onInfoPress={openInfoBottomSheet}
-                    tokenContract={tokenContract}
-                    vaultName={vault.metadata.name}
+                <DynamicScreenHeader
+                    closeActionType="back"
+                    subtitle={
+                        shouldShowLowLimitWarning ? undefined : (
+                            <Translation
+                                id="earn.yieldDepositRevokeScreen.subtitle"
+                                values={{ tokenSymbol }}
+                            />
+                        )
+                    }
+                    title={
+                        <Translation
+                            id="earn.yieldDepositRevokeScreen.title"
+                            values={{ tokenSymbol }}
+                        />
+                    }
                 />
             }
             footer={
@@ -65,44 +69,34 @@ export const YieldDepositRevokeScreen = () => {
                             isLoading={isSubmitLoading}
                             onPress={handleReviewAndSign}
                         >
-                            <Translation id="earn.yieldDepositRevokeScreen.reviewAndSignButton" />
+                            <Translation id="generic.buttons.continue" />
                         </Button>
                     </Box>
                 </>
             }
         >
             <Box pointerEvents={pendingModal ? 'none' : 'auto'}>
-                <VStack spacing="sp16">
-                    <YieldDepositStaticStepCard
-                        title={<Translation id="earn.yieldDepositFlowScreen.revokeApproval" />}
-                    />
-
-                    <Box paddingHorizontal="sp16">
+                <VStack spacing="sp12">
+                    {shouldShowLowLimitWarning && (
                         <InlineAlertBox
-                            variant="info"
+                            variant="warning"
                             title={
-                                <Translation
-                                    id="earn.yieldDepositRevokeScreen.infoAlert"
-                                    values={{ tokenSymbol }}
-                                />
+                                <Translation id="earn.yieldDepositRevokeScreen.lowLimitInfoAlert" />
                             }
                         />
-                    </Box>
-
-                    <Box paddingHorizontal="sp16">
-                        <YieldDepositApprovedAmountCard
-                            approvedAmount={formattedApprovedAmount}
-                            isApprovedAmountUnlimited={isApprovedAmountUnlimited}
-                            networkSymbol={account.symbol}
-                            tokenContract={tokenContract}
-                        />
-                    </Box>
-
-                    {feeSelectorProps && (
-                        <Box paddingHorizontal="sp16">
-                            <FeeSelector {...feeSelectorProps} />
-                        </Box>
                     )}
+
+                    <YieldDepositRevokeDetailsCard
+                        account={account}
+                        accountLabel={accountLabel}
+                        approvedAmount={formattedApprovedAmount}
+                        isApprovedAmountUnlimited={isApprovedAmountUnlimited}
+                        providerName={providerName}
+                        tokenContract={tokenContract}
+                        tokenSymbol={tokenSymbol}
+                    />
+
+                    {feeSelectorProps && <FeeSelector {...feeSelectorProps} />}
                 </VStack>
             </Box>
 
@@ -124,14 +118,6 @@ export const YieldDepositRevokeScreen = () => {
                     vaultTokenContract={tokenContract}
                 />
             )}
-
-            <YieldDepositInfoBottomSheet
-                ref={infoBottomSheetRef}
-                apy={apy}
-                onClose={handleCloseInfoBottomSheet}
-                tokenSymbol={tokenSymbol}
-                vaultTokenName={vaultTokenName}
-            />
         </Screen>
     );
 };

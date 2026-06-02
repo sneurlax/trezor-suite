@@ -196,6 +196,7 @@ export const YieldDepositScreen = () => {
             navigation.navigate(YieldStackRoutes.YieldDepositRevoke, {
                 ...route.params,
                 amount,
+                shouldShowLowLimitWarning: true,
             });
         },
         [dispatch, flowKey, isDepositPending, navigation, route.params],

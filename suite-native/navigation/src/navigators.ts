@@ -98,6 +98,7 @@ export type YieldDepositApprovalReviewParams = YieldFlowParams & {
 
 export type YieldDepositRevokeParams = YieldFlowParams & {
     amount?: string;
+    shouldShowLowLimitWarning?: boolean;
 };
 
 export type YieldDepositRevokeReviewParams = YieldFlowParams & {

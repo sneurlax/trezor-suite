@@ -7,7 +7,6 @@ import { isFulfilled } from '@reduxjs/toolkit';
 import { getNetwork } from '@suite-common/wallet-config';
 import { stablecoinYieldActions, submitYieldRevokeThunk } from '@suite-common/wallet-core';
 import { isPositiveBalance } from '@suite-common/wallet-utils';
-import { useBottomSheetModal } from '@suite-native/atoms';
 import {
     type StackNavigationProps,
     type YieldStackParamList,
@@ -40,21 +39,15 @@ export const useYieldDepositRevokeScreen = () => {
     const dispatch = useDispatch();
     const isFocused = useIsFocused();
     const showYieldAlert = useShowYieldAlert();
-    const {
-        bottomSheetRef: infoBottomSheetRef,
-        closeModal: closeInfoBottomSheet,
-        openModal: openInfoBottomSheet,
-    } = useBottomSheetModal();
     const resolvedFlowData = useResolvedYieldFlowData(route.params);
     const {
         account,
-        apy,
         flowData,
         flowKey,
+        providerName,
         token,
         tokenSymbol,
         vault,
-        vaultTokenName,
         resolutionStatus,
     } = resolvedFlowData;
     const session = useYieldSession({
@@ -68,7 +61,6 @@ export const useYieldDepositRevokeScreen = () => {
         pendingBottomSheetRef,
         pendingModalProps,
         pendingTransaction: revokePendingTransaction,
-        reopenPendingBottomSheet,
     } = useYieldPendingTransaction({
         accountKey: account?.key,
         isFocused,
@@ -85,6 +77,7 @@ export const useYieldDepositRevokeScreen = () => {
     const [isPreparingReview, setIsPreparingReview] = useState(false);
     const isPreparingRevoke = session?.approval.isSubmitting ?? false;
     const hasRevokeRequestAmount = isPositiveBalance(revokeRequestAmount);
+    const shouldShowLowLimitWarning = !!route.params.shouldShowLowLimitWarning;
     const { formattedApprovedAmount, hasApprovedAmount: hasApprovedAllowanceAmount } =
         useYieldApprovedAmountDisplay({
             allowanceAmount: approvedAllowanceAmount,
@@ -121,6 +114,7 @@ export const useYieldDepositRevokeScreen = () => {
     const hasPreparedRevokeTransaction = revokeFeeTransaction !== null;
     const isRevokeFeeReadyForReview = hasPreparedRevokeTransaction && isAllowanceFeeReady;
     const shouldPrepareRevokeTransaction =
+        hasApprovedAllowanceAmount &&
         hasRevokeRequestAmount &&
         !hasRequestedRevokePreparation &&
         !isPreparingRevoke &&
@@ -145,7 +139,7 @@ export const useYieldDepositRevokeScreen = () => {
     const shouldShowMissingAmountError =
         resolutionStatus === 'resolved' &&
         allowanceStatus === 'loaded' &&
-        !hasRevokeRequestAmount &&
+        !hasApprovedAllowanceAmount &&
         revokePendingTransaction === undefined;
 
     const handleRevokeConfirmed = useCallback(() => {
@@ -267,11 +261,6 @@ export const useYieldDepositRevokeScreen = () => {
         shouldPrepareRevokeTransaction,
     ]);
 
-    const handleCloseInfoBottomSheet = useCallback(() => {
-        closeInfoBottomSheet();
-        reopenPendingBottomSheet();
-    }, [closeInfoBottomSheet, reopenPendingBottomSheet]);
-
     const handleReviewAndSign = useCallback(async () => {
         if (!canReviewRevoke || resolutionStatus !== 'resolved') {
             return;
@@ -320,7 +309,7 @@ export const useYieldDepositRevokeScreen = () => {
         showYieldAlert,
     ]);
 
-    if (resolutionStatus !== 'resolved') {
+    if (resolutionStatus !== 'resolved' || shouldShowMissingAmountError) {
         return null;
     }
 
@@ -352,21 +341,18 @@ export const useYieldDepositRevokeScreen = () => {
     return {
         account,
         accountLabel,
-        apy,
         feeSelectorProps,
         formattedApprovedAmount,
-        handleCloseInfoBottomSheet,
         handleReviewAndSign,
-        infoBottomSheetRef,
         isApprovedAmountUnlimited,
         isSubmitDisabled,
         isSubmitLoading,
-        openInfoBottomSheet,
         pendingBottomSheetRef,
         pendingModal,
+        providerName,
+        shouldShowLowLimitWarning,
         tokenContract: route.params.tokenContract,
         tokenSymbol,
         vault,
-        vaultTokenName,
     };
 };

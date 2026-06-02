@@ -2748,10 +2748,14 @@ export const messages = {
             },
         },
         yieldDepositRevokeScreen: {
-            infoAlert:
-                "To change your approval limit, revoke the current approval first. After it's confirmed, you can set a new limit for {tokenSymbol}.",
+            title: 'Revoke {tokenSymbol} spending',
+            subtitle: 'Revoke provider to spend your {tokenSymbol}.',
+            lowLimitInfoAlert:
+                'The spending limit too low. Revoke the current spending limit and approve a higher amount.',
+            account: 'Account',
+            provider: 'Provider',
+            limit: 'Limit',
             pendingTitle: 'Confirming revoke',
-            reviewAndSignButton: 'Review & sign',
         },
         yieldDepositApprovalReviewScreen: {
             title: 'Review with Trezor',

@@ -100,6 +100,7 @@ export const useYieldDepositApprovalSubmit = ({
                     navigation.navigate(YieldStackRoutes.YieldDepositRevoke, {
                         ...routeParams,
                         amount,
+                        shouldShowLowLimitWarning: true,
                     });
 
                     return;
