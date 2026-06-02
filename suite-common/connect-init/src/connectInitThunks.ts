@@ -23,6 +23,7 @@ import TrezorConnect, {
     TRANSPORT_EVENT,
     UI_EVENT,
     UI_REQUEST,
+    initLog,
 } from '@trezor/connect';
 import { isDesktop, isWeb } from '@trezor/env-utils';
 import { DATA_URL } from '@trezor/urls';
@@ -201,6 +202,14 @@ export const connectInitThunk = createThunk<void, ConnectInitHooks | void, void>
             thp.hostName = capitalizeFirstLetter(getBrowserName());
         }
 
+        // Logger factory supplied to @trezor/connect from this composition root. On desktop the core
+        // runs in the main process, so the factory (a function) cannot cross the IPC boundary — it is
+        // injected there instead (see suite-desktop-core's trezor-connect.ts), driven by showConnectLogs.
+        // TODO(logger-unification): build the logger from a unified app-wide logger instead of initLog.
+        const createLogger = isDesktop()
+            ? undefined
+            : (prefix: string) => initLog(prefix, showConnectLogs);
+
         try {
             await TrezorConnect.init({
                 ...connectInitSettings,
@@ -209,6 +218,7 @@ export const connectInitThunk = createThunk<void, ConnectInitHooks | void, void>
                 transports,
                 thp,
                 debug: showConnectLogs,
+                createLogger,
                 firmwareHashCheckTimeouts,
                 firmwareChannel: getEffectiveFirmwareChannel(getState()),
             });
