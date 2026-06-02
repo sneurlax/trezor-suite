@@ -6,6 +6,8 @@ import { selectBaseCurrency, selectCurrentFiatRates } from '@suite-common/wallet
 import { type SelectedAccountLoaded } from '@suite-common/wallet-types';
 import { isErc4626, isTestnet } from '@suite-common/wallet-utils';
 
+import { useTokenDisplaySymbolNames } from 'src/components/suite/asset-picker/hooks';
+import { getTokenDisplaySymbolName } from 'src/components/suite/asset-picker/utils/tokenDisplayNames';
 import { useSelector } from 'src/hooks/suite';
 import {
     enhanceTokensWithRates,
@@ -42,15 +44,39 @@ export const CoinsTable = ({ selectedAccount, searchQuery }: CoinsTableProps) =>
         return tokensWithRates.sort(sortTokensWithRates);
     }, [account.tokens, account.symbol, baseCurrencyCode, fiatRates]);
 
+    const tokenDisplayNameSources = useMemo(
+        () =>
+            enhancedTokens.map(token => ({
+                account,
+                token,
+            })),
+        [account, enhancedTokens],
+    );
+
+    const tokenDisplaySymbolNames = useTokenDisplaySymbolNames(tokenDisplayNameSources);
+
+    const enhancedTokensWithDisplayNames = useMemo(
+        () =>
+            enhancedTokens.map(token => ({
+                ...token,
+                name: getTokenDisplaySymbolName({
+                    tokenDisplaySymbolNames,
+                    account,
+                    token,
+                }),
+            })),
+        [account, enhancedTokens, tokenDisplaySymbolNames],
+    );
+
     const tokens = useMemo(
         () =>
             getTokens({
-                tokens: enhancedTokens,
+                tokens: enhancedTokensWithDisplayNames,
                 symbol: account.symbol,
                 tokenDefinitions: coinDefinitions,
                 searchQuery,
             }),
-        [enhancedTokens, account.symbol, coinDefinitions, searchQuery],
+        [enhancedTokensWithDisplayNames, account.symbol, coinDefinitions, searchQuery],
     );
 
     const hiddenTokensCount =
