@@ -40,7 +40,7 @@ const getTranslationId = (
         return 'earn.yieldDepositFlowScreen.revokeApproval';
     }
 
-    if (approvalAction && approvalAction != 'continue') {
+    if (approvalAction === 'increase') {
         return 'earn.yieldDepositFlowScreen.increaseApprovalLimit';
     }
 
@@ -74,11 +74,10 @@ export const YieldDepositFlowFooter = ({
         });
     }, [amountValue, apy, CryptoAmountFormatter, tokenSymbol]);
 
-    const isEstimatedRewardsVisible = !isDisabled && estimatedRewards !== null;
     const buttonTranslationId = getTranslationId(approvalAction);
-    const buttonColorProps = approvalAction
-        ? { intent: 'neutral' as const, priority: 'secondary' as const }
-        : undefined;
+    const isApprovalLimitAction = approvalAction === 'increase' || approvalAction === 'revoke';
+    const isEstimatedRewardsVisible =
+        !isApprovalLimitAction && !isDisabled && estimatedRewards !== null;
 
     return (
         <Animated.View entering={SlideInDown} exiting={SlideOutDown}>
@@ -99,7 +98,6 @@ export const YieldDepositFlowFooter = ({
                         accessibilityRole="button"
                         accessibilityLabel={translate(buttonTranslationId)}
                         onPress={onPress}
-                        {...buttonColorProps}
                         isDisabled={isDisabled}
                         isLoading={isLoading}
                     >
