@@ -1,9 +1,14 @@
+import { useSelector } from 'react-redux';
+
 import { type NetworkSymbol } from '@suite-common/wallet-config';
-import { selectBaseCurrency, selectFiatRatesByFiatRateKey } from '@suite-common/wallet-core';
+import {
+    type FiatRatesRootState,
+    type WalletSettingsRootState,
+    selectBaseCurrency,
+    selectFiatRatesByFiatRateKey,
+} from '@suite-common/wallet-core';
 import { type RateTypeWithoutHistoric, type TokenAddress } from '@suite-common/wallet-types';
 import { type AmountUnit, getFiatRateKey, toFiatCurrency } from '@suite-common/wallet-utils';
-
-import { useSelector } from 'src/hooks/suite';
 
 interface CommonOwnProps {
     amount: string | AmountUnit; // Todo: remove `string` only for back compatibility
@@ -25,10 +30,12 @@ export const useFiatFromCryptoValue = ({
     useHistoricRate,
     rateType,
 }: UseFiatFromCryptoValueParams) => {
-    const baseCurrencyCode = useSelector(selectBaseCurrency);
+    const baseCurrencyCode = useSelector((state: WalletSettingsRootState) =>
+        selectBaseCurrency(state),
+    );
     const fiatRateKey = getFiatRateKey(symbol, baseCurrencyCode, tokenAddress);
 
-    const currentRate = useSelector(state =>
+    const currentRate = useSelector((state: FiatRatesRootState) =>
         selectFiatRatesByFiatRateKey(state, fiatRateKey, rateType),
     );
 

@@ -3,6 +3,7 @@ import { type JSX, type ReactElement } from 'react';
 import type { FormatNumberOptions } from '@formatjs/intl';
 import styled from 'styled-components';
 
+import { type UseFiatFromCryptoValueParams, useFiatFromCryptoValue } from '@suite/formatters';
 import { useFormatters } from '@suite-common/formatters';
 import { selectIsSpecificCoinDefinitionKnown } from '@suite-common/token-definitions';
 import { CONTRACT_ADDRESS_FOR_NATIVE_TOKEN } from '@suite-common/trading';
@@ -16,8 +17,6 @@ import { BigNumber } from '@trezor/utils';
 
 import { HiddenPlaceholder } from 'src/components/suite/HiddenPlaceholder';
 import { useLoadingSkeleton, useSelector } from 'src/hooks/suite';
-import type { UseFiatFromCryptoValueParams } from 'src/hooks/suite/useFiatFromCryptoValue';
-import { useFiatFromCryptoValue } from 'src/hooks/suite/useFiatFromCryptoValue';
 
 import { type HiddenPlaceholderProps } from './HiddenPlaceholder';
 
