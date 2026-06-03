@@ -5,7 +5,11 @@ import { type RouteProp, useIsFocused, useNavigation, useRoute } from '@react-na
 import { isFulfilled } from '@reduxjs/toolkit';
 
 import { getNetwork } from '@suite-common/wallet-config';
-import { stablecoinYieldActions, submitYieldRevokeThunk } from '@suite-common/wallet-core';
+import {
+    REVOKE_ALLOWANCE_AMOUNT,
+    stablecoinYieldActions,
+    submitYieldRevokeThunk,
+} from '@suite-common/wallet-core';
 import { isPositiveBalance } from '@suite-common/wallet-utils';
 import {
     type StackNavigationProps,
@@ -30,8 +34,6 @@ type NavigationProps = StackNavigationProps<
     YieldStackParamList,
     YieldStackRoutes.YieldDepositRevoke
 >;
-
-const REVOKE_ALLOWANCE_AMOUNT = '0';
 
 export const useYieldDepositRevokeScreen = () => {
     const route = useRoute<RouteProps>();

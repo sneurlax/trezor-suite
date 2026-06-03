@@ -1,5 +1,6 @@
 import { createThunk } from '@suite-common/redux-utils';
 import {
+    REVOKE_ALLOWANCE_AMOUNT,
     type YieldFlowResolvedData,
     formDraftActions,
     selectDeepCopyOfFormDraft,
@@ -77,7 +78,7 @@ const getYieldAllowanceReviewAmount = ({
             });
         case 'revoke':
         case 'revoke-only':
-            return '0';
+            return REVOKE_ALLOWANCE_AMOUNT;
         default:
             return exhaustive(modalTxType);
     }
