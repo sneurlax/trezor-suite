@@ -28,6 +28,61 @@ const methods = [
     'solana_signMessage',
 ];
 
+const solanaSignMessage = createThunk<
+    { signature: string },
+    {
+        session: WalletConnectSession;
+        message: string;
+        pubkey: string;
+        origin: string;
+    }
+>(
+    `${WALLETCONNECT_MODULE}/solanaSignMessage`,
+    async ({ session, message, pubkey, origin }, { dispatch, getState }) => {
+        const device = selectSelectedDevice(getState());
+        const accounts = selectAccounts(getState());
+        const account = accounts.find(
+            a => a.networkType === 'solana' && a.visible && a.descriptor === pubkey,
+        );
+        if (!account) {
+            throw new Error('Account not found');
+        }
+
+        // WalletConnect sends message as base58-encoded bytes; convert to hex for TrezorConnect
+        const messageBytes = base58.decode(message);
+        const messageHex = Buffer.from(messageBytes).toString('hex');
+
+        dispatch(
+            trezorConnectPopupActions.connectPopupCallThunk({
+                method: 'solanaSignMessage',
+                payload: {
+                    path: account.path,
+                    device,
+                    message: messageHex,
+                },
+                source: {
+                    type: 'walletconnect' as const,
+                    origin,
+                    manifest: {
+                        appName: session.peer.metadata.name,
+                        appIcon: session.peer.metadata.icons?.[0],
+                    },
+                },
+            }),
+        );
+        const response = (await trezorConnectPopupActions.getPopupCallDeferred(true)
+            .promise) as Result<CallMethodResponse<'solanaSignMessage'>>;
+        if (!response.success) {
+            console.error('solana_signMessage error', response);
+            throw new Error('Solana message signing error');
+        }
+
+        return {
+            signature: base58.encode(Buffer.from(response.payload.signature, 'hex')),
+        };
+    },
+);
+
 const solanaSignTransaction = createThunk<
     { signature: string; transaction: string },
     {
@@ -158,9 +213,14 @@ const solanaRequestThunk = createThunk<
             return { signature: pushResponse.payload.txid };
         }
         case 'solana_signMessage': {
-            // Signing arbitrary messages for Solana is not supported in FW
-            // We indicate support for it in the adapter for compatibility, since some apps request it but don't actually use it
-            throw new Error('Solana message signing is not supported');
+            const { message, pubkey } = event.params.request.params;
+            const { origin } = event.verifyContext.verified;
+
+            const response = await dispatch(
+                solanaSignMessage({ session, message, pubkey, origin }),
+            ).unwrap();
+
+            return { signature: response.signature };
         }
     }
 });

@@ -107,3 +107,19 @@ export const SolanaComposedTransaction = Type.Object({
         tokenAccountInfo: Type.Optional(SolanaTxTokenAccountInfo),
     }),
 });
+
+// solanaSignMessage
+
+export type SolanaSignMessage = Static<typeof SolanaSignMessage>;
+export const SolanaSignMessage = Type.Object({
+    path: Type.Union([Type.String(), Type.Array(Type.Number())]),
+    // Hex-encoded OCMS v0 envelope (Solana Off-Chain Message Signing).
+    // Build the envelope yourself or use a Solana SDK helper before calling this method.
+    message: Type.String(),
+    chunkify: Type.Optional(Type.Boolean()),
+});
+
+export type SolanaSignedMessage = Static<typeof SolanaSignedMessage>;
+export const SolanaSignedMessage = Type.Object({
+    signature: Type.String(),
+});

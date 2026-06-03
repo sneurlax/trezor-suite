@@ -1,0 +1,98 @@
+import { SolanaSignMessage } from '@trezor/connect-common/src/types/api/solana';
+
+import { ApiPlayground } from '../../../components/ApiPlayground';
+import { CommonParamsLink } from '../../../components/CommonParamsLink';
+import { ParamsTable } from '../../../components/ParamsTable';
+import signMessage from '../../../data/methods/solana/signMessage.ts';
+
+<ApiPlayground
+    options={[
+        { title: 'Sign message', legacyConfig: signMessage[0] },
+        {
+            title: 'Advanced schema',
+            method: 'solanaSignMessage',
+            schema: SolanaSignMessage,
+        },
+    ]}
+/>
+
+export const paramDescriptions = {
+    path: 'minimum length is `2`. [read more](/details/path)',
+    message: 'Hex-encoded OCMS (Off-Chain Message Signing) v0 envelope. See format below.',
+    chunkify: 'If `true`, long strings will be split into multiple chunks on the device display.',
+};
+
+## Solana: Sign message
+
+Asks device to sign a Solana off-chain message. User is asked to confirm the message on Trezor.
+
+```javascript
+const result = await TrezorConnect.solanaSignMessage(params);
+```
+
+### Params
+
+<CommonParamsLink />
+
+#### SolanaSignMessage
+
+<ParamsTable schema={SolanaSignMessage} descriptions={paramDescriptions} />
+
+### Message format (OCMS v0)
+
+The `message` field must be a hex-encoded **OCMS (Off-Chain Message Signing) v0 envelope** as specified in the [Solana off-chain message signing proposal](https://github.com/solana-labs/solana/blob/master/docs/src/proposals/off-chain-message-signing.md).
+
+```
+[0xff][solana offchain\x00]   17 bytes  signing domain
+[0x00]                         1 byte   header version (0)
+[32 zero bytes]               32 bytes  application domain (all-zero = generic wallet)
+[format]                       1 byte   0x00 = restricted ASCII, 0x01 = UTF-8, 0x02 = extended
+[len LE]                       2 bytes  message body length, little-endian u16
+[message body]               variable
+```
+
+Example envelope for `"Hello, Trezor!"` (14 bytes, restricted ASCII):
+
+```
+ff736f6c616e61206f6666636861696e  ← 0xff + "solana offchain" + 0x00
+00                                 ← version 0
+0000000000000000000000000000000000000000000000000000000000000000  ← app domain
+00                                 ← format: restricted ASCII
+0e00                               ← length: 14 (LE)
+48656c6c6f2c205472657a6f7221      ← "Hello, Trezor!"
+```
+
+### Example
+
+```javascript
+// OCMS v0 envelope for "Hello, Trezor!" (restricted ASCII)
+TrezorConnect.solanaSignMessage({
+    path: "m/44'/501'/0'/0'",
+    message:
+        'ff736f6c616e61206f6666636861696e00000000000000000000000000000000000000000000000000000000000000000000000e0048656c6c6f2c205472657a6f7221',
+});
+```
+
+### Result
+
+[SolanaSignedMessage type](https://github.com/trezor/trezor-suite/blob/develop/packages/connect-common/src/types/api/solana/index.ts)
+
+```javascript
+{
+    success: true,
+    payload: {
+        signature: string // hex-encoded Ed25519 signature over the OCMS envelope
+    }
+}
+```
+
+Error
+
+```javascript
+{
+    success: false,
+    error: {
+        message: string // error message
+    }
+}
+```

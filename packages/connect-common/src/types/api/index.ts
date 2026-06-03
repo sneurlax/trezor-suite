@@ -81,6 +81,7 @@ import type { signTransaction } from './signTransaction';
 import type { solanaComposeTransaction } from './solanaComposeTransaction';
 import type { solanaGetAddress } from './solanaGetAddress';
 import type { solanaGetPublicKey } from './solanaGetPublicKey';
+import type { solanaSignMessage } from './solanaSignMessage';
 import type { solanaSignTransaction } from './solanaSignTransaction';
 import type { stellarGetAddress } from './stellarGetAddress';
 import type { stellarSignTransaction } from './stellarSignTransaction';
@@ -387,6 +388,9 @@ export const TrezorConnectSolana = Type.Object({
 
     // https://connect.trezor.io/9/methods/solana/solanaSignTransaction/
     solanaSignTransaction: Type.Unsafe<typeof solanaSignTransaction>(),
+
+    // https://connect.trezor.io/9/methods/solana/solanaSignMessage/
+    solanaSignMessage: Type.Unsafe<typeof solanaSignMessage>(),
 
     // https://connect.trezor.io/9/methods/solana/solanaComposeTransaction/
     solanaComposeTransaction: Type.Unsafe<typeof solanaComposeTransaction>(),
