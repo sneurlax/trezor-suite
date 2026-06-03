@@ -12,7 +12,7 @@
 const legacyResults = [
     {
         // solanaSignMessage not supported below this version
-        rules: ['<2.12.3', '1'],
+        rules: ['<2.12.1', '1'],
         success: false,
     },
 ];
