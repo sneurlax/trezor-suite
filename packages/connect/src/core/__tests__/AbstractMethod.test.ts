@@ -43,12 +43,12 @@ describe('AbstractMethod Cardano enablement guard', () => {
             ).toThrow();
         });
 
-        it('the thrown error carries the Method_CardanoNetworkNotEnabled code', () => {
+        it('the thrown error carries the Method_NetworkNotEnabled code', () => {
             try {
                 make('cardanoSignTransaction');
                 throw new Error('expected guard to throw');
             } catch (error: any) {
-                expect(error.code).toBe('Method_CardanoNetworkNotEnabled');
+                expect(error.code).toBe('Method_NetworkNotEnabled');
             }
         });
     });

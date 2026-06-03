@@ -203,7 +203,7 @@ export abstract class AbstractMethod<Name extends CallMethodPayload['method'], P
             payload.method.startsWith('cardano') || payloadReferencesCardanoCoin(payload);
         if (isCardanoBound && !adaEnabled) {
             throw ERRORS.TypedError(
-                'Method_CardanoNetworkNotEnabled',
+                'Method_NetworkNotEnabled',
                 `Cardano operation '${payload.method}' requires 'ada' in enabled networks. ` +
                     "Call TrezorConnect.setEnabledNetworks(['ada']) before invoking Cardano methods.",
             );

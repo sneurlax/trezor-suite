@@ -55,7 +55,7 @@ Today the only network this affects is Cardano: including `'ada'` makes the devi
 
 The declared set is applied **additively** by whatever hosts the Core (Trezor Suite, for popup / desktop / webextension / deeplink integrations): your declaration widens the host's enabled networks, it never replaces them.
 
-Cardano derivation is driven **solely** by this declaration — there is no per-call escape hatch (the former `useCardanoDerivation` common param has been removed). Any Cardano-bound call made while `'ada'` is not enabled — whether a `cardano*` method (`cardanoGetAddress`, `cardanoSignTransaction`, …) or a non-`cardano*` method targeting a Cardano coin (e.g. `getAccountInfo({ coin: 'ada', path: ... })`) — is rejected up-front with a `Method_CardanoNetworkNotEnabled` error rather than silently producing a non-Cardano session. Declare `'ada'` in `init` before invoking Cardano methods.
+Cardano derivation is driven **solely** by this declaration — there is no per-call escape hatch (the former `useCardanoDerivation` common param has been removed). Any Cardano-bound call made while `'ada'` is not enabled — whether a `cardano*` method (`cardanoGetAddress`, `cardanoSignTransaction`, …) or a non-`cardano*` method targeting a Cardano coin (e.g. `getAccountInfo({ coin: 'ada', path: ... })`) — is rejected up-front with a `Method_NetworkNotEnabled` error rather than silently producing a non-Cardano session. Declare `'ada'` in `init` before invoking Cardano methods.
 
 ### Runtime mutation
 

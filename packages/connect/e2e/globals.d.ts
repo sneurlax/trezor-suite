@@ -19,7 +19,7 @@ declare namespace globalThis {
         /** Pushed to `TrezorConnect.setEnabledNetworks` before the method call. Required for
          *  any Cardano-bound fixture (both `cardano*` methods and non-`cardano*` methods on
          *  Cardano coins, e.g. `getAccountInfo({ coin: 'ada' })`) — Connect rejects Cardano
-         *  calls with `Method_CardanoNetworkNotEnabled` unless `'ada'` is enabled. */
+         *  calls with `Method_NetworkNotEnabled` unless `'ada'` is enabled. */
         enabledNetworks?: string[];
         setup?: {
             wiped?: boolean;
