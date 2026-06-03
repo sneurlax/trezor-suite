@@ -37,15 +37,13 @@
         {
             "path": "../../suite-common/wallet-types"
         },
-        {
-            "path": "../../suite-common/wallet-utils"
-        },
         { "path": "../intl" },
         { "path": "../metadata" },
         { "path": "../router" },
         { "path": "../suite-sync" },
         { "path": "../../packages/components" },
         { "path": "../../packages/connect" },
+        { "path": "../../packages/device-utils" },
         {
             "path": "../../packages/product-components"
         },

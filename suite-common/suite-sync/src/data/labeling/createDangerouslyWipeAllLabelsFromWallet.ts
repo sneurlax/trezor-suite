@@ -7,7 +7,7 @@ import {
 } from '@suite-common/suite-sync-types';
 import { type WalletDescriptor } from '@suite-common/wallet';
 import { type Account } from '@suite-common/wallet-types';
-import { parseDeviceStaticSessionId } from '@suite-common/wallet-utils';
+import { parseStaticSessionId } from '@trezor/device-utils';
 import { ok } from '@trezor/type-utils';
 
 import {
@@ -42,8 +42,7 @@ export const createDangerouslyWipeAllLabelsFromWallet =
             .getAccounts()
             .filter(
                 account =>
-                    parseDeviceStaticSessionId(account.deviceState).walletDescriptor ===
-                    walletDescriptor,
+                    parseStaticSessionId(account.deviceState).walletDescriptor === walletDescriptor,
             );
 
         const deviceStaticSessionId = walletAccounts[0]?.deviceState;

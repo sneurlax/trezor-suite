@@ -3,7 +3,7 @@ import type { SuiteSyncAddress, SuiteSyncOutput } from '@suite-common/suite-sync
 import { type WalletDescriptor } from '@suite-common/wallet';
 import { type NetworkSymbol } from '@suite-common/wallet-config';
 import { type AccountDescriptor } from '@suite-common/wallet-types';
-import { parseDeviceStaticSessionId } from '@suite-common/wallet-utils';
+import { parseStaticSessionId } from '@trezor/device-utils';
 
 import { suiteSyncToBip329 } from './suiteSyncToBip329';
 
@@ -32,7 +32,7 @@ export type ExportSuiteSyncToBip329Dep = {
 export const createSuiteSyncToBip329 =
     (deps: GetAllLabelsForAccountDeps): ExportBip329 =>
     ({ account }) => {
-        const { walletDescriptor } = parseDeviceStaticSessionId(account.deviceState);
+        const { walletDescriptor } = parseStaticSessionId(account.deviceState);
 
         const { accountLabel, addressLabels, outputLabels } = deps.getAllLabelsForAccount({
             walletDescriptor,

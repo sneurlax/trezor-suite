@@ -10,7 +10,7 @@
         { "path": "../wallet" },
         { "path": "../wallet-config" },
         { "path": "../wallet-types" },
-        { "path": "../wallet-utils" },
+        { "path": "../../packages/device-utils" },
         { "path": "../../packages/type-utils" }
     ]
 }

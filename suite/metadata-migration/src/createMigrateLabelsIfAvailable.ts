@@ -8,8 +8,8 @@ import { type WalletSuiteSyncOnEnsuredListener } from '@suite-common/suite-sync-
 import { type TrezorDevice } from '@suite-common/suite-types';
 import { notificationsActions } from '@suite-common/toast-notifications';
 import { type WalletDescriptor } from '@suite-common/wallet';
-import { parseDeviceStaticSessionId } from '@suite-common/wallet-utils';
 import { type StaticSessionId } from '@trezor/connect';
+import { parseStaticSessionId } from '@trezor/device-utils';
 
 import type { MigrateLegacyLabelsToSuiteSync } from './migrateLegacyLabelsToSuiteSync';
 
@@ -30,7 +30,7 @@ export const createMigrateLabelsIfAvailable = (
     const isMigratingByWalletDescriptor = new Map<WalletDescriptor, true>();
 
     return async ({ deviceStaticSessionId }) => {
-        const { walletDescriptor } = parseDeviceStaticSessionId(deviceStaticSessionId);
+        const { walletDescriptor } = parseStaticSessionId(deviceStaticSessionId);
 
         if (isMigratingByWalletDescriptor.has(walletDescriptor)) {
             return;
