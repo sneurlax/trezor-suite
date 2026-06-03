@@ -51,12 +51,12 @@ const ApprovalReviewContent = ({ flowData, flowKey, route }: ApprovalReviewConte
     }, []);
     const {
         handleApprovalSubmitted,
-        handleSubmitApprovalReview,
         isApprovalSigned,
+        isApprovalReviewReady,
         isSendingApproval,
         isSigningApproval,
-        isSubmitDisabled,
         leaveReviewFromDeviceCancel,
+        startApprovalReview,
     } = useYieldApprovalReview({
         approvalLimitType,
         flowData,
@@ -76,8 +76,8 @@ const ApprovalReviewContent = ({ flowData, flowKey, route }: ApprovalReviewConte
         onDeviceReviewReady: revealConfirmOnTrezorSheet,
         onReviewCancelled: handleReviewCancelled,
         onReviewFailed: closeSheet,
-        shouldAutoStartReview: !isSubmitDisabled && !isApprovalSigned && !isSigningApproval,
-        startReview: handleSubmitApprovalReview,
+        shouldAutoStartReview: isApprovalReviewReady && !isSigningApproval,
+        startReview: startApprovalReview,
     });
 
     useEffect(() => {

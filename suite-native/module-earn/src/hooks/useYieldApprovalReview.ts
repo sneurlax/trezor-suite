@@ -46,12 +46,12 @@ type UseYieldApprovalReviewParams = {
 
 type UseYieldApprovalReviewResult = {
     handleApprovalSubmitted: () => Promise<void>;
-    handleSubmitApprovalReview: () => Promise<YieldReviewSigningResult>;
     isApprovalSigned: boolean;
+    isApprovalReviewReady: boolean;
     isSendingApproval: boolean;
     isSigningApproval: boolean;
-    isSubmitDisabled: boolean;
     leaveReviewFromDeviceCancel: () => void;
+    startApprovalReview: () => Promise<YieldReviewSigningResult>;
 };
 
 type NavigationProps = StackToStackCompositeNavigationProps<
@@ -93,7 +93,7 @@ export const useYieldApprovalReview = ({
     });
 
     const isPreparingApproval = approval.isSubmitting || !reviewTransaction;
-    const isSubmitDisabled = isPreparingApproval || isApprovalSigned;
+    const isApprovalReviewReady = !isPreparingApproval && !isApprovalSigned;
     const shouldConfirmApprovalCancellation =
         isSigningApproval || isApprovalSigned || isSendingApproval;
 
@@ -105,7 +105,7 @@ export const useYieldApprovalReview = ({
             transactionType,
         });
 
-    const handleSubmitApprovalReview = useCallback(async (): Promise<YieldReviewSigningResult> => {
+    const startApprovalReview = useCallback(async (): Promise<YieldReviewSigningResult> => {
         if (isApprovalSigned) {
             return 'signed';
         }
@@ -251,11 +251,11 @@ export const useYieldApprovalReview = ({
 
     return {
         handleApprovalSubmitted,
-        handleSubmitApprovalReview,
         isApprovalSigned,
+        isApprovalReviewReady,
         isSendingApproval,
         isSigningApproval,
-        isSubmitDisabled,
         leaveReviewFromDeviceCancel,
+        startApprovalReview,
     };
 };

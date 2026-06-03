@@ -61,9 +61,9 @@ const DepositReviewContent = ({
     }, []);
     const {
         depositStatus,
-        handleSubmitDepositReview,
         handleDepositSubmitted,
         leaveReviewFromDeviceCancel,
+        startDepositReview,
     } = useYieldDepositReview({
         flowData,
         flowKey,
@@ -84,7 +84,7 @@ const DepositReviewContent = ({
         onReviewCancelled: handleReviewCancelled,
         onReviewFailed: closeSheet,
         shouldAutoStartReview: depositStatus === 'idle',
-        startReview: handleSubmitDepositReview,
+        startReview: startDepositReview,
     });
 
     useEffect(() => {

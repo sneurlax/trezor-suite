@@ -17,7 +17,10 @@ import type {
 } from '@suite-native/navigation';
 
 import { useShowPushTransactionFailedDuringReviewAlert } from './useShowPushTransactionFailedDuringReviewAlert';
-import { useYieldDepositReviewBackNavigation } from './useYieldDepositReviewBackNavigation';
+import {
+    type YieldDepositReviewStatus,
+    useYieldDepositReviewBackNavigation,
+} from './useYieldDepositReviewBackNavigation';
 import { type YieldReviewSigningResult } from '../types';
 import { isUserCancelledSignError } from '../utils';
 import { pushYieldActionReviewThunk, signYieldActionReviewThunk } from '../yieldTransactionThunks';
@@ -29,13 +32,12 @@ type UseYieldDepositReviewParams = {
 };
 
 type YieldDepositReviewActionStatus = 'idle' | 'signing' | 'sending';
-type YieldDepositReviewStatus = YieldDepositReviewActionStatus | 'signed';
 
 type UseYieldDepositReviewResult = {
     depositStatus: YieldDepositReviewStatus;
-    handleSubmitDepositReview: () => Promise<YieldReviewSigningResult>;
     handleDepositSubmitted: () => Promise<void>;
     leaveReviewFromDeviceCancel: () => void;
+    startDepositReview: () => Promise<YieldReviewSigningResult>;
 };
 
 type NavigationProps = StackNavigationProps<
@@ -69,7 +71,7 @@ export const useYieldDepositReview = ({
             onReviewLeave,
         });
 
-    const handleSubmitDepositReview = useCallback(async (): Promise<YieldReviewSigningResult> => {
+    const startDepositReview = useCallback(async (): Promise<YieldReviewSigningResult> => {
         if (depositStatus === 'signed') {
             return 'signed';
         }
@@ -163,8 +165,8 @@ export const useYieldDepositReview = ({
 
     return {
         depositStatus,
-        handleSubmitDepositReview,
         handleDepositSubmitted,
         leaveReviewFromDeviceCancel,
+        startDepositReview,
     };
 };
