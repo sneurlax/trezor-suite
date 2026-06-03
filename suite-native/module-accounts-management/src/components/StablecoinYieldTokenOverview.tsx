@@ -24,7 +24,7 @@ import { FeatureFlag, useFeatureFlag } from '@suite-native/feature-flags';
 import { TokenAmountFormatter } from '@suite-native/formatters';
 import { CryptoIconWithNetwork, Icon } from '@suite-native/icons';
 import { Translation, useTranslate } from '@suite-native/intl';
-import { useResolvedYieldFlowData, useWorkInProgressAlert } from '@suite-native/module-earn';
+import { useResolvedYieldFlowData } from '@suite-native/module-earn';
 import {
     type RootStackParamList,
     RootStackRoutes,
@@ -45,7 +45,6 @@ export const StablecoinYieldTokenOverview = ({
     accountKey,
     tokenContract,
 }: StablecoinYieldTokenOverviewProps) => {
-    const handleShowWithdrawWorkInProgressAlert = useWorkInProgressAlert();
     const navigation = useNavigation<NavigationProps>();
     const { showAlert } = useAlert();
     const { translate } = useTranslate();
@@ -99,6 +98,16 @@ export const StablecoinYieldTokenOverview = ({
             },
         });
     }, [accountKey, navigation, vault]);
+
+    const handleWithdrawPress = useCallback(() => {
+        navigation.navigate(RootStackRoutes.YieldNavigator, {
+            screen: YieldStackRoutes.YieldWithdraw,
+            params: {
+                accountKey,
+                tokenContract,
+            },
+        });
+    }, [accountKey, navigation, tokenContract]);
 
     if (resolutionStatus !== 'resolved' || !vault?.token.address) return null;
 
@@ -192,8 +201,7 @@ export const StablecoinYieldTokenOverview = ({
                             </Box>
                             <Box flex={1}>
                                 <Button
-                                    // TODO: Remove once the stablecoin yield withdraw flow is implemented.
-                                    onPress={handleShowWithdrawWorkInProgressAlert}
+                                    onPress={handleWithdrawPress}
                                     intent="brand"
                                     priority="secondary"
                                     size="medium"

@@ -244,9 +244,12 @@ export enum YieldStackRoutes {
     YieldConsents = 'YieldConsents',
     YieldDepositApproval = 'YieldDepositApproval',
     YieldDeposit = 'YieldDeposit',
+    YieldWithdraw = 'YieldWithdraw',
     YieldDepositApprovalReview = 'YieldDepositApprovalReview',
     YieldDepositReview = 'YieldDepositReview',
+    YieldWithdrawReview = 'YieldWithdrawReview',
     YieldDepositComplete = 'YieldDepositComplete',
+    YieldWithdrawComplete = 'YieldWithdrawComplete',
 }
 
 export enum ReceiveStackRoutes {

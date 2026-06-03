@@ -16,7 +16,8 @@ import type {
     YieldStackRoutes,
 } from '@suite-native/navigation';
 
-import { USER_CANCELLED_ERROR_CODES } from '../constants';
+import { type YieldReviewActionStatus, type YieldReviewStatus } from '../types';
+import { isUserCancelledSignError } from '../utils';
 import { pushYieldActionReviewThunk, signYieldActionReviewThunk } from '../yieldTransactionThunks';
 import { useShowPushTransactionFailedDuringReviewAlert } from './useShowPushTransactionFailedDuringReviewAlert';
 
@@ -25,11 +26,8 @@ type UseYieldDepositReviewParams = {
     flowKey: string;
 };
 
-type YieldDepositReviewActionStatus = 'idle' | 'signing' | 'sending';
-type YieldDepositReviewStatus = YieldDepositReviewActionStatus | 'signed';
-
 type UseYieldDepositReviewResult = {
-    depositStatus: YieldDepositReviewStatus;
+    depositStatus: YieldReviewStatus;
     handleSubmitDepositReview: () => Promise<void>;
     handleDepositSubmitted: () => Promise<void>;
 };
@@ -38,10 +36,6 @@ type NavigationProps = StackNavigationProps<
     YieldStackParamList,
     YieldStackRoutes.YieldDepositReview
 >;
-
-const isUserCancelledSignError = (payload: { errorCode?: string; message?: string } | undefined) =>
-    payload?.message === 'tx-cancelled' ||
-    (!!payload?.errorCode && USER_CANCELLED_ERROR_CODES.some(code => code === payload.errorCode));
 
 export const useYieldDepositReview = ({
     flowData,
@@ -54,13 +48,12 @@ export const useYieldDepositReview = ({
         showPushTransactionFailedAlert,
         showSignTransactionFailedAlert,
     } = useShowPushTransactionFailedDuringReviewAlert('yield-deposit');
-    const [depositActionStatus, setDepositActionStatus] =
-        useState<YieldDepositReviewActionStatus>('idle');
+    const [depositActionStatus, setDepositActionStatus] = useState<YieldReviewActionStatus>('idle');
     const txReview = useSelector((state: StablecoinYieldRootState) =>
         selectStablecoinYieldTxReview(state),
     );
     const isDepositSigned = txReview.accountKey === flowData.account.key && !!txReview.serializedTx;
-    const depositStatus: YieldDepositReviewStatus =
+    const depositStatus: YieldReviewStatus =
         depositActionStatus === 'idle' && isDepositSigned ? 'signed' : depositActionStatus;
 
     const handleSubmitDepositReview = useCallback(async () => {

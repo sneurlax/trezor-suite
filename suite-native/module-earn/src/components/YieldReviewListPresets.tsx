@@ -6,7 +6,7 @@ import { CryptoAmountFormatter } from '@suite-native/formatters';
 import { type TxKeyPath } from '@suite-native/intl';
 import { ReviewOutputItemValues } from '@suite-native/transaction-management';
 
-export type YieldReviewListVariant = 'approval' | 'deposit';
+export type YieldReviewListVariant = 'approval' | 'deposit' | 'withdraw';
 
 type YieldReviewListCommonProps = {
     accountKey: AccountKey;
@@ -20,18 +20,21 @@ type YieldApprovalReviewListProps = YieldReviewListCommonProps & {
     variant: 'approval';
 };
 
-type YieldDepositReviewListProps = YieldReviewListCommonProps & {
+type YieldActionReviewListProps = YieldReviewListCommonProps & {
     receiveAmount?: string;
     receiveTokenSymbol?: string;
-    variant: 'deposit';
+    variant: 'deposit' | 'withdraw';
 };
 
-export type YieldReviewListProps = (YieldApprovalReviewListProps | YieldDepositReviewListProps) & {
+type YieldReviewListActionProps = {
     isFooterVisible?: boolean;
     isSubmitDisabled?: boolean;
     isSubmitLoading?: boolean;
     onSubmit: () => void | Promise<void>;
 };
+
+export type YieldReviewListProps = (YieldApprovalReviewListProps | YieldActionReviewListProps) &
+    YieldReviewListActionProps;
 
 export type YieldReviewCard = {
     content: ReactNode;
@@ -44,18 +47,20 @@ type DetailRowProps = {
     value: ReactNode;
 };
 
-type CreateYieldReviewCardsParams = YieldApprovalReviewListProps | YieldDepositReviewListProps;
+type CreateYieldReviewCardsParams = YieldApprovalReviewListProps | YieldActionReviewListProps;
 
 type Translate = (id: TxKeyPath) => string;
 
 const cardTitleTranslationIds = {
     approval: 'earn.yieldReview.approvalCard.title',
     deposit: 'earn.yieldReview.depositCard.title',
+    withdraw: 'earn.yieldReview.withdrawCard.title',
 } satisfies Record<YieldReviewListVariant, TxKeyPath>;
 
 const detailsTitleTranslationIds = {
     approval: 'earn.yieldReview.approvalDetailsCard.title',
     deposit: 'earn.yieldReview.transactionDetailsCard.title',
+    withdraw: 'earn.yieldReview.transactionDetailsCard.title',
 } satisfies Record<YieldReviewListVariant, TxKeyPath>;
 
 const DetailRow = ({ label, value }: DetailRowProps) => (

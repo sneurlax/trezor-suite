@@ -14,6 +14,9 @@ import { YieldDepositApprovalTransactionDataReviewScreen } from '../screens/Yiel
 import { YieldDepositCompleteScreen } from '../screens/YieldDepositCompleteScreen';
 import { YieldDepositReviewScreen } from '../screens/YieldDepositReviewScreen';
 import { YieldDepositScreen } from '../screens/YieldDepositScreen';
+import { YieldWithdrawCompleteScreen } from '../screens/YieldWithdrawCompleteScreen';
+import { YieldWithdrawReviewScreen } from '../screens/YieldWithdrawReviewScreen';
+import { YieldWithdrawScreen } from '../screens/YieldWithdrawScreen';
 
 const YieldStack = createNativeStackNavigator<YieldStackParamList>();
 
@@ -46,6 +49,11 @@ export const YieldStackNavigator = () => {
                 component={YieldDepositScreen}
             />
             <YieldStack.Screen
+                options={{ title: YieldStackRoutes.YieldWithdraw }}
+                name={YieldStackRoutes.YieldWithdraw}
+                component={YieldWithdrawScreen}
+            />
+            <YieldStack.Screen
                 options={{ title: YieldStackRoutes.YieldDepositApprovalReview }}
                 name={YieldStackRoutes.YieldDepositApprovalReview}
                 component={YieldDepositApprovalTransactionDataReviewScreen}
@@ -56,9 +64,19 @@ export const YieldStackNavigator = () => {
                 component={YieldDepositReviewScreen}
             />
             <YieldStack.Screen
+                options={{ title: YieldStackRoutes.YieldWithdrawReview }}
+                name={YieldStackRoutes.YieldWithdrawReview}
+                component={YieldWithdrawReviewScreen}
+            />
+            <YieldStack.Screen
                 options={{ title: YieldStackRoutes.YieldDepositComplete }}
                 name={YieldStackRoutes.YieldDepositComplete}
                 component={YieldDepositCompleteScreen}
+            />
+            <YieldStack.Screen
+                options={{ title: YieldStackRoutes.YieldWithdrawComplete }}
+                name={YieldStackRoutes.YieldWithdrawComplete}
+                component={YieldWithdrawCompleteScreen}
             />
         </YieldStack.Navigator>
     );
