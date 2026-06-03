@@ -34,7 +34,7 @@ type YieldDepositFlowFooterProps = {
     tokenSymbol: TokenSymbol;
 };
 
-const getTranslationId = (
+const getSubmitButtonTranslationId = (
     approvalAction?: YieldDepositFlowFooterProps['approvalAction'],
 ): TxKeyPath => {
     if (approvalAction === 'revoke') {
@@ -76,7 +76,7 @@ export const YieldDepositFlowFooter = ({
         });
     }, [amountValue, apy, CryptoAmountFormatter, tokenSymbol]);
 
-    const buttonTranslationId = getTranslationId(approvalAction);
+    const buttonTranslationId = getSubmitButtonTranslationId(approvalAction);
     const isApprovalLimitAction = approvalAction === 'increase' || approvalAction === 'revoke';
     const isEstimatedRewardsVisible =
         (shouldKeepEstimatedRewardsVisible || (!isApprovalLimitAction && !isDisabled)) &&
