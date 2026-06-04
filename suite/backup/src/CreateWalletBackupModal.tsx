@@ -10,7 +10,6 @@ import {
 } from '@suite/nfc';
 import { isAdditionalShamirBackupInProgress } from '@suite/recovery';
 import { selectIsN4w1BackupEnabled } from '@suite/settings';
-import { createAdditionalBackupThunk, verifyOwnershipThunk } from '@suite-common/backup';
 import { selectSelectedDevice } from '@suite-common/device';
 import { notificationsActions } from '@suite-common/toast-notifications';
 import { Modal } from '@trezor/components';
@@ -50,11 +49,14 @@ export const CreateWalletBackupModal = ({ onCancel }: CreateWalletBackupModalPro
     const startBackupFlow = async () => {
         setStep('verify-ownership');
 
-        const verifyResult = await dispatch(
-            verifyOwnershipThunk({ devicePath: device.path }),
-        ).unwrap();
+        const verifyResult = await TrezorConnect.recoveryDevice({
+            type: 'UnlockRepeatedBackup',
+            input_method: PROTO.RecoveryDeviceInputMethod.Matrix,
+            enforce_wordlist: true,
+            device: { path: device.path },
+        });
 
-        if (!verifyResult) {
+        if (!verifyResult.success) {
             dispatch(notificationsActions.addToast({ type: 'backup-failed' }));
             onCancel();
 
@@ -63,11 +65,12 @@ export const CreateWalletBackupModal = ({ onCancel }: CreateWalletBackupModalPro
 
         setStep('backup');
 
-        const backupResult = await dispatch(
-            createAdditionalBackupThunk({ devicePath: device.path, backupMethod }),
-        ).unwrap();
+        const backupResult = await TrezorConnect.backupDevice({
+            backup_method: backupMethod,
+            device: { path: device.path },
+        });
 
-        if (!backupResult) {
+        if (!backupResult.success) {
             dispatch(notificationsActions.addToast({ type: 'backup-failed' }));
             onCancel();
 

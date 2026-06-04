@@ -10220,7 +10220,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@suite-common/backup@workspace:suite-common/backup"
   dependencies:
-    "@suite-common/redux-utils": "workspace:*"
     "@suite-common/suite-types": "workspace:*"
     "@trezor/connect": "workspace:*"
   languageName: unknown
