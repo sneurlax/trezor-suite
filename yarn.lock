@@ -13339,6 +13339,7 @@ __metadata:
     "@trezor/requirements": "workspace:*"
     "@trezor/styles-native": "workspace:*"
     "@trezor/urls": "workspace:*"
+    "@trezor/utils": "workspace:*"
     react: "npm:19.2.4"
     react-native: "npm:0.83.2"
     react-native-reanimated: "npm:~4.2.1"
