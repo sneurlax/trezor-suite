@@ -139,8 +139,8 @@ export const setup = async (
 
     // after all is done, start bridge again
     await TrezorUserEnvLink.startBridge(
-        // @ts-expect-error
-        process.env.TESTS_TRANSPORT,
+        'local-suite-node-bridge',
+        // process.env.TESTS_TRANSPORT,
     );
 };
 
