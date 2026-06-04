@@ -90,7 +90,8 @@ jobs:
       - if: ${{ inputs.transport }}
         run: |
           sfw yarn workspaces focus @trezor/transport-bridge
-          sfw yarn && yarn workspace @trezor/transport-bridge build:js
+          sfw yarn add webpack-cli
+          sfw yarn workspace @trezor/transport-bridge build:js
       - run: './docker/docker-connect-test.sh ${{ inputs.testEnv }} -p "${{ inputs.testPattern }}" -f "${{ inputs.testsFirmware }}" $ADDITIONAL_ARGS'
       - name: Extract and Upload Logs
         if: ${{ !cancelled() }}
