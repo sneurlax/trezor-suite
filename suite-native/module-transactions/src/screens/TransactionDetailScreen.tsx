@@ -1,9 +1,15 @@
 import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 
 import { useServices } from '@suite-common/dependency-injection';
 import { useFormatters } from '@suite-common/formatters';
+import {
+    type AccountsRootState,
+    createTargets,
+    selectAccountByKey,
+} from '@suite-common/wallet-core';
 import { redactNumericalSubstring } from '@suite-common/wallet-utils';
 import { events, selectNativeAnalyticsDep } from '@suite-native/analytics';
 import { Button, HStack, Text, VStack, useDiscreetMode } from '@suite-native/atoms';
@@ -49,6 +55,10 @@ export const TransactionDetailScreen = ({
         askForRating();
     });
 
+    const account = useSelector((state: AccountsRootState) =>
+        selectAccountByKey(state, accountKey),
+    );
+
     useEffect(() => {
         if (transaction) {
             analytics.report({
@@ -83,6 +93,8 @@ export const TransactionDetailScreen = ({
         });
         openInBlockchain();
     };
+
+    const allOutputs = account !== null ? createTargets({ transaction, account }) : [];
 
     return (
         <Screen
@@ -128,6 +140,7 @@ export const TransactionDetailScreen = ({
                 <VStack spacing="sp24">
                     <TransactionDetailHeader
                         transaction={transaction}
+                        allOutputs={allOutputs}
                         tokenTransfer={tokenTransfer as TypedTokenTransfer}
                     />
                     {isUnstakeTransaction && (
