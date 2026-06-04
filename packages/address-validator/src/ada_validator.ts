@@ -20,16 +20,21 @@ function getDecoded(address: string): any {
 
 function isValidLegacyAddress(address: string): boolean {
     const decoded = getDecoded(address);
-    if (!decoded || (!Array.isArray(decoded) && decoded.length !== 2)) {
+    if (!decoded || !Array.isArray(decoded) || decoded.length !== 2) {
         return false;
     }
 
     const tagged = decoded[0];
+    const taggedValue = tagged?.value;
     const validCrc = decoded[1];
-    if (typeof validCrc !== 'number') {
+    if (
+        taggedValue === null ||
+        typeof taggedValue === 'undefined' ||
+        typeof validCrc !== 'number'
+    ) {
         return false;
     }
-    const crc = CRC.crc32(tagged.value);
+    const crc = CRC.crc32(taggedValue);
 
     return crc === validCrc;
 }
