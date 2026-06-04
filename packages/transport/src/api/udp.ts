@@ -17,6 +17,10 @@ import { arrayPartition, isNotUndefined, resolveAfter } from '@trezor/utils';
 
 const PING = Buffer.from('PINGPING');
 const PONG = Buffer.from('PONGPONG');
+const CHANNELS = {
+    wire: PathInternal('127.0.0.1:21324'),
+    debug: PathInternal('127.0.0.1:21325'),
+};
 
 export class UdpApi extends AbstractApi {
     chunkSize = 64;
@@ -122,8 +126,8 @@ export class UdpApi extends AbstractApi {
         return this.readBuffer.read(path, options?.signal);
     }
 
-    private async ping(path: PathInternal, signal?: AbortSignal) {
-        await this.write(path, PING, { signal });
+    private async ping(_path: PathInternal, signal?: AbortSignal) {
+        await this.write(CHANNELS.debug, PING, { signal });
         if (signal?.aborted) {
             throw new Error(ERRORS.ABORTED_BY_SIGNAL);
         }
@@ -152,8 +156,7 @@ export class UdpApi extends AbstractApi {
             this.interface.addListener('error', onError);
             this.interface.addListener('message', onMessage);
 
-            // TODO temporarily increased from 1s to 4s until success screen is solved on fw side
-            const timeout = setTimeout(onError, 4000);
+            const timeout = setTimeout(onError, 1000);
         });
 
         return pinged;
@@ -161,9 +164,7 @@ export class UdpApi extends AbstractApi {
 
     public async enumerate(signal?: AbortSignal) {
         // in theory we could support multiple devices, but we don't yet
-        const paths = this.debugLink
-            ? [PathInternal('127.0.0.1:21325')]
-            : [PathInternal('127.0.0.1:21324')];
+        const paths = this.debugLink ? [CHANNELS.debug] : [CHANNELS.wire];
 
         try {
             const enumerateResult = await Promise.all(
