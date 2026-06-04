@@ -413,8 +413,10 @@ const init = async () => {
         const statePatch = processStatePatch();
         // load and wait for handshake message from renderer
 
-        // Refresh if it failed to load
-        mainWindow.webContents.on('did-fail-load', () => {
+        // Refresh if it failed to load, but ignore ERR_ABORTED (-3) which fires when
+        // the user reloads while a load is in progress — not a real failure.
+        mainWindow.webContents.on('did-fail-load', (_, errorCode) => {
+            if (errorCode === -3) return;
             loadIndex(mainWindow);
         });
 
