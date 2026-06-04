@@ -13,13 +13,19 @@ import { FormatterProvider } from '@suite-common/formatters';
 import { ReactNativeQueryProvider } from '@suite-common/react-query/src/components/ReactNativeQueryProvider';
 import { applicationInit } from '@suite-native/app-init';
 import { selectShouldUserBeAuthenticated } from '@suite-native/biometrics';
+import { launchArguments } from '@suite-native/config';
 import { configureNetInfo } from '@suite-native/connection-status';
 import { useFormattersConfig } from '@suite-native/formatters-config';
 import { IntlProvider } from '@suite-native/intl';
 import { KillswitchMessageScreen } from '@suite-native/message-system';
 import { NavigationContainerWithAnalytics } from '@suite-native/navigation';
 import { initSentry } from '@suite-native/sentry';
-import { StoreProvider, selectIsAppReady } from '@suite-native/state';
+import {
+    type PreloadedState,
+    StoreProvider,
+    initStore,
+    selectIsAppReady,
+} from '@suite-native/state';
 
 import { BannersRenderer } from './BannersRenderer';
 import { ModalsRenderer } from './ModalsRenderer';
@@ -50,6 +56,12 @@ SplashScreen.preventAutoHideAsync();
 // Calling this will stop all previously added listeners on NetInfo from being called again.
 // https://github.com/react-native-netinfo/react-native-netinfo?tab=readme-ov-file#configure
 configureNetInfo();
+
+// The store is created synchronously at startup. It only wires up reducers and middleware;
+// reading the encryption key from SecureStore is deferred until the encrypted storage is first
+// accessed (during persist rehydration), so there is no need to gate creation on app foreground.
+// `launchArguments.preloadedState` is populated only in E2E builds, it is empty otherwise.
+const store = initStore(launchArguments.preloadedState as PreloadedState);
 
 const AppComponent = () => {
     const dispatch = useDispatch();
@@ -93,7 +105,7 @@ const AppComponent = () => {
 
 const PureApp = () => (
     <GestureHandlerRootView style={{ flex: 1 }}>
-        <StoreProvider>
+        <StoreProvider store={store}>
             <ReactNativeQueryProvider>
                 <IntlProvider>
                     <KeyboardProvider>

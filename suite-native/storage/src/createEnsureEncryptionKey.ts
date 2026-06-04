@@ -13,8 +13,8 @@ export type EnsureEncryptionKeyDep = {
     ensureEncryptionKey: EnsureEncryptionKey;
 };
 
-export const createEnsureEncryptionKey = (): EnsureEncryptionKey => {
-    const secureKeyPromise = SecureStore.getItemAsync(ENCRYPTION_KEY)
+const resolveEncryptionKey = (): Promise<StorageEncryptionKey | null> =>
+    SecureStore.getItemAsync(ENCRYPTION_KEY)
         .catch(error => {
             // If there is an error, report it and try to read one more time.
             captureException(error, { tags: { attempt: 1 } });
@@ -50,5 +50,16 @@ export const createEnsureEncryptionKey = (): EnsureEncryptionKey => {
                 });
         });
 
-    return () => secureKeyPromise;
+export const createEnsureEncryptionKey = (): EnsureEncryptionKey => {
+    // Resolved lazily on the first `ensureEncryptionKey()` call, then memoized.
+    // This defers the SecureStore (keychain) read out of store creation, so it
+    // happens only when encrypted storage is actually accessed (and the app is
+    // already in the foreground / device unlocked).
+    let secureKeyPromise: Promise<StorageEncryptionKey | null> | null = null;
+
+    return () => {
+        secureKeyPromise ??= resolveEncryptionKey();
+
+        return secureKeyPromise;
+    };
 };
