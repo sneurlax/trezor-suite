@@ -156,7 +156,7 @@ export class UdpApi extends AbstractApi {
             this.interface.addListener('error', onError);
             this.interface.addListener('message', onMessage);
 
-            const timeout = setTimeout(onError, 1000);
+            const timeout = setTimeout(onError, 4000);
         });
 
         return pinged;
