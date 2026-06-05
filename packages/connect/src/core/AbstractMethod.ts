@@ -191,8 +191,9 @@ export abstract class AbstractMethod<Name extends CallMethodPayload['method'], P
         this.useDeviceState = true;
         this.useUi = true;
         // Cardano derivation is driven solely by the application-declared enabled-networks set
-        // (`TrezorConnect.setEnabledNetworks(...)` / `init({ enabledNetworks })`). There is no
-        // per-call escape hatch — `useCardanoDerivation` is no longer part of `CommonParams`.
+        // (`init({ enabledNetworks })`, or `updateConnectSettings({ enabledNetworks })` on
+        // in-process hosts). There is no per-call escape hatch — `useCardanoDerivation` is no
+        // longer part of `CommonParams`.
         const adaEnabled = enabledNetworksStore.has('ada');
 
         // DX guard: when a call is clearly Cardano-bound — by `cardano*` method name or by an
@@ -205,7 +206,7 @@ export abstract class AbstractMethod<Name extends CallMethodPayload['method'], P
             throw ERRORS.TypedError(
                 'Method_NetworkNotEnabled',
                 `Cardano operation '${payload.method}' requires 'ada' in enabled networks. ` +
-                    "Call TrezorConnect.setEnabledNetworks(['ada']) before invoking Cardano methods.",
+                    "Declare it via init({ enabledNetworks: ['ada'] }) before invoking Cardano methods.",
             );
         }
 

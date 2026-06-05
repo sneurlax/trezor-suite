@@ -13,8 +13,6 @@ export interface ConnectFactoryDependencies<SettingsType extends Record<string, 
     call: CallMethod;
     eventEmitter: ConnectEmitter;
     updateConnectSettings: TrezorConnect['updateConnectSettings'];
-    setEnabledNetworks: TrezorConnect['setEnabledNetworks'];
-    getEnabledNetworks: TrezorConnect['getEnabledNetworks'];
     uiResponse: TrezorConnect['uiResponse'];
     cancel: TrezorConnect['cancel'];
     dispose: TrezorConnect['dispose'];
@@ -29,8 +27,6 @@ export const factory = <
         init,
         call,
         updateConnectSettings,
-        setEnabledNetworks,
-        getEnabledNetworks,
         uiResponse,
         cancel,
         dispose,
@@ -57,10 +53,6 @@ export const factory = <
     return {
         init,
         updateConnectSettings,
-
-        setEnabledNetworks,
-
-        getEnabledNetworks,
 
         on: eventEmitter.on.bind(eventEmitter),
 

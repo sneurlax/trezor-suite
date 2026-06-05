@@ -26,7 +26,7 @@ describe('walletSettings Actions', () => {
     walletSettingsFixtures.forEach(f => {
         it(f.description, async () => {
             const store = initStore(f.initialState);
-            // Simulate the connect-init listener: setEnabledNetworks → changeNetworks dispatch.
+            // Simulate the connect-init listener: updateConnectSettings({ enabledNetworks }) → changeNetworks dispatch.
             wireEnabledNetworksMock(store, walletSettingsActions.changeNetworks);
             await store.dispatch(f.action() as any);
             expect(store.getState().wallet.settings).toMatchObject(f.result);

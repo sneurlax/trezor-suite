@@ -4,6 +4,7 @@ import { type MethodPermission } from '@trezor/connect-common';
 
 import type { MethodMessage } from '../core/AbstractMethod';
 import { AbstractMethod } from '../core/AbstractMethod';
+import * as enabledNetworksStore from '../data/enabledNetworksStore';
 import * as settingsStore from '../data/settingsStore';
 
 export default class GetSettings extends AbstractMethod<'getSettings'> {
@@ -17,6 +18,12 @@ export default class GetSettings extends AbstractMethod<'getSettings'> {
     }
 
     run() {
-        return Promise.resolve(settingsStore.get());
+        // `enabledNetworks` lives in its own store (guard hot path + sanitization/additive
+        // logic); merge its live canonical set in so callers read the current value here
+        // instead of via a separate getEnabledNetworks method.
+        return Promise.resolve({
+            ...settingsStore.get(),
+            enabledNetworks: enabledNetworksStore.get(),
+        });
     }
 }

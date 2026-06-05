@@ -475,7 +475,7 @@ describe('Storage actions', () => {
         store.dispatch(await preloadStore());
         expect(store.getState().wallet.graph.data.length).toBe(2);
 
-        // Simulate the connect-init listener: setEnabledNetworks → changeNetworks dispatch.
+        // Simulate the connect-init listener: updateConnectSettings({ enabledNetworks }) → changeNetworks dispatch.
         wireEnabledNetworksMock(store, changeNetworks);
         // disable btc network, enable ltc, triggering ACCOUNT.REMOVE
         await store.dispatch(changeCoinVisibility({ symbol: 'ltc', shouldBeVisible: true }));

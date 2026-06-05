@@ -27,10 +27,10 @@ export const changeCoinVisibility = createThunk<
         } else if (!isAlreadyHidden) {
             enabledNetworks = [...enabledNetworks, symbol];
         }
-        // Connect is the runtime source of truth. The setter triggers a canonical
+        // Connect is the runtime source of truth. The update triggers a canonical
         // 'enabled-networks-changed' event; the connect-init listener writes it back to
         // Redux. By the time await resolves, Redux is up-to-date (in-module IPC is sync).
-        await TrezorConnect.setEnabledNetworks(enabledNetworks);
+        await TrezorConnect.updateConnectSettings({ enabledNetworks });
 
         const accountsToRemove = selectAccountsToBeForgotten(getState());
         if (accountsToRemove.length > 0) {
@@ -58,9 +58,9 @@ export const addEnabledNetworks = createThunk<void, NetworkSymbol[], void>(
         const union = [...new Set([...current, ...networks])];
         if (union.length === current.length) return;
 
-        // Connect is the runtime source of truth; the setter emits 'enabled-networks-changed'
+        // Connect is the runtime source of truth; the update emits 'enabled-networks-changed'
         // which the connect-init listener mirrors back into Redux.
-        await TrezorConnect.setEnabledNetworks(union);
+        await TrezorConnect.updateConnectSettings({ enabledNetworks: union });
     },
 );
 

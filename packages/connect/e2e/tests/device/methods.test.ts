@@ -130,7 +130,7 @@ describe(`TrezorConnect methods`, () => {
                         const enabledNetworks = testCase.method.startsWith('cardano')
                             ? [...new Set(['ada', ...(t.enabledNetworks ?? [])])]
                             : (t.enabledNetworks ?? []);
-                        await TrezorConnect.setEnabledNetworks(enabledNetworks);
+                        await TrezorConnect.updateConnectSettings({ enabledNetworks });
 
                         // @ts-expect-error, string + params union
                         const result = await TrezorConnect[testCase.method](t.params);

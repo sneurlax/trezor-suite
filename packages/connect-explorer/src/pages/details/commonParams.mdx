@@ -59,6 +59,12 @@ Cardano derivation is driven **solely** by this declaration — there is no per-
 
 ### Runtime mutation
 
-`TrezorConnect.setEnabledNetworks([...])` and `getEnabledNetworks()` are internal plumbing for in-process Core hosts — code that embeds `@trezor/connect` directly and owns the Core (Trezor Suite itself, or a consumer of the `@trezor/connect` package). The setter mutates the set at runtime (e.g. when the user toggles a coin) and broadcasts the canonical result via the `'enabled-networks-changed'` event.
+To change the set at runtime, pass `enabledNetworks` to `updateConnectSettings`:
 
-On the thin-client transports (popup / desktop / webextension / deeplink) the Core lives in the host, so `setEnabledNetworks` is not available there — those integrations declare their networks through `init` instead.
+```ts
+TrezorConnect.updateConnectSettings({ enabledNetworks: ['btc', 'eth', 'ada'] });
+```
+
+This is internal plumbing for in-process Core hosts — code that embeds `@trezor/connect` directly and owns the Core (Trezor Suite itself, or a consumer of the `@trezor/connect` package). It applies the set (e.g. when the user toggles a coin) and broadcasts the canonical result via the `'enabled-networks-changed'` event; the current set is readable from `getSettings().enabledNetworks`.
+
+On the thin-client transports (popup / desktop / webextension / deeplink) the Core lives in the host, so runtime mutation is not available there — those integrations declare their networks through `init` instead.

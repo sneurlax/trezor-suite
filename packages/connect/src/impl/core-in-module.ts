@@ -19,7 +19,6 @@ import type {
     CoreEventMessage,
     CoreRequestMessage,
     MethodResponseMessage,
-    SetEnabledNetworks,
     UiResponseEvent,
     UpdateConnectSettings,
 } from '@trezor/connect-common';
@@ -43,7 +42,6 @@ export abstract class CoreInModule implements ConnectFactoryDependencies<Connect
     private coreManager;
     private log;
     private messagePromises;
-    private enabledNetworksCache: string[] = [];
 
     private readonly boundOnCoreEvent = this.onCoreEvent.bind(this);
 
@@ -109,7 +107,6 @@ export abstract class CoreInModule implements ConnectFactoryDependencies<Connect
                 break;
 
             case ENABLED_NETWORKS_CHANGED:
-                this.enabledNetworksCache = [...payload];
                 this.eventEmitter.emit(ENABLED_NETWORKS_CHANGED, payload);
                 break;
 
@@ -141,7 +138,7 @@ export abstract class CoreInModule implements ConnectFactoryDependencies<Connect
     protected abstract updateProxy(proxy: UpdateConnectSettings['proxy']): Promise<void>;
 
     public async updateConnectSettings(params: UpdateConnectSettings) {
-        const { proxy, transports: newTransports } = params;
+        const { proxy, transports: newTransports, enabledNetworks } = params;
 
         try {
             await this.updateProxy(proxy);
@@ -156,24 +153,17 @@ export abstract class CoreInModule implements ConnectFactoryDependencies<Connect
             this.handleCoreMessage({ type: TRANSPORT.SET_TRANSPORTS, payload: { transports } });
         }
 
-        return { success: true as const, payload: { message: 'success' } } as const;
-    }
-
-    public setEnabledNetworks(networks: SetEnabledNetworks) {
-        try {
-            this.handleCoreMessage({ type: SET_ENABLED_NETWORKS, payload: networks });
-        } catch (err) {
-            return Promise.resolve(createErrorMessage(err));
+        // enabledNetworks mutation reuses the canonical Core handler; it sanitizes the input
+        // and broadcasts the post-validation set via the 'enabled-networks-changed' event.
+        if (enabledNetworks !== undefined) {
+            try {
+                this.handleCoreMessage({ type: SET_ENABLED_NETWORKS, payload: enabledNetworks });
+            } catch (err) {
+                return Promise.resolve(createErrorMessage(err));
+            }
         }
 
-        return Promise.resolve({
-            success: true as const,
-            payload: { message: 'success' },
-        } as const);
-    }
-
-    public getEnabledNetworks() {
-        return Promise.resolve([...this.enabledNetworksCache]);
+        return { success: true as const, payload: { message: 'success' } } as const;
     }
 
     public async call(params: CallMethodPayload) {

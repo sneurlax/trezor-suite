@@ -77,7 +77,7 @@ describe(`TrezorConnect.discoverAccounts`, () => {
 
         // The bundle includes a Cardano coin, so 'ada' must be enabled — otherwise Connect
         // rejects the call with Method_NetworkNotEnabled.
-        await TrezorConnect.setEnabledNetworks(['ada']);
+        await TrezorConnect.updateConnectSettings({ enabledNetworks: ['ada'] });
 
         const result = await TrezorConnect.discoverAccounts({
             coins: [

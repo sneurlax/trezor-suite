@@ -3,13 +3,14 @@ interface StoreLike {
 }
 
 /**
- * Wires the global `TrezorConnect.setEnabledNetworks` mock so it dispatches the
- * `changeNetworks` action into the provided store, simulating the listener registered
- * by `connectInitThunk` in real apps. Pass the action creator to avoid a dep from
- * `@suite-common/test-utils` to `@suite-common/wallet-core`.
+ * Wires the global `TrezorConnect.updateConnectSettings` mock so that an
+ * `{ enabledNetworks }` update dispatches the `changeNetworks` action into the provided
+ * store, simulating the listener registered by `connectInitThunk` in real apps. Pass the
+ * action creator to avoid a dep from `@suite-common/test-utils` to `@suite-common/wallet-core`.
  *
- * Use in tests where `changeCoinVisibility` (or any code calling `setEnabledNetworks`)
- * is expected to produce a `changeNetworks` Redux action end-to-end.
+ * Use in tests where `changeCoinVisibility` (or any code calling
+ * `updateConnectSettings({ enabledNetworks })`) is expected to produce a `changeNetworks`
+ * Redux action end-to-end.
  */
 export const wireEnabledNetworksMock = (
     store: StoreLike,
@@ -25,8 +26,10 @@ export const wireEnabledNetworksMock = (
 
     const TrezorConnect = require('@trezor/connect').default;
 
-    const impl = (networks: string[]) => {
-        store.dispatch(changeNetworksAction(networks));
+    const impl = (params: { enabledNetworks?: string[] }) => {
+        if (params?.enabledNetworks) {
+            store.dispatch(changeNetworksAction(params.enabledNetworks));
+        }
 
         return Promise.resolve({
             success: true,
@@ -37,5 +40,5 @@ export const wireEnabledNetworksMock = (
     // Some test environments (e.g. wallet-core) don't activate the @trezor/connect auto-mock
     // from `test-utils/__mocks__`. Replace the property unconditionally — works whether the
     // existing function is the real one or a jest.fn.
-    TrezorConnect.setEnabledNetworks = jest.fn(impl);
+    TrezorConnect.updateConnectSettings = jest.fn(impl);
 };

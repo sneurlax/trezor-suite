@@ -11,7 +11,7 @@ import { getCoinInfo } from './coinInfo';
 
 let networks: ReadonlySet<string> = new Set();
 
-// The set originates from untrusted 3rd-party input (init settings, `setEnabledNetworks`,
+// The set originates from untrusted 3rd-party input (init settings, `updateConnectSettings`,
 // the popup/desktop handshake, the mobile deeplink JSON). TS types are not a runtime
 // guarantee, so coerce defensively: accept only an array, and keep only entries that are
 // non-empty strings AND resolve to a known coin (`getCoinInfo`). Unknown symbols (e.g.

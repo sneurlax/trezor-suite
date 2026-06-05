@@ -27,7 +27,7 @@ describe('keepSession common param', () => {
 
         // With 'ada' removed from the runtime set, a Cardano-bound call (coin: 'ada') is
         // rejected up-front by Connect's guard rather than reaching the device.
-        await TrezorConnect.setEnabledNetworks([]);
+        await TrezorConnect.updateConnectSettings({ enabledNetworks: [] });
         const noDerivation = await TrezorConnect.getAccountInfo({
             coin: 'ada',
             path: "m/1852'/1815'/0'/0/0",
@@ -37,7 +37,7 @@ describe('keepSession common param', () => {
         expect(noDerivation.error.message).toContain("requires 'ada' in enabled networks");
 
         // Re-enable. The next call forces a session re-create with derive_cardano.
-        await TrezorConnect.setEnabledNetworks(['ada']);
+        await TrezorConnect.updateConnectSettings({ enabledNetworks: ['ada'] });
         const enableDerivation = await TrezorConnect.getAccountInfo({
             coin: 'ada',
             path: "m/1852'/1815'/0'/0/0",

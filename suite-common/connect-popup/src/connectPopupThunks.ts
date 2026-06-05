@@ -297,10 +297,11 @@ export const connectPopupDeeplinkThunk = createThunk<void, { url: string }>(
             try {
                 const networks = JSON.parse(queryParams.enabledNetworks);
                 if (Array.isArray(networks) && networks.length) {
-                    const current = await TrezorConnect.getEnabledNetworks();
+                    const settings = await TrezorConnect.getSettings();
+                    const current = settings.success ? (settings.payload.enabledNetworks ?? []) : [];
                     const union = [...new Set([...current, ...networks])];
                     if (union.length > current.length) {
-                        await TrezorConnect.setEnabledNetworks(union);
+                        await TrezorConnect.updateConnectSettings({ enabledNetworks: union });
                     }
                 }
             } catch {
