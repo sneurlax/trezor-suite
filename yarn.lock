@@ -10370,6 +10370,7 @@ __metadata:
   resolution: "@suite-common/discreet-mode@workspace:suite-common/discreet-mode"
   dependencies:
     "@reduxjs/toolkit": "npm:2.11.2"
+    "@suite-common/redux-utils": "workspace:*"
     react: "npm:19.2.4"
     react-redux: "npm:9.2.0"
   languageName: unknown
@@ -11502,6 +11503,7 @@ __metadata:
     "@storybook/react-native": "npm:^10.2.1"
     "@suite-common/dependency-injection": "workspace:*"
     "@suite-common/device": "workspace:*"
+    "@suite-common/discreet-mode": "workspace:*"
     "@suite-common/e2e-evolu-client": "workspace:*"
     "@suite-common/firmware-authenticity": "workspace:*"
     "@suite-common/formatters": "workspace:*"
@@ -12255,6 +12257,7 @@ __metadata:
     "@shopify/react-native-skia": "npm:2.5.1"
     "@suite-common/dependency-injection": "workspace:*"
     "@suite-common/device": "workspace:*"
+    "@suite-common/discreet-mode": "workspace:*"
     "@suite-common/formatters": "workspace:*"
     "@suite-common/graph": "workspace:*"
     "@suite-common/redux-utils": "workspace:*"

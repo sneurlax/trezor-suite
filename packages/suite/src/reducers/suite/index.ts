@@ -10,7 +10,7 @@ import { prepareSuiteSettingsReducer } from '@suite/settings';
 import { torReducer } from '@suite/tor';
 import { prepareAnalyticsReducer } from '@suite-common/analytics-redux';
 import { prepareConnectPopupReducer } from '@suite-common/connect-popup';
-import { discreetModeReducer } from '@suite-common/discreet-mode';
+import { prepareDiscreetModeReducer } from '@suite-common/discreet-mode';
 import { logsSlice } from '@suite-common/logger';
 import { prepareMessageSystemReducer } from '@suite-common/message-system';
 import { createNotificationsReducer } from '@suite-common/toast-notifications';
@@ -28,6 +28,7 @@ const analytics = prepareAnalyticsReducer(extraDependencies);
 // Type annotation as a workaround for type-check error "The inferred type of 'default' cannot be named..."
 const messageSystem = prepareMessageSystemReducer(extraDependencies);
 const device = deviceSlice.prepareReducer(extraDependencies);
+const discreetMode = prepareDiscreetModeReducer(extraDependencies);
 const flags = prepareFlagsReducer(extraDependencies);
 const suiteSettings = prepareSuiteSettingsReducer(extraDependencies);
 const connectPopupReducer = prepareConnectPopupReducer(extraDependencies);
@@ -35,7 +36,7 @@ const walletConnectReducer = prepareWalletConnectReducer(extraDependencies);
 
 export default {
     suite,
-    discreetMode: discreetModeReducer,
+    discreetMode,
     tor: torReducer,
     suiteSettings,
     flags,

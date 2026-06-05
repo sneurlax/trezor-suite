@@ -44,6 +44,7 @@ const walletSettingsReducer = prepareWalletSettingsReducer(extraDependencies);
 const rootReducer = combineReducers({
     suite: createReducer({}, () => ({})),
     tor: torReducer,
+    discreetMode: createReducer({ isActive: false }, () => {}),
     locks: locksReducer,
     device: createReducer(
         { devices: [fixtures.DEVICE], selectedDevice: fixtures.DEVICE },

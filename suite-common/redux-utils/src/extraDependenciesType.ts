@@ -108,6 +108,7 @@ export type ExtraDependenciesStatic = {
         storageLoadTokenManagement: StorageLoadReducer;
         storageLoadWalletSettings: StorageLoadReducer;
         storageLoadBioAuth: StorageLoadReducer;
+        storageLoadDiscreetMode: StorageLoadReducer;
         storageLoadFlags: StorageLoadReducer;
         storageLoadSuiteSettings: StorageLoadReducer;
     };

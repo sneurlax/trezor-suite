@@ -154,6 +154,7 @@ export const extraDependenciesCommonMock: ExtraDependencies = {
         storageLoadDevices: notImplementedReducer('storageLoadDevices'),
         storageLoadFormDrafts: notImplementedReducer('storageLoadFormDrafts'),
         storageLoadTokenManagement: notImplementedReducer('storageLoadTokenManagement'),
+        storageLoadDiscreetMode: notImplementedReducer('storageLoadDiscreetMode'),
         storageLoadWalletSettings: notImplementedReducer('storageLoadWalletSettings'),
         storageLoadBioAuth: notImplementedReducer('storageLoadBioAuth'),
         storageLoadFlags: notImplementedReducer('storageLoadFlags'),

@@ -76,8 +76,6 @@ const analyticsMiddleware = createMiddlewareWithExtraDeps(
                 type: events.menuToggleDiscreetEvent.name,
                 payload: { value: action.payload },
             });
-
-            return result;
         }
 
         if (isAnyOf(firmwareUpdate.fulfilled, firmwareUpdate.rejected)(action)) {

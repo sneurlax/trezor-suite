@@ -29,6 +29,7 @@ import { createBip329CompositionRoot } from '@suite-common/bip329';
 import { delegatedIdentityKeyCompositionRoot } from '@suite-common/delegated-identity-key';
 import { toGetter } from '@suite-common/dependency-injection';
 import { type DeviceReducerState, selectDeviceByStaticSessionId } from '@suite-common/device';
+import type { DiscreetModeState } from '@suite-common/discreet-mode';
 import { FW_HASH_CHECK_DEFAULT_TIMEOUTS } from '@suite-common/firmware-authenticity';
 import { type PlatformEncryptionDep } from '@suite-common/platform-encryption';
 import {
@@ -325,6 +326,8 @@ export const extraDependencies: ExtraDependenciesStatic = {
                 state.drafts[d.key] = d.value;
             });
         },
+        storageLoadDiscreetMode: (state: DiscreetModeState, { payload }: StorageLoadAction) =>
+            payload.discreetMode ? { ...state, ...payload.discreetMode } : state,
         storageLoadWalletSettings: (state: WalletSettingsState, { payload }: StorageLoadAction) =>
             payload.walletSettings ? { ...state, ...payload.walletSettings } : state,
         // this is deprecated, bioAuth settings is now stored in electron store
