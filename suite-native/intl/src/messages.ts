@@ -3145,6 +3145,9 @@ export const messages = {
                 domain: 'Domain',
                 message: 'Message',
             },
+            tradedAssets: {
+                recipient: 'Recipient',
+            },
         },
         tradingConfirmationScreen: {
             approveHeaderTitle: 'Approve {symbol} spending',
