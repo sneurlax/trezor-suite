@@ -39,10 +39,9 @@ export const TradeActions = ({ selectedAccount }: TradeActionsProps) => {
         dispatch(goto(payload));
     };
 
-    const navigateToTrading = (
-        routeName: 'wallet-trading-buy' | 'wallet-trading-sell',
-        type: 'buy' | 'sell',
-    ) => {
+    const navigateToTrading = (type: 'buy' | 'sell') => {
+        const routeName = `wallet-trading-${type}` as const;
+
         if (account) {
             dispatch(
                 tradingActions.setTradingFromPrefilledAccount(
@@ -72,14 +71,14 @@ export const TradeActions = ({ selectedAccount }: TradeActionsProps) => {
                 <ButtonGroup intent="neutral" priority="secondary" isDisabled={isAccountLoading}>
                     <HeaderActionButton
                         icon="plus"
-                        onClick={() => navigateToTrading('wallet-trading-buy', 'buy')}
+                        onClick={() => navigateToTrading('buy')}
                         data-testid="@wallet/menu/wallet-trading-buy"
                     >
                         <Translation id="TR_NAV_BUY" />
                     </HeaderActionButton>
                     <HeaderActionButton
                         icon="minus"
-                        onClick={() => navigateToTrading('wallet-trading-sell', 'sell')}
+                        onClick={() => navigateToTrading('sell')}
                         data-testid="@wallet/menu/wallet-trading-sell"
                     >
                         <Translation id="TR_NAV_SELL" />
