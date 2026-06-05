@@ -118,4 +118,48 @@ describe('enabledNetworksStore', () => {
             expect(enabledNetworksStore.has('ada')).toBe(true);
         });
     });
+
+    describe('sanitizes untrusted input (3rd-party shape validation)', () => {
+        it('set drops non-string and empty entries', () => {
+            // emulate untrusted input that lies about its type
+            const result = enabledNetworksStore.set([
+                'btc',
+                '',
+                42,
+                null,
+                undefined,
+                { coin: 'eth' },
+                ['ada'],
+                'ada',
+            ] as any);
+
+            expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'ada']));
+            expect(result.canonical).toHaveLength(2);
+        });
+
+        it('add drops non-string and empty entries', () => {
+            enabledNetworksStore.set(['btc']);
+
+            const result = enabledNetworksStore.add([null, 'ada', '', 7] as any);
+
+            expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'ada']));
+            expect(result.canonical).toHaveLength(2);
+        });
+
+        it('coerces a non-array input to an empty set', () => {
+            const result = enabledNetworksStore.set('ada' as any);
+
+            expect(result.canonical).toEqual([]);
+            expect(enabledNetworksStore.has('ada')).toBe(false);
+        });
+
+        it('add ignores a non-array input (no-op)', () => {
+            enabledNetworksStore.set(['btc']);
+
+            const result = enabledNetworksStore.add({ ada: true } as any);
+
+            expect(result.changed).toBe(false);
+            expect(result.canonical).toEqual(['btc']);
+        });
+    });
 });
