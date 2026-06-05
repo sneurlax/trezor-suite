@@ -41,6 +41,11 @@ export type MerklRewardsSource = {
     address: string;
 };
 
+type UseGetMerklRewardsQueryEntriesOptions = {
+    isDebugMode?: boolean;
+    skipEmptyAccountCheck?: boolean;
+};
+
 function getMerklRewardsQueryEntries(sources: MerklRewardsSource[]) {
     const candidatesForMerklRewards = sources.flatMap(source => {
         const network = getNetwork(source.symbol);
@@ -65,20 +70,35 @@ function getMerklRewardsQueryEntries(sources: MerklRewardsSource[]) {
         .filter((queryEntry): queryEntry is NonNullable<typeof queryEntry> => Boolean(queryEntry));
 }
 
-export function useGetMerklRewardsQueryEntries(accounts: Account[], isDebugMode?: boolean) {
-    return useMemo(() => {
-        const accountsRewardSources = accounts
-            .filter(
-                (account): account is AccountWithNetworkType<'ethereum'> =>
-                    account?.networkType === 'ethereum' &&
-                    isEarnYieldClaimSupported(account.symbol, { isDebugMode }) &&
-                    !isEmptyEvmAccount(account),
-            )
-            .map(account => ({
-                symbol: account.symbol,
-                address: account.descriptor,
-            }));
+export function getMerklRewardsQueryEntriesForAccounts(
+    accounts: Account[],
+    { isDebugMode, skipEmptyAccountCheck = false }: UseGetMerklRewardsQueryEntriesOptions = {},
+) {
+    const accountsRewardSources = accounts
+        .filter(
+            (account): account is AccountWithNetworkType<'ethereum'> =>
+                account?.networkType === 'ethereum' &&
+                isEarnYieldClaimSupported(account.symbol, { isDebugMode }) &&
+                (skipEmptyAccountCheck || !isEmptyEvmAccount(account)),
+        )
+        .map(account => ({
+            symbol: account.symbol,
+            address: account.descriptor,
+        }));
 
-        return getMerklRewardsQueryEntries(accountsRewardSources);
-    }, [accounts, isDebugMode]);
+    return getMerklRewardsQueryEntries(accountsRewardSources);
+}
+
+export function useGetMerklRewardsQueryEntries(
+    accounts: Account[],
+    { isDebugMode, skipEmptyAccountCheck }: UseGetMerklRewardsQueryEntriesOptions = {},
+) {
+    return useMemo(
+        () =>
+            getMerklRewardsQueryEntriesForAccounts(accounts, {
+                isDebugMode,
+                skipEmptyAccountCheck,
+            }),
+        [accounts, isDebugMode, skipEmptyAccountCheck],
+    );
 }
