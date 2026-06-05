@@ -161,5 +161,23 @@ describe('enabledNetworksStore', () => {
             expect(result.changed).toBe(false);
             expect(result.canonical).toEqual(['btc']);
         });
+
+        it('drops unknown coin symbols, keeps known ones', () => {
+            const result = enabledNetworksStore.set(['btc', 'meow', 'ada', 'notacoin']);
+
+            expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'ada']));
+            expect(result.canonical).toHaveLength(2);
+            expect(enabledNetworksStore.has('meow')).toBe(false);
+        });
+
+        it('add drops unknown coin symbols', () => {
+            enabledNetworksStore.set(['btc']);
+
+            const result = enabledNetworksStore.add(['meow', 'tada']);
+
+            expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'tada']));
+            expect(result.canonical).toHaveLength(2);
+            expect(enabledNetworksStore.has('meow')).toBe(false);
+        });
     });
 });

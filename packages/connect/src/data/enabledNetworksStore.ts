@@ -7,16 +7,23 @@
  * cache hydrated by the `'enabled-networks-changed'` event.
  */
 
+import { getCoinInfo } from './coinInfo';
+
 let networks: ReadonlySet<string> = new Set();
 
 // The set originates from untrusted 3rd-party input (init settings, `setEnabledNetworks`,
 // the popup/desktop handshake, the mobile deeplink JSON). TS types are not a runtime
-// guarantee, so coerce defensively: accept only an array, keep only non-empty strings, drop
-// everything else. This is shape validation — Connect doesn't own the coin-symbol registry,
-// so membership ("is this a known coin?") is intentionally not checked here.
+// guarantee, so coerce defensively: accept only an array, and keep only entries that are
+// non-empty strings AND resolve to a known coin (`getCoinInfo`). Unknown symbols (e.g.
+// 'meow') and malformed entries are dropped rather than thrown — `add` (init / handshake /
+// deeplink) must never reject the whole call over one bad entry, and the caller still sees
+// the accepted set in the canonical 'enabled-networks-changed' result.
 const sanitize = (input: unknown): string[] =>
     Array.isArray(input)
-        ? input.filter((symbol): symbol is string => typeof symbol === 'string' && symbol !== '')
+        ? input.filter(
+              (symbol): symbol is string =>
+                  typeof symbol === 'string' && symbol !== '' && getCoinInfo(symbol) !== undefined,
+          )
         : [];
 
 export const get = (): string[] => [...networks];

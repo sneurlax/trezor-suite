@@ -4,7 +4,8 @@
  * a Cardano-aware THP session). The canonical post-validation set is delivered
  * back via the `'enabled-networks-changed'` event.
  *
- * Unknown coin symbols throw `Method_UnknownCoin`.
+ * Input is sanitized: non-string entries and unknown coin symbols are dropped,
+ * so the canonical set may be smaller than what was passed in.
  */
 
 import type { Response } from '../params';
