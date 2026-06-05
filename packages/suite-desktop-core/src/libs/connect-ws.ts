@@ -5,6 +5,7 @@ import {
     CORE_CALL_CANCEL,
     type CoreCallCancelMessage,
     type CoreCallMessage,
+    type EnabledNetwork,
     type Manifest,
     POPUP,
     type PopupClosedMessage,
@@ -105,7 +106,7 @@ export const exposeConnectWs = ({
 
         let manifest: Manifest | undefined;
         let version: string | undefined;
-        let enabledNetworks: string[] | undefined;
+        let enabledNetworks: EnabledNetwork[] | undefined;
 
         logger.info(LOG_PREFIX, `origin: ${origin}`);
 

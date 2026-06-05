@@ -40,6 +40,15 @@ export type ConnectSettingsTransport =
     | Transport
     | (new (...args: any[]) => Transport);
 
+// A network the application has enabled. Only `coin` (a coin symbol, e.g. `'btc'` / `'ada'`)
+// is consumed today; `permissions` / `backends` are reserved for the upcoming permissions
+// system and are accepted but ignored for now.
+export interface EnabledNetwork {
+    coin: string;
+    permissions?: string[];
+    backends?: string[];
+}
+
 export interface ConnectSettingsPublic {
     manifest?: Manifest;
     debug?: boolean;
@@ -52,11 +61,11 @@ export interface ConnectSettingsPublic {
     enableFirmwareHashCheck?: boolean;
     firmwareHashCheckTimeouts?: FirmwareHashCheckTimeouts;
     thp?: ThpSettings;
-    // Initial set of enabled network symbols. Drives session-level derivation flags
-    // (today: `'ada'` triggers `derive_cardano: true` on `Initialize`). Equivalent to an
-    // `updateConnectSettings({ enabledNetworks })` call after init, but populates the
-    // store before the first device session is created — no race window.
-    enabledNetworks?: string[];
+    // Networks the application has enabled. Drives session-level derivation flags (today:
+    // `coin: 'ada'` triggers `derive_cardano: true` on `Initialize`). Equivalent to an
+    // `updateConnectSettings({ enabledNetworks })` call after init, but populates the store
+    // before the first device session is created — no race window. Applied additively.
+    enabledNetworks?: EnabledNetwork[];
 }
 
 // internal part, not to be accepted from .init()

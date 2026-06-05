@@ -2,22 +2,19 @@
  * Update Connect settings such as proxy and transports configuration.
  *
  * `enabledNetworks` declares which networks the application has enabled (drives
- * session-level derivation flags; today `'ada'` triggers a Cardano-aware session).
- * It is applied additively and only on in-process Core hosts — on the thin-client
- * transports (popup / desktop / webextension / deeplink) the Core lives in the host,
- * so declare networks via `init({ enabledNetworks })` there instead. Input is
- * sanitized: non-string and unknown coin symbols are dropped. The canonical
- * post-validation set is delivered back via the `'enabled-networks-changed'` event;
- * `getSettings().enabledNetworks` returns the current set.
+ * session-level derivation flags; today `coin: 'ada'` triggers a Cardano-aware session).
+ * It is applied **additively** — entries are added to the set, removing a network is not
+ * propagated. Input is sanitized: non-object entries and unknown coin symbols are dropped.
+ * The current set is readable from `getSettings().enabledNetworks`.
  */
 
 import type { Response } from '../params';
-import type { ConnectSettingsTransport, Proxy } from '../settings';
+import type { ConnectSettingsTransport, EnabledNetwork, Proxy } from '../settings';
 
 export type UpdateConnectSettings = {
     proxy?: Proxy;
     transports?: ConnectSettingsTransport[];
-    enabledNetworks?: string[];
+    enabledNetworks?: EnabledNetwork[];
 };
 
 export declare function updateConnectSettings(

@@ -3,7 +3,6 @@ import {
     CORE_CALL,
     CORE_CALL_CANCEL,
     DEVICE_EVENT,
-    ENABLED_NETWORKS_CHANGED,
     RESPONSE_EVENT,
     SET_ENABLED_NETWORKS,
     TRANSPORT_EVENT,
@@ -104,10 +103,6 @@ export abstract class CoreInModule implements ConnectFactoryDependencies<Connect
                 // pass UI event up
                 this.eventEmitter.emit(event, message);
                 this.eventEmitter.emit(type, payload);
-                break;
-
-            case ENABLED_NETWORKS_CHANGED:
-                this.eventEmitter.emit(ENABLED_NETWORKS_CHANGED, payload);
                 break;
 
             default:

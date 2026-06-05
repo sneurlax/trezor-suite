@@ -1,53 +1,51 @@
 /**
  * Runtime store for the application-declared set of enabled networks.
  *
- * Mutations come in via `Core.handleMessage(SET_ENABLED_NETWORKS)`; reads are
- * synchronous from anywhere in the connect package (see AbstractMethod's
- * resolution of `useCardanoDerivation`). The IPC entry layer keeps its own
- * cache hydrated by the `'enabled-networks-changed'` event.
+ * Populated additively via `Core.handleMessage(SET_ENABLED_NETWORKS)` (from
+ * `updateConnectSettings` / `init`); reads are synchronous from anywhere in the connect
+ * package (see AbstractMethod's resolution of `useCardanoDerivation`, and GetSettings).
+ *
+ * Keyed by coin symbol. Only `coin` is consumed today; the full `EnabledNetwork` object
+ * (with future `permissions` / `backends`) is retained so it's available once those land.
  */
+
+import type { EnabledNetwork } from '@trezor/connect-common';
 
 import { getCoinInfo } from './coinInfo';
 
-let networks: ReadonlySet<string> = new Set();
+let networks: ReadonlyMap<string, EnabledNetwork> = new Map();
 
-// The set originates from untrusted 3rd-party input (init settings, `updateConnectSettings`,
+// The input originates from untrusted 3rd-party callers (init settings, `updateConnectSettings`,
 // the popup/desktop handshake, the mobile deeplink JSON). TS types are not a runtime
 // guarantee, so coerce defensively: accept only an array, and keep only entries that are
-// non-empty strings AND resolve to a known coin (`getCoinInfo`). Unknown symbols (e.g.
-// 'meow') and malformed entries are dropped rather than thrown — `add` (init / handshake /
-// deeplink) must never reject the whole call over one bad entry, and the caller still sees
-// the accepted set in the canonical 'enabled-networks-changed' result.
-const sanitize = (input: unknown): string[] =>
+// objects with a non-empty string `coin` resolving to a known coin (`getCoinInfo`). Unknown
+// coins (e.g. 'meow') and malformed entries are dropped rather than thrown — a single bad
+// entry must not reject the whole call.
+const sanitize = (input: unknown): EnabledNetwork[] =>
     Array.isArray(input)
         ? input.filter(
-              (symbol): symbol is string =>
-                  typeof symbol === 'string' && symbol !== '' && getCoinInfo(symbol) !== undefined,
+              (n): n is EnabledNetwork =>
+                  !!n &&
+                  typeof n === 'object' &&
+                  typeof (n as EnabledNetwork).coin === 'string' &&
+                  (n as EnabledNetwork).coin !== '' &&
+                  getCoinInfo((n as EnabledNetwork).coin) !== undefined,
           )
         : [];
 
-export const get = (): string[] => [...networks];
+export const get = (): EnabledNetwork[] => [...networks.values()];
 
-export const has = (symbol: string): boolean => networks.has(symbol);
+export const has = (coin: string): boolean => networks.has(coin);
 
-export const set = (next: unknown): { canonical: string[]; changed: boolean } => {
-    const nextSet = new Set(sanitize(next));
-    const changed =
-        nextSet.size !== networks.size || [...nextSet].some(symbol => !networks.has(symbol));
-    networks = nextSet;
-
-    return { canonical: [...nextSet], changed };
+export const set = (next: unknown): void => {
+    networks = new Map(sanitize(next).map(network => [network.coin, network]));
 };
 
-// Additive union. Third-party `init({ enabledNetworks })` (popup / desktop / webextension /
-// deeplink hosts) widens the host's set rather than replacing it — a 3rd-party call on a new
-// coin extends the enabled set, it never disables what the host already had. Only the host's
-// own authoritative toggle (`set`, via SET_ENABLED_NETWORKS) may remove networks.
-export const add = (extra: unknown): { canonical: string[]; changed: boolean } => {
-    const nextSet = new Set(networks);
-    sanitize(extra).forEach(symbol => nextSet.add(symbol));
-    const changed = nextSet.size !== networks.size;
-    networks = nextSet;
-
-    return { canonical: [...nextSet], changed };
+// Additive union — entries are added, never removed. Suite coin-enable, 3rd-party
+// `init({ enabledNetworks })`, handshake and deeplink all widen the set; disabling a coin is
+// intentionally not propagated (Connect keeps deriving, which is harmless and resets on init).
+export const add = (extra: unknown): void => {
+    const next = new Map(networks);
+    sanitize(extra).forEach(network => next.set(network.coin, network));
+    networks = next;
 };

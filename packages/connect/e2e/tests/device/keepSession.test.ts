@@ -37,7 +37,7 @@ describe('keepSession common param', () => {
         expect(noDerivation.error.message).toContain("requires 'ada' in enabled networks");
 
         // Re-enable. The next call forces a session re-create with derive_cardano.
-        await TrezorConnect.updateConnectSettings({ enabledNetworks: ['ada'] });
+        await TrezorConnect.updateConnectSettings({ enabledNetworks: [{ coin: 'ada' }] });
         const enableDerivation = await TrezorConnect.getAccountInfo({
             coin: 'ada',
             path: "m/1852'/1815'/0'/0/0",

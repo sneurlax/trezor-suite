@@ -14,7 +14,6 @@ import { testMocks, wireEnabledNetworksMock } from '@suite-common/test-utils';
 import { asWalletDescriptor } from '@suite-common/wallet';
 import {
     changeCoinVisibility,
-    changeNetworks,
     prepareDiscoveryReducer,
     prepareSendFormReducer,
     transactionsActions,
@@ -475,8 +474,8 @@ describe('Storage actions', () => {
         store.dispatch(await preloadStore());
         expect(store.getState().wallet.graph.data.length).toBe(2);
 
-        // Simulate the connect-init listener: updateConnectSettings({ enabledNetworks }) → changeNetworks dispatch.
-        wireEnabledNetworksMock(store, changeNetworks);
+        // changeCoinVisibility awaits updateConnectSettings; mock it as a no-op success.
+        wireEnabledNetworksMock();
         // disable btc network, enable ltc, triggering ACCOUNT.REMOVE
         await store.dispatch(changeCoinVisibility({ symbol: 'ltc', shouldBeVisible: true }));
         await store.dispatch(changeCoinVisibility({ symbol: 'btc', shouldBeVisible: false }));

@@ -1,6 +1,6 @@
 import type { TransportInfo } from './transport';
 import { UI_EVENT } from './ui-request';
-import type { ConnectSettings, Manifest } from '../types/settings';
+import type { ConnectSettings, EnabledNetwork, Manifest } from '../types/settings';
 import type { MessageFactoryFn } from '../types/utils';
 
 export const POPUP = {
@@ -33,7 +33,7 @@ export interface PopupHandshake {
             version: string;
             // Application-declared enabled networks. Applied additively by the Core host
             // (Suite / native) — widens the host's set, never replaces it.
-            enabledNetworks?: string[];
+            enabledNetworks?: EnabledNetwork[];
         }; // those are settings from the iframe, they could be different from window.opener settings
         transports?: TransportInfo[];
     };

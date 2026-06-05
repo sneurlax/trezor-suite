@@ -1,7 +1,9 @@
 import * as enabledNetworksStore from '../enabledNetworksStore';
 
+// Coins are referenced by symbol; the store keys by `coin`.
+const coins = (...symbols: string[]) => symbols.map(coin => ({ coin }));
+
 describe('enabledNetworksStore', () => {
-    // Reset the singleton between tests — `set([])` is the canonical reset path.
     afterEach(() => {
         enabledNetworksStore.set([]);
     });
@@ -11,173 +13,115 @@ describe('enabledNetworksStore', () => {
         expect(enabledNetworksStore.has('ada')).toBe(false);
     });
 
-    it('set populates the store and reports changed=true', () => {
-        const result = enabledNetworksStore.set(['btc', 'ada']);
+    it('set populates the store keyed by coin', () => {
+        enabledNetworksStore.set(coins('btc', 'ada'));
 
-        expect(result.changed).toBe(true);
-        expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'ada']));
-        expect(result.canonical).toHaveLength(2);
-        expect(enabledNetworksStore.get()).toEqual(expect.arrayContaining(['btc', 'ada']));
+        expect(enabledNetworksStore.get()).toEqual(
+            expect.arrayContaining([{ coin: 'btc' }, { coin: 'ada' }]),
+        );
+        expect(enabledNetworksStore.get()).toHaveLength(2);
         expect(enabledNetworksStore.has('ada')).toBe(true);
         expect(enabledNetworksStore.has('btc')).toBe(true);
         expect(enabledNetworksStore.has('eth')).toBe(false);
     });
 
     it('set replaces the previous value (no merge)', () => {
-        enabledNetworksStore.set(['btc']);
-        enabledNetworksStore.set(['eth']);
+        enabledNetworksStore.set(coins('btc'));
+        enabledNetworksStore.set(coins('eth'));
 
-        expect(enabledNetworksStore.get()).toEqual(['eth']);
         expect(enabledNetworksStore.has('btc')).toBe(false);
         expect(enabledNetworksStore.has('eth')).toBe(true);
     });
 
-    it('set deduplicates the incoming array', () => {
-        const result = enabledNetworksStore.set(['ada', 'ada', 'btc', 'ada']);
+    it('set deduplicates by coin', () => {
+        enabledNetworksStore.set(coins('ada', 'ada', 'btc', 'ada'));
 
-        expect(result.canonical).toHaveLength(2);
-        expect(result.canonical).toEqual(expect.arrayContaining(['ada', 'btc']));
+        expect(enabledNetworksStore.get()).toHaveLength(2);
+        expect(enabledNetworksStore.has('ada')).toBe(true);
+        expect(enabledNetworksStore.has('btc')).toBe(true);
     });
 
-    it('set reports changed=false when the set is identical (any order)', () => {
-        enabledNetworksStore.set(['btc', 'ada']);
+    it('set([]) clears the store', () => {
+        enabledNetworksStore.set(coins('ada'));
+        enabledNetworksStore.set([]);
 
-        const result = enabledNetworksStore.set(['ada', 'btc']);
-
-        expect(result.changed).toBe(false);
-        expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'ada']));
-    });
-
-    it('set reports changed=true when adding a symbol', () => {
-        enabledNetworksStore.set(['btc']);
-
-        const result = enabledNetworksStore.set(['btc', 'ada']);
-
-        expect(result.changed).toBe(true);
-    });
-
-    it('set reports changed=true when removing a symbol', () => {
-        enabledNetworksStore.set(['btc', 'ada']);
-
-        const result = enabledNetworksStore.set(['btc']);
-
-        expect(result.changed).toBe(true);
-    });
-
-    it('set([]) on a non-empty store reports changed=true and clears', () => {
-        enabledNetworksStore.set(['ada']);
-
-        const result = enabledNetworksStore.set([]);
-
-        expect(result.changed).toBe(true);
         expect(enabledNetworksStore.get()).toEqual([]);
         expect(enabledNetworksStore.has('ada')).toBe(false);
     });
 
     it('get returns a fresh array each call (callers cannot mutate internal state)', () => {
-        enabledNetworksStore.set(['btc']);
+        enabledNetworksStore.set(coins('btc'));
         const snapshot = enabledNetworksStore.get();
-        snapshot.push('hack');
+        snapshot.push({ coin: 'hack' });
 
-        expect(enabledNetworksStore.get()).toEqual(['btc']);
+        expect(enabledNetworksStore.get()).toEqual([{ coin: 'btc' }]);
     });
 
     describe('add (additive union)', () => {
-        it('widens the set without removing existing symbols', () => {
-            enabledNetworksStore.set(['btc', 'eth']);
+        it('widens the set without removing existing coins', () => {
+            enabledNetworksStore.set(coins('btc', 'eth'));
+            enabledNetworksStore.add(coins('ada'));
 
-            const result = enabledNetworksStore.add(['ada']);
-
-            expect(result.changed).toBe(true);
-            expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'eth', 'ada']));
-            expect(result.canonical).toHaveLength(3);
-        });
-
-        it('reports changed=false when all symbols are already present', () => {
-            enabledNetworksStore.set(['btc', 'ada']);
-
-            const result = enabledNetworksStore.add(['ada']);
-
-            expect(result.changed).toBe(false);
-            expect(result.canonical).toHaveLength(2);
+            expect(enabledNetworksStore.get()).toEqual(
+                expect.arrayContaining([{ coin: 'btc' }, { coin: 'eth' }, { coin: 'ada' }]),
+            );
+            expect(enabledNetworksStore.get()).toHaveLength(3);
         });
 
         it('add([]) is a no-op', () => {
-            enabledNetworksStore.set(['btc']);
+            enabledNetworksStore.set(coins('btc'));
+            enabledNetworksStore.add([]);
 
-            const result = enabledNetworksStore.add([]);
-
-            expect(result.changed).toBe(false);
-            expect(result.canonical).toEqual(['btc']);
+            expect(enabledNetworksStore.get()).toEqual([{ coin: 'btc' }]);
         });
 
         it('add on an empty store behaves like set', () => {
-            const result = enabledNetworksStore.add(['ada']);
+            enabledNetworksStore.add(coins('ada'));
 
-            expect(result.changed).toBe(true);
             expect(enabledNetworksStore.has('ada')).toBe(true);
         });
     });
 
-    describe('sanitizes untrusted input (3rd-party shape validation)', () => {
-        it('set drops non-string and empty entries', () => {
-            // emulate untrusted input that lies about its type
-            const result = enabledNetworksStore.set([
-                'btc',
-                '',
-                42,
+    describe('sanitizes untrusted input', () => {
+        it('drops non-object, malformed, and unknown-coin entries', () => {
+            enabledNetworksStore.set([
+                { coin: 'btc' },
+                { coin: '' },
+                { coin: 42 },
+                'ada',
                 null,
                 undefined,
-                { coin: 'eth' },
-                ['ada'],
-                'ada',
+                { notACoin: 'eth' },
+                { coin: 'meow' },
+                { coin: 'ada', permissions: ['read'] },
             ] as any);
 
-            expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'ada']));
-            expect(result.canonical).toHaveLength(2);
+            expect(enabledNetworksStore.has('btc')).toBe(true);
+            expect(enabledNetworksStore.has('ada')).toBe(true);
+            expect(enabledNetworksStore.has('meow')).toBe(false);
+            expect(enabledNetworksStore.get()).toHaveLength(2);
         });
 
-        it('add drops non-string and empty entries', () => {
-            enabledNetworksStore.set(['btc']);
+        it('retains extra fields (permissions/backends) on valid entries', () => {
+            enabledNetworksStore.set([{ coin: 'ada', permissions: ['read', 'write'] }] as any);
 
-            const result = enabledNetworksStore.add([null, 'ada', '', 7] as any);
-
-            expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'ada']));
-            expect(result.canonical).toHaveLength(2);
+            expect(enabledNetworksStore.get()).toEqual([
+                { coin: 'ada', permissions: ['read', 'write'] },
+            ]);
         });
 
         it('coerces a non-array input to an empty set', () => {
-            const result = enabledNetworksStore.set('ada' as any);
+            enabledNetworksStore.set('ada' as any);
 
-            expect(result.canonical).toEqual([]);
+            expect(enabledNetworksStore.get()).toEqual([]);
             expect(enabledNetworksStore.has('ada')).toBe(false);
         });
 
         it('add ignores a non-array input (no-op)', () => {
-            enabledNetworksStore.set(['btc']);
+            enabledNetworksStore.set(coins('btc'));
+            enabledNetworksStore.add({ coin: 'ada' } as any);
 
-            const result = enabledNetworksStore.add({ ada: true } as any);
-
-            expect(result.changed).toBe(false);
-            expect(result.canonical).toEqual(['btc']);
-        });
-
-        it('drops unknown coin symbols, keeps known ones', () => {
-            const result = enabledNetworksStore.set(['btc', 'meow', 'ada', 'notacoin']);
-
-            expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'ada']));
-            expect(result.canonical).toHaveLength(2);
-            expect(enabledNetworksStore.has('meow')).toBe(false);
-        });
-
-        it('add drops unknown coin symbols', () => {
-            enabledNetworksStore.set(['btc']);
-
-            const result = enabledNetworksStore.add(['meow', 'tada']);
-
-            expect(result.canonical).toEqual(expect.arrayContaining(['btc', 'tada']));
-            expect(result.canonical).toHaveLength(2);
-            expect(enabledNetworksStore.has('meow')).toBe(false);
+            expect(enabledNetworksStore.get()).toEqual([{ coin: 'btc' }]);
         });
     });
 });

@@ -6,7 +6,6 @@ import {
     CORE_CALL_CANCEL,
     CORE_EVENT,
     DEVICE,
-    ENABLED_NETWORKS_CHANGED,
     POPUP,
     RESPONSE_EVENT,
     SET_ENABLED_NETWORKS,
@@ -839,17 +838,11 @@ export class Core extends EventEmitter {
                 resetTransports(this.getCoreContext());
                 break;
 
-            case SET_ENABLED_NETWORKS: {
-                const { canonical, changed } = enabledNetworksStore.set(message.payload);
-                if (changed) {
-                    this.sendCoreMessage({
-                        event: ENABLED_NETWORKS_CHANGED,
-                        type: ENABLED_NETWORKS_CHANGED,
-                        payload: canonical,
-                    });
-                }
+            case SET_ENABLED_NETWORKS:
+                // Additive: enabling a network widens the set; there is no mirror back to the
+                // caller — Connect is not the source of truth for the host's coin settings.
+                enabledNetworksStore.add(message.payload);
                 break;
-            }
 
             case TRANSPORT.REQUEST_DEVICE:
                 /**
@@ -973,20 +966,11 @@ export class Core extends EventEmitter {
 
         try {
             settingsStore.set(settings);
-            // Apply init-time enabledNetworks before any session can be created so the
-            // first Initialize message carries the correct derive_cardano flag. This is
-            // additive (a client declaring its networks widens the host's set, never
-            // replaces it). Emit the canonical event so listeners (Suite's connect-init)
-            // can mirror it into Redux, same as for runtime SET_ENABLED_NETWORKS mutations.
+            // Apply init-time enabledNetworks before any session can be created so the first
+            // Initialize message carries the correct derive_cardano flag. Additive — a client
+            // declaring its networks widens the set, it never replaces it.
             if (settings.enabledNetworks) {
-                const { canonical, changed } = enabledNetworksStore.add(settings.enabledNetworks);
-                if (changed) {
-                    this.sendCoreMessage({
-                        event: ENABLED_NETWORKS_CHANGED,
-                        type: ENABLED_NETWORKS_CHANGED,
-                        payload: canonical,
-                    });
-                }
+                enabledNetworksStore.add(settings.enabledNetworks);
             }
             await firmwareReleaseStore.init(
                 settings.firmwareChannel,

@@ -127,10 +127,12 @@ describe(`TrezorConnect methods`, () => {
                         // rejects them; other fixtures opt in per-test via `enabledNetworks`
                         // (e.g. non-cardano* methods on Cardano paths). Keeps unrelated tests
                         // off the slower Initialize path.
-                        const enabledNetworks = testCase.method.startsWith('cardano')
+                        const enabledCoins = testCase.method.startsWith('cardano')
                             ? [...new Set(['ada', ...(t.enabledNetworks ?? [])])]
                             : (t.enabledNetworks ?? []);
-                        await TrezorConnect.updateConnectSettings({ enabledNetworks });
+                        await TrezorConnect.updateConnectSettings({
+                            enabledNetworks: enabledCoins.map(coin => ({ coin })),
+                        });
 
                         // @ts-expect-error, string + params union
                         const result = await TrezorConnect[testCase.method](t.params);

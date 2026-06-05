@@ -22,6 +22,7 @@ describe('AbstractMethod Cardano enablement guard', () => {
         enabledNetworksStore.set([]);
     });
 
+
     describe("rejects Cardano-bound calls while 'ada' is not enabled", () => {
         it('cardano* method name', () => {
             expect(() => make('cardanoGetAddress')).toThrow("requires 'ada' in enabled networks");
@@ -55,7 +56,7 @@ describe('AbstractMethod Cardano enablement guard', () => {
 
     describe("allows calls once 'ada' is enabled", () => {
         beforeEach(() => {
-            enabledNetworksStore.set(['ada']);
+            enabledNetworksStore.set([{ coin: 'ada' }]);
         });
 
         it('cardano* method enables derivation', () => {

@@ -8,7 +8,7 @@ import {
     createErrorMessage,
 } from '@trezor/connect-common/src/events';
 import type { ConnectImpl, ConnectImplSettings } from '@trezor/connect-common/src/impl/dynamic';
-import type { Manifest } from '@trezor/connect-common/src/types/settings';
+import type { EnabledNetwork, Manifest } from '@trezor/connect-common/src/types/settings';
 import {
     type CancelParams,
     normalizeCancelParams,
@@ -21,7 +21,7 @@ import { WebsocketClient, WebsocketError } from '@trezor/websocket-client';
 export class CoreInSuiteDesktop implements ConnectImpl {
     private manifest?: Manifest;
     private version?: string;
-    private enabledNetworks?: string[];
+    private enabledNetworks?: EnabledNetwork[];
     private ws: WebsocketClient<Record<never, never>>;
     private localNetworkPermissionState: PermissionState | 'unknown' = 'unknown';
 

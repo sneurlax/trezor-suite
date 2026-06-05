@@ -4,7 +4,7 @@ import { createThunk } from '@suite-common/redux-utils';
 import { type NetworkSymbol } from '@suite-common/wallet-config';
 import TrezorConnect, { PROTO } from '@trezor/connect';
 
-import { setBitcoinAmountUnits } from './walletSettingsActions';
+import { changeNetworks, setBitcoinAmountUnits } from './walletSettingsActions';
 import { WALLET_SETTINGS } from './walletSettingsConstants';
 import { selectBitcoinAmountUnit, selectEnabledNetworks } from './walletSettingsReducer';
 import { accountsActions } from '../accounts/accountsActions';
@@ -27,10 +27,15 @@ export const changeCoinVisibility = createThunk<
         } else if (!isAlreadyHidden) {
             enabledNetworks = [...enabledNetworks, symbol];
         }
-        // Connect is the runtime source of truth. The update triggers a canonical
-        // 'enabled-networks-changed' event; the connect-init listener writes it back to
-        // Redux. By the time await resolves, Redux is up-to-date (in-module IPC is sync).
-        await TrezorConnect.updateConnectSettings({ enabledNetworks });
+        // Suite is the source of truth for its coin settings — update Redux directly.
+        dispatch(changeNetworks(enabledNetworks));
+
+        // Declare the change to Connect one-way. Only enabling propagates (additive); Connect
+        // is not the source of truth, so disabling is intentionally not pushed — it keeps the
+        // coin (harmless, resets on init).
+        if (shouldBeVisible && !isAlreadyHidden) {
+            await TrezorConnect.updateConnectSettings({ enabledNetworks: [{ coin: symbol }] });
+        }
 
         const accountsToRemove = selectAccountsToBeForgotten(getState());
         if (accountsToRemove.length > 0) {
@@ -43,24 +48,6 @@ export const changeCoinVisibility = createThunk<
             type: WALLET_SETTINGS.CHANGE_COIN_VISIBILITY,
             payload: { symbol, shouldBeVisible },
         });
-    },
-);
-
-/**
- * Additively widen Suite's enabled networks with a set declared by a 3rd-party caller
- * (connect popup / desktop / deeplink). The caller's `init({ enabledNetworks })` extends the
- * host's set — it never removes what the user already enabled. No-op when nothing is new.
- */
-export const addEnabledNetworks = createThunk<void, NetworkSymbol[], void>(
-    '@common/wallet-settings/addEnabledNetworks',
-    async (networks, { getState }) => {
-        const current = selectEnabledNetworks(getState());
-        const union = [...new Set([...current, ...networks])];
-        if (union.length === current.length) return;
-
-        // Connect is the runtime source of truth; the update emits 'enabled-networks-changed'
-        // which the connect-init listener mirrors back into Redux.
-        await TrezorConnect.updateConnectSettings({ enabledNetworks: union });
     },
 );
 

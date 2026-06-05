@@ -15,8 +15,6 @@ import {
 } from '@suite-common/connect-popup';
 import { useServices } from '@suite-common/dependency-injection';
 import { selectSelectedDevice } from '@suite-common/device';
-import { type NetworkSymbol } from '@suite-common/wallet-config';
-import { addEnabledNetworks } from '@suite-common/wallet-core';
 import TrezorConnect, {
     type CallMethodKeys,
     type CallMethodPayload,
@@ -48,11 +46,13 @@ export const useConnectPopupDesktop = () => {
             const SILENT_ALLOWED_METHODS = new Set(['getAccountInfo', 'blockchainEstimateFee']);
 
             desktopApi.on('connect-popup/call', async params => {
-                // The caller's declared networks additively widen Suite's enabled set before
-                // any call runs, so Connect's Cardano guard accepts the caller's coins. No-op
-                // when nothing new is requested, so it's safe to apply on every call.
+                // Declare the caller's networks to Connect one-way (additive) before any call
+                // runs, so its Cardano guard accepts the caller's coins. Does NOT touch Suite's
+                // own coin settings. Safe to apply on every call (additive).
                 if (params.enabledNetworks?.length) {
-                    await dispatch(addEnabledNetworks(params.enabledNetworks as NetworkSymbol[]));
+                    await TrezorConnect.updateConnectSettings({
+                        enabledNetworks: params.enabledNetworks,
+                    });
                 }
 
                 // Silent calls bypass the connect-popup flow entirely and call

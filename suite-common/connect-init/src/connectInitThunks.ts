@@ -14,18 +14,12 @@ import {
 import { createThunk } from '@suite-common/redux-utils';
 import { type TrezorDevice } from '@suite-common/suite-types';
 import { getBrowserName } from '@suite-common/suite-utils';
-import { type NetworkSymbol } from '@suite-common/wallet-config';
-import {
-    changeNetworks,
-    deviceConnectThunks,
-    selectEnabledNetworks,
-} from '@suite-common/wallet-core';
+import { deviceConnectThunks, selectEnabledNetworks } from '@suite-common/wallet-core';
 import TrezorConnect, {
     BLOCKCHAIN_EVENT,
     DEVICE,
     DEVICE_EVENT,
     type Device,
-    ENABLED_NETWORKS_CHANGED,
     TRANSPORT_EVENT,
     UI_EVENT,
     UI_REQUEST,
@@ -151,13 +145,6 @@ export const connectInitThunk = createThunk<void, ConnectInitHooks | void, void>
             dispatch(action);
         });
 
-        // Connect is the runtime source of truth for enabledNetworks. Every mutation (boot
-        // push, UI toggle, future device-driven changes) reaches Redux through this single
-        // entry point — there is no optimistic dispatch elsewhere.
-        TrezorConnect.on(ENABLED_NETWORKS_CHANGED, networks => {
-            dispatch(changeNetworks(networks as NetworkSymbol[]));
-        });
-
         const synchronize = getSynchronize();
 
         Object.keys(TrezorConnect)
@@ -203,14 +190,13 @@ export const connectInitThunk = createThunk<void, ConnectInitHooks | void, void>
             thp.hostName = capitalizeFirstLetter(getBrowserName());
         }
 
-        const hydrated = selectEnabledNetworks(getState());
+        // Suite's enabled coins, declared to Connect one-way (Connect is not the source of
+        // truth for Suite's coin settings). Only `coin` is populated today.
+        const hydrated = selectEnabledNetworks(getState()).map(coin => ({ coin }));
 
         try {
-            // Pass the suite-storage-hydrated set as part of init settings so the store is
-            // populated before any device session is created. The listener registered above
-            // is already wired up to dispatch `changeNetworks` on the canonical event Connect
-            // emits when applying the init-time value — Redux stays in sync without an
-            // additional post-init setter call.
+            // Pass the suite-storage-hydrated set as part of init settings so Connect's store
+            // is populated before any device session is created.
             await TrezorConnect.init({
                 ...connectInitSettings,
                 binFilesBaseUrl,

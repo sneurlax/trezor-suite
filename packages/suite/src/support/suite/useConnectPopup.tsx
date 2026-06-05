@@ -9,12 +9,11 @@ import {
     queuePopupCall,
     selectConnectPopupCall,
 } from '@suite-common/connect-popup';
-import { type NetworkSymbol } from '@suite-common/wallet-config';
-import { addEnabledNetworks } from '@suite-common/wallet-core';
-import {
+import TrezorConnect, {
     CORE_CALL,
     CORE_CALL_CANCEL,
     type CallMethodKeys,
+    type EnabledNetwork,
     POPUP,
     RESPONSE_EVENT,
     createPopupMessage,
@@ -30,7 +29,7 @@ export type ConnectPopupMessage =
     | {
           type: typeof POPUP.HANDSHAKE;
           id: string;
-          payload: { manifest: ManifestPartial; enabledNetworks?: string[] };
+          payload: { manifest: ManifestPartial; enabledNetworks?: EnabledNetwork[] };
           version: string;
       }
     | { type: typeof CORE_CALL; id: string; payload: { method: string; [key: string]: unknown } }
@@ -93,10 +92,13 @@ export const useConnectPopup = (
                     ...event.payload.manifest,
                     npmVersion: event.version,
                 };
-                // The caller's declared networks additively widen Suite's enabled set so
-                // its Cardano (and future per-coin) calls are accepted by Connect's guard.
+                // Declare the caller's networks to Connect one-way (additive) so its Cardano
+                // (and future per-coin) calls pass Connect's guard. This does NOT touch Suite's
+                // own coin settings — it only informs the hosted Core.
                 if (event.payload.enabledNetworks?.length) {
-                    dispatch(addEnabledNetworks(event.payload.enabledNetworks as NetworkSymbol[]));
+                    TrezorConnect.updateConnectSettings({
+                        enabledNetworks: event.payload.enabledNetworks,
+                    });
                 }
                 setPendingHandshake(event.id);
             } else if (event.type === CORE_CALL) {

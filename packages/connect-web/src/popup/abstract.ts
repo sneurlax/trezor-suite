@@ -6,7 +6,7 @@ import {
     type AbstractMessageChannel,
     type Message,
 } from '@trezor/connect-common/src/messageChannel/abstract';
-import type { ConnectSettings } from '@trezor/connect-common/src/types';
+import type { ConnectSettings, EnabledNetwork } from '@trezor/connect-common/src/types';
 import { type Log } from '@trezor/connect-common/src/utils/debug';
 import { getOrigin } from '@trezor/connect-common/src/utils/urlUtils';
 import type { IntervalId } from '@trezor/type-utils';
@@ -14,7 +14,7 @@ import { type Deferred, createDeferred } from '@trezor/utils';
 
 export type Params = Pick<ConnectSettings, 'manifest' | 'popupSrc' | 'version'> & {
     logger: Log;
-    enabledNetworks?: string[];
+    enabledNetworks?: EnabledNetwork[];
 };
 
 // How often to check if popup window is still open (ms).

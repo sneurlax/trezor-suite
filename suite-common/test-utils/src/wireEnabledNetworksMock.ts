@@ -1,24 +1,10 @@
-interface StoreLike {
-    dispatch: (action: any) => unknown;
-}
-
 /**
- * Wires the global `TrezorConnect.updateConnectSettings` mock so that an
- * `{ enabledNetworks }` update dispatches the `changeNetworks` action into the provided
- * store, simulating the listener registered by `connectInitThunk` in real apps. Pass the
- * action creator to avoid a dep from `@suite-common/test-utils` to `@suite-common/wallet-core`.
- *
- * Use in tests where `changeCoinVisibility` (or any code calling
- * `updateConnectSettings({ enabledNetworks })`) is expected to produce a `changeNetworks`
- * Redux action end-to-end.
+ * Mocks `TrezorConnect.updateConnectSettings` so that `changeCoinVisibility` — which awaits it
+ * to declare the coin to Connect one-way — resolves without a real Connect call. The Redux
+ * `changeNetworks` dispatch is performed by `changeCoinVisibility` itself (Suite is the source
+ * of truth for its coin settings), so this mock only needs to be a no-op success.
  */
-export const wireEnabledNetworksMock = (
-    store: StoreLike,
-    // `any` because callers pass a strongly-typed action creator (NetworkSymbol[] payload)
-    // and we don't want to leak that type into the cross-package helper. The runtime
-    // shape is `(payload) => { type, payload }`.
-    changeNetworksAction: (networks: any) => any,
-) => {
+export const wireEnabledNetworksMock = () => {
     // Lazy-require — a top-level `import TrezorConnect from '@trezor/connect'` here would
     // pull the connect-common types (cardano → @trezor/protobuf → @bufbuild/protobuf)
     // into every consumer of `@suite-common/test-utils`, breaking tests in jsdom envs
@@ -26,19 +12,8 @@ export const wireEnabledNetworksMock = (
 
     const TrezorConnect = require('@trezor/connect').default;
 
-    const impl = (params: { enabledNetworks?: string[] }) => {
-        if (params?.enabledNetworks) {
-            store.dispatch(changeNetworksAction(params.enabledNetworks));
-        }
-
-        return Promise.resolve({
-            success: true,
-            payload: { message: 'success' },
-        });
-    };
-
-    // Some test environments (e.g. wallet-core) don't activate the @trezor/connect auto-mock
-    // from `test-utils/__mocks__`. Replace the property unconditionally — works whether the
-    // existing function is the real one or a jest.fn.
-    TrezorConnect.updateConnectSettings = jest.fn(impl);
+    // Replace unconditionally — works whether the existing function is the real one or a jest.fn.
+    TrezorConnect.updateConnectSettings = jest.fn(() =>
+        Promise.resolve({ success: true, payload: { message: 'success' } }),
+    );
 };

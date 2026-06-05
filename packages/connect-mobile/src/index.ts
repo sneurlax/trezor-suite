@@ -7,7 +7,11 @@ import {
 import { type CallMethodPayload } from '@trezor/connect-common/src/events';
 import { createErrorMessage } from '@trezor/connect-common/src/events';
 import { type ConnectFactoryDependencies, factory } from '@trezor/connect-common/src/factory';
-import { type Manifest, type UpdateConnectSettings } from '@trezor/connect-common/src/types';
+import {
+    type EnabledNetwork,
+    type Manifest,
+    type UpdateConnectSettings,
+} from '@trezor/connect-common/src/types';
 import { ConnectEmitter } from '@trezor/connect-common/src/types/emitter';
 import {
     type CancelParams,
@@ -22,7 +26,7 @@ type BuildUrlParams = {
     connectSrc: string | undefined;
     callbackUrl: string;
     manifest?: Manifest;
-    enabledNetworks?: string[];
+    enabledNetworks?: EnabledNetwork[];
 };
 
 const buildUrl = ({
@@ -59,7 +63,7 @@ interface ConnectSettingsMobile {
     connectSrc?: string;
     deeplinkOpen: (url: string) => void;
     deeplinkCallbackUrl: string;
-    enabledNetworks?: string[];
+    enabledNetworks?: EnabledNetwork[];
 }
 
 export class TrezorConnectDeeplink implements ConnectFactoryDependencies<ConnectSettingsMobile> {
@@ -68,7 +72,7 @@ export class TrezorConnectDeeplink implements ConnectFactoryDependencies<Connect
 
     private manifest?: Manifest;
 
-    private enabledNetworks?: string[];
+    private enabledNetworks?: EnabledNetwork[];
 
     public updateConnectSettings(_params: UpdateConnectSettings) {
         return Promise.resolve(createErrorMessage(ERRORS.TypedError('Method_InvalidPackage')));
