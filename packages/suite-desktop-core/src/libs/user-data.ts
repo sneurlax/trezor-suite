@@ -6,6 +6,8 @@ import { isDevEnv } from '@suite-common/suite-utils';
 import type { InvokeResult } from '@trezor/suite-desktop-api';
 import type { Result } from '@trezor/type-utils';
 
+import { setAutoStartEnabled } from './auto-start';
+
 const resolveDirectoryInUserDataDir = (directory: string): Result<{ dir: string }, string> => {
     const userDataDir = path.resolve(app.getPath('userData'));
     const dir = path.resolve(path.join(userDataDir, directory));
@@ -190,6 +192,7 @@ export const rename = async (
  * This contrasts with resetSuiteAppThunk, which only removes the user data, and it is driven from the Renderer.
  */
 export const clearAppData = async (): Promise<InvokeResult> => {
+    setAutoStartEnabled(false);
     const localDataDir = path.normalize(app.getPath('userData'));
     try {
         await fs.promises.rm(localDataDir, { recursive: true, force: true });
@@ -207,6 +210,7 @@ export const clearAppData = async (): Promise<InvokeResult> => {
  * it must run synchronously but we do not care about success/failure.
  */
 export const clearAppDataForTesting = (): void => {
+    setAutoStartEnabled(false);
     const localDataDir = app.getPath('userData');
     const filesToDelete = fs.readdirSync(localDataDir);
     filesToDelete.forEach(file => {
