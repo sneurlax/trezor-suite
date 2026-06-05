@@ -8,6 +8,7 @@ import { AnimatedBox, Text, VStack, useBottomSheetModal } from '@suite-native/at
 import { Translation } from '@suite-native/intl';
 import { Link } from '@suite-native/link';
 import { selectIsAmountInputActive } from '@suite-native/trading-state';
+import { nativeSpacings } from '@trezor/theme';
 
 import { HowTradingWorksSheet } from './HowTradingWorksSheet';
 
@@ -70,18 +71,18 @@ export const Footer = ({ isFormMountedRecently }: FooterProps) => {
                 exiting={FadeOutDown}
                 layout={LinearTransition}
             >
-                <VStack alignItems="center">
+                <VStack alignItems="center" paddingBottom="sp12">
                     <FooterProviderContent provider={providerInfo} />
-
                     <Link
                         label={
                             <Translation id="moduleTrading.tradingScreen.footer.howTradingWorksSheet.title" />
                         }
-                        onPress={openModal}
                         textVariant="body-sm"
                         textColor="contentSecondary"
                         textPressedColor="contentDisabled"
                         isUnderlined
+                        onPress={openModal}
+                        style={{ height: nativeSpacings.sp44, textAlignVertical: 'center' }}
                     />
                 </VStack>
             </AnimatedBox>
