@@ -11238,6 +11238,7 @@ __metadata:
     react: "npm:19.2.4"
     react-hook-form: "npm:^7.71.2"
     web3-utils: "npm:^4.3.3"
+    viem: "npm:^2.48.1"
   languageName: unknown
   linkType: soft
 
@@ -13112,6 +13113,7 @@ __metadata:
     react-native-svg: "npm:15.15.3"
     react-redux: "npm:9.2.0"
     web3-utils: "npm:^4.3.3"
+    viem: "npm:^2.48.1"
   languageName: unknown
   linkType: soft
 
@@ -16575,6 +16577,7 @@ __metadata:
     stylelint: "npm:^17.1.1"
     stylelint-config-standard: "npm:^40.0.0"
     web3-utils: "npm:^4.3.3"
+    viem: "npm:^2.48.1"
   languageName: unknown
   linkType: soft
 
