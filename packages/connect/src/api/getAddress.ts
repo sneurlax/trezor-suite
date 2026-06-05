@@ -3,8 +3,8 @@
 import {
     type BitcoinNetworkInfo,
     Bundle,
-    type MethodPermission,
     type PROTO,
+    type PermissionRequest,
 } from '@trezor/connect-common';
 import { UI_REQUEST, createUiMessage } from '@trezor/connect-common';
 import { ERRORS } from '@trezor/connect-common/src/constants';
@@ -85,8 +85,10 @@ export default class GetAddress extends AbstractMethod<'getAddress', Params[]> {
         this.confirmMissingBackup = true;
     }
 
-    get requiredPermissions(): MethodPermission[] {
-        return ['read'];
+    get requiredPermissions(): PermissionRequest[] {
+        const responseFromCoinPerms = this.coinPerms('read_address', this.requiredFirmwareCoins);
+
+        return responseFromCoinPerms;
     }
 
     get info() {
