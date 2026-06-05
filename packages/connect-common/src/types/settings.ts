@@ -40,13 +40,11 @@ export type ConnectSettingsTransport =
     | Transport
     | (new (...args: any[]) => Transport);
 
-// A network the application has enabled. Only `coin` (a coin symbol, e.g. `'btc'` / `'ada'`)
-// is consumed today; `permissions` / `backends` are reserved for the upcoming permissions
-// system and are accepted but ignored for now.
+// A network the application has enabled. `coin` is a coin symbol, e.g. `'btc'` / `'ada'`.
+// TODO(#23879): the upcoming permissions system will extend this object (e.g. per-network
+// `permissions` and `backends`).
 export interface EnabledNetwork {
     coin: string;
-    permissions?: string[];
-    backends?: string[];
 }
 
 export interface ConnectSettingsPublic {

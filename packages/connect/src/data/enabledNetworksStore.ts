@@ -5,8 +5,7 @@
  * `updateConnectSettings` / `init`); reads are synchronous from anywhere in the connect
  * package (see AbstractMethod's resolution of `useCardanoDerivation`, and GetSettings).
  *
- * Keyed by coin symbol. Only `coin` is consumed today; the full `EnabledNetwork` object
- * (with future `permissions` / `backends`) is retained so it's available once those land.
+ * Keyed by coin symbol; the full `EnabledNetwork` object is retained.
  */
 
 import type { EnabledNetwork } from '@trezor/connect-common';

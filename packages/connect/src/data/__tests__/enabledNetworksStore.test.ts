@@ -93,21 +93,13 @@ describe('enabledNetworksStore', () => {
                 undefined,
                 { notACoin: 'eth' },
                 { coin: 'meow' },
-                { coin: 'ada', permissions: ['read'] },
+                { coin: 'ada' },
             ] as any);
 
             expect(enabledNetworksStore.has('btc')).toBe(true);
             expect(enabledNetworksStore.has('ada')).toBe(true);
             expect(enabledNetworksStore.has('meow')).toBe(false);
             expect(enabledNetworksStore.get()).toHaveLength(2);
-        });
-
-        it('retains extra fields (permissions/backends) on valid entries', () => {
-            enabledNetworksStore.set([{ coin: 'ada', permissions: ['read', 'write'] }] as any);
-
-            expect(enabledNetworksStore.get()).toEqual([
-                { coin: 'ada', permissions: ['read', 'write'] },
-            ]);
         });
 
         it('coerces a non-array input to an empty set', () => {
