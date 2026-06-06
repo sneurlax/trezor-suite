@@ -1,13 +1,15 @@
-import { fromWei, hexToNumberString, numberToHex } from 'web3-utils';
-
 import { asTypedDesktopAnalytics, events } from '@suite/analytics';
 import { closeModal, openDeferredModal, preserveModal } from '@suite/modal';
-import { Calldata, asEvmAddress } from '@suite-common/calldata';
 import { selectSelectedDevice } from '@suite-common/device';
+import {
+    buildClaimCalldata,
+    buildClaimTransactionReview,
+    buildUnsignedClaimTransaction,
+} from '@suite-common/earn-stablecoin/src/signing';
 import { type StablecoinYieldTxSimulationParams } from '@suite-common/earn-stablecoin/src/tx-simulation';
 import { type YieldAccountsRewards } from '@suite-common/earn-stablecoin-api';
 import { createThunk } from '@suite-common/redux-utils';
-import { type EvmFeeHex, type EvmHexString, parseEvmFeeHex } from '@suite-common/schemas/src/evm';
+import { type EvmHexString } from '@suite-common/schemas/src/evm';
 import { notificationsActions } from '@suite-common/toast-notifications';
 import {
     type NetworkSymbol,
@@ -27,102 +29,11 @@ import {
     type Account,
     type AccountDescriptor,
     AddressDisplayOptions,
-    type FormState,
-    type PrecomposedTransactionFinal,
-    type YieldClaimReward,
 } from '@suite-common/wallet-types';
-import { getAccountIdentity, getMevProtectedTxData, sanitizeHex } from '@suite-common/wallet-utils';
+import { getAccountIdentity, getMevProtectedTxData } from '@suite-common/wallet-utils';
 import TrezorConnect, { type StaticSessionId } from '@trezor/connect';
-import { BigNumber } from '@trezor/utils';
 
 type ClaimMerklReward = YieldAccountsRewards[number]['rewards'][number];
-
-type BuildClaimReviewStateParams = {
-    data: EvmHexString;
-    contractAddress: EvmHexString;
-    fee: EvmFeeHex;
-    rewards: ClaimMerklReward[];
-};
-
-type BuildClaimReviewStateResult = {
-    formState: FormState;
-    precomposedTransaction: PrecomposedTransactionFinal;
-    availableRewards: YieldClaimReward[];
-};
-
-const buildClaimReviewState = ({
-    data,
-    contractAddress,
-    fee,
-    rewards,
-}: BuildClaimReviewStateParams): BuildClaimReviewStateResult => {
-    const feePriceWei = new BigNumber(
-        hexToNumberString(fee.type === 'eip1559' ? fee.maxFeePerGas : fee.gasPrice),
-    );
-    const feeLimitWei = hexToNumberString(fee.gasLimit);
-    const feeWei = new BigNumber(feeLimitWei).multipliedBy(feePriceWei).toFixed(0);
-
-    const feePerUnitGwei = fromWei(feePriceWei.toFixed(0), 'gwei');
-    const eip1559Fields: {
-        maxFeePerGasGwei?: PrecomposedTransactionFinal['maxFeePerGas'];
-        maxPriorityFeePerGasGwei?: PrecomposedTransactionFinal['maxPriorityFeePerGas'];
-        baseFeePerGasGwei?: FormState['baseFeePerGas'];
-    } = {};
-
-    if (fee.type === 'eip1559') {
-        Object.assign(eip1559Fields, {
-            maxFeePerGasGwei: fromWei(hexToNumberString(fee.maxFeePerGas), 'gwei'),
-            maxPriorityFeePerGasGwei: fromWei(hexToNumberString(fee.maxPriorityFeePerGas), 'gwei'),
-            baseFeePerGasGwei: fromWei(hexToNumberString(fee.baseFeePerGas), 'gwei'),
-        });
-    }
-
-    const formState: FormState = {
-        outputs: [
-            {
-                type: 'payment',
-                address: contractAddress,
-                amount: '0',
-                fiat: '',
-                currency: { value: '', label: '' },
-                token: null,
-                dataHex: data,
-            },
-        ],
-        selectedFee: 'custom',
-        feePerUnit: feePerUnitGwei,
-        feeLimit: feeLimitWei,
-        maxFeePerGas: eip1559Fields.maxFeePerGasGwei,
-        maxPriorityFeePerGas: eip1559Fields.maxPriorityFeePerGasGwei,
-        baseFeePerGas: eip1559Fields.baseFeePerGasGwei,
-        options: ['broadcast', 'transactionData'],
-        transactionData: data,
-        isCoinControlEnabled: false,
-        hasCoinControlBeenOpened: false,
-        selectedUtxos: [],
-    };
-
-    const availableRewards = rewards.map(reward => ({
-        tokenAddress: reward.token.address,
-        tokenSymbol: reward.token.symbol,
-    }));
-
-    const precomposedTransaction: PrecomposedTransactionFinal = {
-        type: 'final',
-        bytes: 0,
-        inputs: [],
-        outputs: [{ address: contractAddress, amount: '0' }],
-        outputsPermutation: [0],
-        totalSpent: feeWei,
-        fee: feeWei,
-        feePerByte: feePerUnitGwei,
-        feeLimit: feeLimitWei,
-        maxFeePerGas: eip1559Fields.maxFeePerGasGwei,
-        maxPriorityFeePerGas: eip1559Fields.maxPriorityFeePerGasGwei,
-    };
-
-    return { formState, precomposedTransaction, availableRewards };
-};
 
 interface GetEstimatedClaimFeeParams {
     networkSymbol: NetworkSymbol;
@@ -222,28 +133,17 @@ export const claimMerklRewardsThunk = createThunk(
         );
 
         try {
-            const sender = asEvmAddress(account.descriptor);
-            const claimResult = Calldata.evm.distributor.claim.encode(
-                {
-                    users: rewards.map(() => sender),
-                    tokens: rewards.map(reward => asEvmAddress(reward.token.address)),
-                    amounts: rewards.map(reward => new BigNumber(reward.amount)),
-                    proofs: rewards.map(reward => reward.proofs),
-                },
-                { sender },
-            );
-
-            if (!claimResult.isValid) {
-                const issues = claimResult.errors.map(issue => issue.code).join(', ');
-                throw new Error(`Failed to build claim calldata${issues ? `: ${issues}` : '.'}`);
-            }
+            const claimCalldata = buildClaimCalldata({
+                senderAddress: account.descriptor,
+                rewards,
+            });
 
             const estimatedFeeTask = getEstimatedFee({
                 networkSymbol: account.symbol,
                 deviceState: account.deviceState,
                 from: account.descriptor,
                 to: merklXyzContractAddress,
-                data: claimResult.data,
+                data: claimCalldata,
             });
 
             const nonceTask = dispatch(
@@ -252,15 +152,13 @@ export const claimMerklRewardsThunk = createThunk(
 
             const [estimatedFee, { nonce }] = await Promise.all([estimatedFeeTask, nonceTask]);
 
-            const unsignedClaimTx = {
-                to: merklXyzContractAddress,
-                data: claimResult.data,
+            const unsignedClaimTx = buildUnsignedClaimTransaction({
+                contractAddress: merklXyzContractAddress,
+                data: claimCalldata,
                 chainId: network.chainId,
-                maxPriorityFeePerGas: estimatedFee.maxPriorityFeePerGas,
-                maxFeePerGas: estimatedFee.maxFeePerGas,
-                gasLimit: estimatedFee.gasLimit,
+                fee: estimatedFee,
                 nonce,
-            };
+            });
 
             const userAcceptedTxSimulation = await dispatch(
                 openDeferredModal({
@@ -287,18 +185,12 @@ export const claimMerklRewardsThunk = createThunk(
                 return;
             }
 
-            const parsedSelectedFee = parseEvmFeeHex(userAcceptedTxSimulation?.selectedFee);
-
-            if (!parsedSelectedFee) {
-                throw new Error('Fee information is missing for the transaction.');
-            }
-
-            const { formState, precomposedTransaction, availableRewards } = buildClaimReviewState({
-                data: unsignedClaimTx.data,
-                contractAddress: unsignedClaimTx.to,
-                fee: parsedSelectedFee,
-                rewards,
-            });
+            const { formState, precomposedTransaction, availableRewards, transactionForSigning } =
+                buildClaimTransactionReview({
+                    unsignedTransaction: unsignedClaimTx,
+                    selectedFee: userAcceptedTxSimulation?.selectedFee,
+                    rewards,
+                });
 
             dispatch(
                 stablecoinYieldActions.storePrecomposedTransaction({
@@ -320,22 +212,7 @@ export const claimMerklRewardsThunk = createThunk(
                         useEmptyPassphrase: device.useEmptyPassphrase,
                     },
                     path: account.path,
-                    transaction: {
-                        to: unsignedClaimTx.to,
-                        chainId: unsignedClaimTx.chainId,
-                        value: '0x0',
-                        nonce: numberToHex(unsignedClaimTx.nonce),
-                        data: sanitizeHex(unsignedClaimTx.data),
-                        gasLimit: parsedSelectedFee.gasLimit,
-                        ...(parsedSelectedFee.type === 'eip1559'
-                            ? {
-                                  maxFeePerGas: parsedSelectedFee.maxFeePerGas,
-                                  maxPriorityFeePerGas: parsedSelectedFee.maxPriorityFeePerGas,
-                              }
-                            : {
-                                  gasPrice: parsedSelectedFee.gasPrice,
-                              }),
-                    },
+                    transaction: transactionForSigning,
                     chunkify: addressDisplayType === AddressDisplayOptions.CHUNKED,
                 });
 
