@@ -1,3 +1,4 @@
+import { type BaseCurrencyAmount } from '@suite-common/wallet-types';
 import {
     Box,
     Card,
@@ -11,10 +12,16 @@ import { Translation } from '@suite-native/intl';
 import { prepareNativeStyle, useNativeStyles } from '@trezor/styles-native';
 
 import { useEarnDepositsCardData } from '../hooks/useEarnDepositsCardData';
-import { type StablecoinYieldEarnItem, type StakingEarnItem } from '../types';
+import {
+    type StablecoinYieldClaimSummary,
+    type StablecoinYieldEarnItem,
+    type StakingEarnItem,
+} from '../types';
 import { EarnActiveItemsBottomSheet } from './EarnActiveItemsBottomSheet';
 import { EarnDepositsCardRow } from './EarnDepositsCardRow';
 import { EarnItemInfoModal } from './EarnItemInfoModal';
+import { StablecoinYieldClaimRewardsBottomSheet } from './StablecoinYieldClaimRewardsBottomSheet';
+import { StablecoinYieldClaimRewardsCardSection } from './StablecoinYieldClaimRewardsCardSection';
 
 const cardHeaderStyle = prepareNativeStyle(utils => ({
     padding: utils.spacings.sp16,
@@ -23,13 +30,19 @@ const cardHeaderStyle = prepareNativeStyle(utils => ({
 type EarnDepositsCardProps = {
     stakingActiveItems: StakingEarnItem[];
     stablecoinYieldActiveItems: StablecoinYieldEarnItem[];
+    stablecoinYieldClaimSummaries: StablecoinYieldClaimSummary[];
+    stablecoinYieldTotalFiatClaimableAmount: BaseCurrencyAmount | null;
     isStablecoinYieldLoading: boolean;
+    isStablecoinYieldClaimSummariesLoading: boolean;
 };
 
 export const EarnDepositsCard = ({
     stakingActiveItems,
     stablecoinYieldActiveItems,
+    stablecoinYieldClaimSummaries,
+    stablecoinYieldTotalFiatClaimableAmount,
     isStablecoinYieldLoading,
+    isStablecoinYieldClaimSummariesLoading,
 }: EarnDepositsCardProps) => {
     const { applyStyle } = useNativeStyles();
     const { stakingRow, stablecoinYieldRow, totalDepositedFiatAmount } = useEarnDepositsCardData({
@@ -51,19 +64,34 @@ export const EarnDepositsCard = ({
     const { bottomSheetRef: stakingInfoSheetRef, openModal: openStakingInfoModal } =
         useBottomSheetModal();
 
+    const {
+        bottomSheetRef: stablecoinYieldClaimRewardsSheetRef,
+        closeModal: closeStablecoinYieldClaimRewardsSheet,
+        openModal: openStablecoinYieldClaimRewardsSheet,
+    } = useBottomSheetModal();
+
     return (
         <>
             <Box marginBottom="sp32">
                 <Card borderColor="borderNeutral" noPadding testID="@earn/deposits-card">
                     <Box style={applyStyle(cardHeaderStyle)}>
-                        <VStack spacing={2}>
-                            <Text variant="body-md" color="contentSecondary">
-                                <Translation id="earn.earnScreen.depositsCard.title" />
-                            </Text>
-                            <BaseCurrencyAmountFormatter
-                                value={totalDepositedFiatAmount}
-                                variant="headline-md"
-                                isDiscreetText={false}
+                        <VStack spacing="sp24">
+                            <VStack spacing={2}>
+                                <Text variant="body-md" color="contentSecondary">
+                                    <Translation id="earn.earnScreen.depositsCard.title" />
+                                </Text>
+                                <BaseCurrencyAmountFormatter
+                                    value={totalDepositedFiatAmount}
+                                    variant="headline-md"
+                                    isDiscreetText={false}
+                                />
+                            </VStack>
+
+                            <StablecoinYieldClaimRewardsCardSection
+                                claimRewards={stablecoinYieldClaimSummaries}
+                                totalFiatClaimableAmount={stablecoinYieldTotalFiatClaimableAmount}
+                                isLoading={isStablecoinYieldClaimSummariesLoading}
+                                onPress={openStablecoinYieldClaimRewardsSheet}
                             />
                         </VStack>
                     </Box>
@@ -102,6 +130,11 @@ export const EarnDepositsCard = ({
             />
 
             <EarnItemInfoModal ref={stakingInfoSheetRef} type="staking" />
+            <StablecoinYieldClaimRewardsBottomSheet
+                ref={stablecoinYieldClaimRewardsSheetRef}
+                claimRewards={stablecoinYieldClaimSummaries}
+                onClose={closeStablecoinYieldClaimRewardsSheet}
+            />
         </>
     );
 };

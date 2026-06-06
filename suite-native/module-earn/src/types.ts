@@ -46,7 +46,6 @@ export type StablecoinYieldClaimSummary = {
     networkSymbol: NetworkSymbol;
     claimableRewardsCount: number;
     fiatClaimableAmount: BaseCurrencyAmount | null;
-    isFiatClaimableAmountComplete: boolean;
 };
 
 export type StablecoinYieldNavigationItem = Pick<
