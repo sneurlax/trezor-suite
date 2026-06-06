@@ -125,7 +125,7 @@ export default {
                 mnemonic: 'mnemonic_all',
             },
             description: 'Cardano: empty account using descriptor',
-            enabledNetworks: ['ada'],
+            enabledCoins: ['ada'],
             params: {
                 coin: 'ada',
                 descriptor:
@@ -145,7 +145,7 @@ export default {
                 mnemonic: 'mnemonic_all',
             },
             description: 'Cardano: empty account using path',
-            enabledNetworks: ['ada'],
+            enabledCoins: ['ada'],
             params: {
                 coin: 'ada',
                 path: "m/1852'/1815'/0'/0/0",

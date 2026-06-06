@@ -16,11 +16,12 @@ declare namespace globalThis {
         result?: any;
         legacyResults?: LegacyResult[];
         customTimeout?: number;
-        /** Pushed via `TrezorConnect.updateConnectSettings({ enabledNetworks })` before the
-         *  method call. Required for any Cardano-bound fixture (both `cardano*` methods and
-         *  non-`cardano*` methods on Cardano coins, e.g. `getAccountInfo({ coin: 'ada' })`) —
-         *  Connect rejects Cardano calls with `Method_NetworkNotEnabled` unless `'ada'` is enabled. */
-        enabledNetworks?: string[];
+        /** Coin symbols enabled (via `updateConnectSettings`) before the method call. Required
+         *  for any Cardano-bound fixture (both `cardano*` methods and non-`cardano*` methods on
+         *  Cardano coins, e.g. `getAccountInfo({ coin: 'ada' })`) — Connect rejects Cardano
+         *  calls with `Method_NetworkNotEnabled` unless `'ada'` is enabled. The harness maps
+         *  these to `EnabledNetwork[]`. */
+        enabledCoins?: string[];
         setup?: {
             wiped?: boolean;
             mnemonic?: string;
