@@ -49,8 +49,7 @@ const buildUrl = ({
         `&callback=${encodeURIComponent(urlWithParams.toString())}` +
         (manifest?.appName ? `&appName=${encodeURIComponent(manifest.appName)}` : '') +
         (manifest?.appIcon ? `&appIcon=${encodeURIComponent(manifest.appIcon)}` : '') +
-        // Application-declared enabled networks. The deeplink is stateless, so this init-time
-        // setting rides along on every call for the native Core to apply to its session.
+        // The deeplink is stateless, so this init-time setting rides along on every call.
         (enabledNetworks?.length
             ? `&enabledNetworks=${encodeURIComponent(JSON.stringify(enabledNetworks))}`
             : '')

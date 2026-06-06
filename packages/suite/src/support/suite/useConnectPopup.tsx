@@ -92,9 +92,8 @@ export const useConnectPopup = (
                     ...event.payload.manifest,
                     npmVersion: event.version,
                 };
-                // Declare the caller's networks to Connect one-way (additive) so its Cardano
-                // (and future per-coin) calls pass Connect's guard. This does NOT touch Suite's
-                // own coin settings — it only informs the hosted Core.
+                // Declare the caller's networks to the hosted Core one-way (does not touch
+                // Suite's own coin settings) so its Cardano calls pass Connect's guard.
                 if (event.payload.enabledNetworks?.length) {
                     TrezorConnect.updateConnectSettings({
                         enabledNetworks: event.payload.enabledNetworks,

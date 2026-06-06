@@ -18,9 +18,7 @@ export default class GetSettings extends AbstractMethod<'getSettings'> {
     }
 
     run() {
-        // `enabledNetworks` lives in its own store (guard hot path + sanitization/additive
-        // logic); merge its live canonical set in so callers read the current value here
-        // instead of via a separate getEnabledNetworks method.
+        // `enabledNetworks` lives in its own store; merge its live set in so it's readable here.
         return Promise.resolve({
             ...settingsStore.get(),
             enabledNetworks: enabledNetworksStore.get(),

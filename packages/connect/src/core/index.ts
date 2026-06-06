@@ -966,9 +966,8 @@ export class Core extends EventEmitter {
 
         try {
             settingsStore.set(settings);
-            // Apply init-time enabledNetworks before any session can be created so the first
-            // Initialize message carries the correct derive_cardano flag. Additive — a client
-            // declaring its networks widens the set, it never replaces it.
+            // Apply init-time enabledNetworks before any session can be created, so the first
+            // Initialize message carries the correct derive_cardano flag.
             if (settings.enabledNetworks) {
                 enabledNetworksStore.add(settings.enabledNetworks);
             }

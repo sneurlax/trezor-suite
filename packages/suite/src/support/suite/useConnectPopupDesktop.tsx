@@ -46,9 +46,8 @@ export const useConnectPopupDesktop = () => {
             const SILENT_ALLOWED_METHODS = new Set(['getAccountInfo', 'blockchainEstimateFee']);
 
             desktopApi.on('connect-popup/call', async params => {
-                // Declare the caller's networks to Connect one-way (additive) before any call
-                // runs, so its Cardano guard accepts the caller's coins. Does NOT touch Suite's
-                // own coin settings. Safe to apply on every call (additive).
+                // Declare the caller's networks to the hosted Core one-way before the call
+                // runs (additive, does not touch Suite's own coin settings).
                 if (params.enabledNetworks?.length) {
                     await TrezorConnect.updateConnectSettings({
                         enabledNetworks: params.enabledNetworks,

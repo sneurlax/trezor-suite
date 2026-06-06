@@ -156,8 +156,7 @@ export type ConnectPopupCall = {
         email: string;
         npmVersion?: string;
     };
-    // Caller-declared enabled networks (from its `init({ enabledNetworks })`), declared
-    // additively to the hosted Core so Connect's Cardano guard accepts the caller's coins.
+    // Caller-declared enabled networks, forwarded to the hosted Core.
     enabledNetworks?: EnabledNetwork[];
 };
 

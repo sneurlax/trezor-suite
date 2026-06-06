@@ -190,8 +190,7 @@ export const connectInitThunk = createThunk<void, ConnectInitHooks | void, void>
             thp.hostName = capitalizeFirstLetter(getBrowserName());
         }
 
-        // Suite's enabled coins, declared to Connect one-way (Connect is not the source of
-        // truth for Suite's coin settings). Only `coin` is populated today.
+        // Suite's enabled coins, declared to Connect one-way as `EnabledNetwork[]`.
         const hydrated = selectEnabledNetworks(getState()).map(coin => ({ coin }));
 
         try {

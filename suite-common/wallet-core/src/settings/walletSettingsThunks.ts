@@ -30,9 +30,8 @@ export const changeCoinVisibility = createThunk<
         // Suite is the source of truth for its coin settings — update Redux directly.
         dispatch(changeNetworks(enabledNetworks));
 
-        // Declare the change to Connect one-way. Only enabling propagates (additive); Connect
-        // is not the source of truth, so disabling is intentionally not pushed — it keeps the
-        // coin (harmless, resets on init).
+        // Declare to Connect one-way, but only on enable — disabling is intentionally not
+        // pushed (Connect keeps the coin; harmless, resets on init).
         if (shouldBeVisible && !isAlreadyHidden) {
             await TrezorConnect.updateConnectSettings({ enabledNetworks: [{ coin: symbol }] });
         }

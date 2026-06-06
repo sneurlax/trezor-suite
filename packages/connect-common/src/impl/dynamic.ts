@@ -14,8 +14,7 @@ export type ConnectImplSettings = {
     version: NonNullable<ConnectSettings['version']>;
     env?: ConnectSettings['env'];
     debug?: ConnectSettings['debug'];
-    // Application-declared enabled networks; forwarded into the (possibly remote) Core's init
-    // so the enabled-networks store is populated before the first device session is created.
+    // Forwarded into the (possibly remote) Core's init. See `ConnectSettings.enabledNetworks`.
     enabledNetworks?: ConnectSettings['enabledNetworks'];
 };
 

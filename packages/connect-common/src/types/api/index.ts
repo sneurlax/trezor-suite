@@ -119,10 +119,7 @@ export const TrezorConnectManagement = Type.Object({
     // For internal use, no public documentation.
     uiResponse: Type.Unsafe<typeof uiResponse>(),
 
-    // For internal use, no public documentation. Also carries `enabledNetworks` — the set
-    // of networks the app has declared (drives session-level derivation flags; today
-    // `coin: 'ada'` triggers `derive_cardano`). Applied additively; readable back from
-    // `getSettings().enabledNetworks`.
+    // For internal use, no public documentation. Also carries `enabledNetworks`.
     updateConnectSettings: Type.Unsafe<typeof updateConnectSettings>(),
 });
 export type TrezorConnectManagement = Static<typeof TrezorConnectManagement>;
