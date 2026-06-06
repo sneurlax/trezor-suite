@@ -1,11 +1,11 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { type RouteProp, useIsFocused, useRoute } from '@react-navigation/native';
 
 import { getNetwork } from '@suite-common/wallet-config';
 import { type AccountsRootState, selectAccountByKey } from '@suite-common/wallet-core';
-import { Box, FullAlertBox, Text, VStack } from '@suite-native/atoms';
+import { Box, FullAlertBox, Text, VStack, useBottomSheetModal } from '@suite-native/atoms';
 import { useFiatFromCryptoValue } from '@suite-native/formatters';
 import { Translation } from '@suite-native/intl';
 import {
@@ -18,8 +18,9 @@ import { FeeSelector } from '@suite-native/transaction-management';
 
 import { YieldClaimFlowFooter } from '../components/YieldClaimFlowFooter';
 import { YieldClaimRewardsCard } from '../components/YieldClaimRewardsCard';
+import { YieldTxSimulationBottomSheet } from '../components/YieldTxSimulationBottomSheet';
 import { useShowYieldTransactionFailureAlert } from '../hooks/useShowYieldTransactionFailureAlert';
-import { useYieldClaimFees } from '../hooks/useYieldClaimFees';
+import { type PreparedYieldClaimAction, useYieldClaimFees } from '../hooks/useYieldClaimFees';
 import { useYieldClaimRewards } from '../hooks/useYieldClaimRewards';
 import { useYieldSession } from '../hooks/useYieldSession';
 import { shouldShowClaimFeeWarning } from '../utils/yieldClaimFeeWarningUtils';
@@ -30,6 +31,13 @@ export const YieldClaimScreen = () => {
     const route = useRoute<RouteProps>();
     const { accountKey } = route.params;
     const isFocused = useIsFocused();
+    const {
+        bottomSheetRef: simulationBottomSheetRef,
+        closeModal: closeSimulationBottomSheet,
+        openModal: openSimulationBottomSheet,
+    } = useBottomSheetModal();
+    const [simulationPreparedAction, setSimulationPreparedAction] =
+        useState<PreparedYieldClaimAction | null>(null);
     const account = useSelector((state: AccountsRootState) =>
         selectAccountByKey(state, accountKey),
     );
@@ -73,12 +81,22 @@ export const YieldClaimScreen = () => {
     });
 
     const handleContinue = useCallback(() => {
-        if (isContinueDisabled) {
+        if (isContinueDisabled || !claimFee.preparedAction) {
             return;
         }
 
-        // TODO: Open Stablecoin Yield claim transaction simulation in the next claim task.
-    }, [isContinueDisabled]);
+        setSimulationPreparedAction(claimFee.preparedAction);
+        requestAnimationFrame(openSimulationBottomSheet);
+    }, [claimFee.preparedAction, isContinueDisabled, openSimulationBottomSheet]);
+
+    const handleConfirmSimulation = useCallback(() => {
+        if (!simulationPreparedAction) {
+            return;
+        }
+
+        // TODO: Store claim review state and navigate to YieldClaimReview once claim review state is implemented.
+        closeSimulationBottomSheet();
+    }, [closeSimulationBottomSheet, simulationPreparedAction]);
 
     if (!account) {
         return null;
@@ -144,6 +162,17 @@ export const YieldClaimScreen = () => {
                     )}
                 </VStack>
             </Box>
+
+            {simulationPreparedAction && (
+                <YieldTxSimulationBottomSheet
+                    ref={simulationBottomSheetRef}
+                    account={account}
+                    flow="claim"
+                    onCancel={closeSimulationBottomSheet}
+                    onConfirm={handleConfirmSimulation}
+                    unsignedTx={simulationPreparedAction.unsignedTransaction}
+                />
+            )}
         </Screen>
     );
 };

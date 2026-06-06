@@ -27,8 +27,8 @@ import { YieldDepositFlowFooter } from '../components/YieldDepositFlowFooter';
 import { YieldDepositFlowScreenHeader } from '../components/YieldDepositFlowScreenHeader';
 import { YieldDepositInfoBottomSheet } from '../components/YieldDepositInfoBottomSheet';
 import { YieldDepositStepCard } from '../components/YieldDepositStepCard';
-import { YieldDepositTxSimulationBottomSheet } from '../components/YieldDepositTxSimulationBottomSheet';
 import { YieldPendingTransactionModal } from '../components/YieldPendingTransactionModal';
+import { YieldTxSimulationBottomSheet } from '../components/YieldTxSimulationBottomSheet';
 import { useResolvedYieldFlowData } from '../hooks/useResolvedYieldFlowData';
 import { useShowYieldTransactionFailureAlert } from '../hooks/useShowYieldTransactionFailureAlert';
 import { type PreparedYieldDepositAction, useYieldDepositFees } from '../hooks/useYieldDepositFees';
@@ -373,12 +373,13 @@ export const YieldDepositScreen = () => {
                 vaultTokenName={vaultTokenName}
             />
             {simulationPreparedAction && (
-                <YieldDepositTxSimulationBottomSheet
+                <YieldTxSimulationBottomSheet
                     ref={simulationBottomSheetRef}
                     account={account}
+                    flow="deposit"
                     onCancel={closeSimulationBottomSheet}
                     onConfirm={handleConfirmSimulation}
-                    preparedAction={simulationPreparedAction}
+                    unsignedTx={simulationPreparedAction.unsignedTransaction}
                 />
             )}
         </Screen>
