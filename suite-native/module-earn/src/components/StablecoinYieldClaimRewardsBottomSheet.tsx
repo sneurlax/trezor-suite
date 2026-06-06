@@ -71,21 +71,22 @@ const StablecoinYieldClaimRewardsItem = ({
 type StablecoinYieldClaimRewardsBottomSheetProps = {
     ref: BottomSheetModalRef;
     claimRewards: StablecoinYieldClaimSummary[];
+    onClaimRewardPress: (claimReward: StablecoinYieldClaimSummary) => void;
     onClose: () => void;
 };
 
 export const StablecoinYieldClaimRewardsBottomSheet = ({
     ref,
     claimRewards,
+    onClaimRewardPress,
     onClose,
 }: StablecoinYieldClaimRewardsBottomSheetProps) => {
     const handleClaimRewardsSelect = useCallback(
-        ({ accountKey }: StablecoinYieldClaimSummary) => {
+        (claimReward: StablecoinYieldClaimSummary) => {
             onClose();
-            // TODO: Navigate to YieldClaim once the Stablecoin Yield claim screen is implemented.
-            void accountKey;
+            onClaimRewardPress(claimReward);
         },
-        [onClose],
+        [onClaimRewardPress, onClose],
     );
 
     const renderItem = useCallback(

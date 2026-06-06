@@ -2762,6 +2762,15 @@ export const messages = {
                 },
             },
         },
+        yieldClaimFlowScreen: {
+            title: 'Claim rewards',
+            rewards: 'Rewards',
+            noRewards: 'No rewards to claim.',
+            feeWarning: {
+                title: 'Network fees may exceed rewards.',
+                description: 'Consider waiting until your rewards grow before claiming.',
+            },
+        },
         yieldDepositApprovalReviewScreen: {
             title: 'Review with Trezor',
             successMessage: "You're all set.",
