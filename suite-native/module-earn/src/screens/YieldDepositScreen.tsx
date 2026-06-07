@@ -177,31 +177,6 @@ export const YieldDepositScreen = () => {
         navigation.goBack();
     }, [amountValue, dispatch, flowKey, isDepositPending, navigation]);
 
-    const handleNavigateToRevoke = useCallback(
-        (amount?: string) => {
-            if (!flowKey || isDepositPending) {
-                return;
-            }
-
-            if (amount) {
-                dispatch(
-                    stablecoinYieldActions.enterModifyMode({
-                        flowType: 'deposit',
-                        flowKey,
-                        amount,
-                    }),
-                );
-            }
-
-            navigation.navigate(YieldStackRoutes.YieldDepositRevoke, {
-                ...route.params,
-                amount,
-                shouldShowLowLimitWarning: true,
-            });
-        },
-        [dispatch, flowKey, isDepositPending, navigation, route.params],
-    );
-
     const handleActionReady = useCallback(
         (preparedAction: PreparedYieldDepositAction) => {
             setSimulationPreparedAction(preparedAction);
@@ -238,7 +213,6 @@ export const YieldDepositScreen = () => {
         flowData,
         flowKey,
         onActionReady: handleActionReady,
-        onRevokeRequired: () => handleNavigateToRevoke(amountValue),
         preparedAction: depositFee.preparedAction,
     });
 

@@ -13,7 +13,6 @@ import { buildYieldDepositFeePreview } from '../yieldDepositFeeUtils';
 type UseYieldDepositSubmitParams = Pick<ResolvedYieldFlowData, 'flowData' | 'flowKey'> & {
     amount: string | undefined;
     onActionReady: (preparedAction: PreparedYieldDepositAction) => void;
-    onRevokeRequired: () => void;
     preparedAction: PreparedYieldDepositAction | null;
 };
 
@@ -22,7 +21,6 @@ export const useYieldDepositSubmit = ({
     flowData,
     flowKey,
     onActionReady,
-    onRevokeRequired,
     preparedAction,
 }: UseYieldDepositSubmitParams) => {
     const dispatch = useDispatch();
@@ -78,26 +76,7 @@ export const useYieldDepositSubmit = ({
 
             return;
         }
-
-        if (response.payload.type === 'revoke-required') {
-            onRevokeRequired();
-
-            return;
-        }
-
-        if (response.payload.type === 'approval-required') {
-            return;
-        }
-    }, [
-        amount,
-        dispatch,
-        flowData,
-        flowKey,
-        onActionReady,
-        onRevokeRequired,
-        preparedAction,
-        showYieldAlert,
-    ]);
+    }, [amount, dispatch, flowData, flowKey, onActionReady, preparedAction, showYieldAlert]);
 
     return { handleSubmitDeposit };
 };
